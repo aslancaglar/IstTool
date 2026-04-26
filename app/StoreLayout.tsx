@@ -1,0 +1,63 @@
+"use client";
+
+import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import Header from '../src/components/Header';
+import Footer from '../src/components/Footer';
+import MobileStickyCart from '../src/components/MobileStickyCart';
+import HolidayNotification from '../src/components/HolidayNotification';
+import AuthModal from '../src/components/AuthModal';
+import { AuthModalProvider, useAuthModal } from '../src/context/AuthModalContext';
+
+function AuthModalUrlSync() {
+    const pathname = usePathname();
+    const router = useRouter();
+    const { openAuthModal } = useAuthModal();
+
+    useEffect(() => {
+        const currentSearch = typeof window !== 'undefined' ? window.location.search : '';
+        const urlParams = new URLSearchParams(currentSearch);
+        const authMode = urlParams.get('auth');
+        if (authMode !== 'login' && authMode !== 'signup') {
+            return;
+        }
+
+        const redirectPath = urlParams.get('redirect') || pathname || '/';
+        openAuthModal(authMode, redirectPath);
+
+        const nextParams = new URLSearchParams(urlParams.toString());
+        nextParams.delete('auth');
+        nextParams.delete('redirect');
+
+        const nextQuery = nextParams.toString();
+        const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+        router.replace(nextUrl, { scroll: false });
+    }, [pathname, openAuthModal, router]);
+
+    return null;
+}
+
+export default function StoreLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isAdmin = pathname?.startsWith('/admin');
+    const isCheckout = pathname === '/checkout';
+
+    if (isAdmin) {
+        return <main className="min-h-screen">{children}</main>;
+    }
+
+    return (
+        <AuthModalProvider>
+            <AuthModalUrlSync />
+            <Header />
+            <HolidayNotification />
+            <main className="min-h-screen">
+                {children}
+            </main>
+            <Footer />
+            {!isCheckout && <MobileStickyCart />}
+            <AuthModal />
+        </AuthModalProvider>
+    );
+}

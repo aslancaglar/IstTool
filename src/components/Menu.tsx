@@ -1,0 +1,171 @@
+"use client";
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import Skeleton from './Skeleton';
+import MenuItem from './MenuItem';
+import FadeIn from './FadeIn';
+import MenuCategoryTabs from './MenuCategoryTabs';
+
+// Lazy-load the heavy modal component because it is rarely viewed on initial page load
+const MenuItemModal = dynamic(() => import('./MenuItemModal'), { ssr: false });
+
+
+interface MenuProps {
+  showHeader?: boolean;
+  reducedTopPadding?: boolean;
+  reducedHeaderSpacing?: boolean;
+}
+
+export default function Menu({ showHeader = false, reducedTopPadding = false, reducedHeaderSpacing = false }: MenuProps) {
+  const hasUserInteracted = useRef(false);
+
+  const menuCategories = useQuery(api.queries.getMenuCategories);
+  const allMenuItems = useQuery(api.queries.getMenuItems);
+
+  const [activeCategory, setActiveCategory] = useState<string>('');
+  const [showRightGradient, setShowRightGradient] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Prevent Modal handlers from re-rendering the entire grid when invoked
+  const handleOpenModal = useCallback((item: any) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    // Delay wiping state to allow modal closing animation
+    setTimeout(() => setSelectedItem(null), 300);
+  }, []);
+
+  const checkScroll = useCallback((scrollContainer: HTMLDivElement | null) => {
+    if (scrollContainer) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+      setShowRightGradient(scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  }, []);
+
+  // When categories load, default to the first one
+  useEffect(() => {
+    if (menuCategories && menuCategories.length > 0 && !activeCategory) {
+      setActiveCategory(menuCategories[0].slug);
+    }
+  }, [menuCategories, activeCategory]);
+
+  // MEMOIZATION: Prevent this heavy array filtering/sorting from running on EVERY render
+  const filteredItems = useMemo(() => {
+    if (!allMenuItems || !activeCategory) return [];
+
+    return allMenuItems
+      .filter(item => item.categories?.includes(activeCategory) && item.active)
+      .sort((a, b) => {
+        const orderA = a.categoryOrders?.find(o => o.category === activeCategory)?.order ?? (a.displayOrder || 0);
+        const orderB = b.categoryOrders?.find(o => o.category === activeCategory)?.order ?? (b.displayOrder || 0);
+        return orderA - orderB;
+      });
+  }, [allMenuItems, activeCategory]);
+
+
+  return (
+    <section id="menu" className={`pb-20 bg-white ${reducedTopPadding ? 'pt-4 md:pt-[42px]' : 'pt-20'}`}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {showHeader && (
+          <FadeIn direction="up">
+            <div className={`text-center ${reducedHeaderSpacing ? 'mb-8' : 'mb-16'}`}>
+              <h2 className="text-primary-600 font-extrabold uppercase tracking-wider mb-2 text-sm sm:text-base">
+                Découvrez
+              </h2>
+              <h2 style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-4xl md:text-5xl text-dark-900 uppercase tracking-wide">
+                Notre Carte
+              </h2>
+            </div>
+          </FadeIn>
+        )}
+
+        {!menuCategories ? (
+          <div className="flex gap-3 justify-center mb-12 overflow-hidden">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-12 w-28 rounded-full flex-shrink-0" />
+            ))}
+          </div>
+        ) : (
+          <MenuCategoryTabs
+            categories={menuCategories.map(c => ({ slug: c.slug, name: c.name }))}
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            showRightGradient={showRightGradient}
+            onScroll={() => {
+              // The child ref is isolated, so we'll let the child manage its own gradient logic,
+              // or handle it by passing a callback. For now, since the child runs onScroll,
+              // we can update parent state via an event.
+              const el = document.querySelector('.overflow-x-auto') as HTMLDivElement;
+              checkScroll(el);
+            }}
+            hasInteractedRef={hasUserInteracted}
+          />
+        )}
+
+        {!allMenuItems ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-md">
+                <Skeleton className="h-48 w-full" />
+                <div className="p-6">
+                  <div className="flex justify-between mb-4">
+                    <Skeleton className="h-6 w-3/4 rounded" />
+                    <Skeleton className="h-6 w-1/4 rounded ml-2" />
+                  </div>
+                  <Skeleton className="h-4 w-full rounded mb-2" />
+                  <Skeleton className="h-4 w-2/3 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Aucun article dans cette catégorie</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredItems.map((item, index) => (
+              <div
+                key={`${item._id}-${activeCategory}`}
+                className="opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <MenuItem
+                  item={{
+                    ...item,
+                    description: item.description || ''
+                  }}
+                  onOpenModal={handleOpenModal}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="text-center mt-12">
+          <Link
+            href="/menu"
+            className="font-display text-xl tracking-wide inline-flex items-center px-8 py-4 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-all shadow-lg hover:shadow-xl hover:scale-105 uppercase"
+          >
+            Commander Maintenant
+          </Link>
+        </div>
+      </div>
+
+      {selectedItem && (
+        <MenuItemModal
+          item={selectedItem}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
+    </section>
+  );
+}

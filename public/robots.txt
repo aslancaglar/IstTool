@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /account/
+Disallow: /checkout/
+Disallow: /order-success/
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://karadeniz.fr/sitemap.xml

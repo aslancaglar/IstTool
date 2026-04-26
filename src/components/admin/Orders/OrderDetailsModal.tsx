@@ -1,0 +1,401 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+    X, Clock, Package, CheckCircle, XCircle,
+    User, Phone, Mail, MapPin, Trash2,
+    Truck, ShoppingBag, CreditCard, Banknote,
+    ChevronDown, ChevronUp, Copy, ExternalLink
+} from 'lucide-react';
+import { Id } from '../../../../convex/_generated/dataModel';
+
+interface OrderDetailsModalProps {
+    order: any;
+    isOpen: boolean;
+    onClose: () => void;
+    onStatusChange: (orderId: Id<'orders'>, newStatus: string) => Promise<void>;
+    onPaymentStatusChange?: (orderId: Id<'orders'>, paymentStatus: 'paid' | 'unpaid') => Promise<void>;
+    onDeleteOrder: (orderId: Id<'orders'>) => Promise<void>;
+    toppings: any[] | undefined;
+    toppingCategories: any[] | undefined;
+}
+
+const STATUS_FLOW_PICKUP = ['pending', 'preparing', 'completed'] as const;
+const STATUS_FLOW_DELIVERY = ['pending', 'preparing', 'delivering', 'completed'] as const;
+
+const STATUS_CONFIG: Record<string, { bg: string; text: string; border: string; icon: any; label: string }> = {
+    pending: { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-200', icon: Clock, label: 'En attente' },
+    preparing: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200', icon: Package, label: 'En préparation' },
+    delivering: { bg: 'bg-violet-100', text: 'text-violet-800', border: 'border-violet-200', icon: Truck, label: 'En livraison' },
+    completed: { bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200', icon: CheckCircle, label: 'Terminée' },
+    cancelled: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200', icon: XCircle, label: 'Annulée' },
+};
+
+export default function OrderDetailsModal({
+    order,
+    isOpen,
+    onClose,
+    onStatusChange,
+    onPaymentStatusChange,
+    onDeleteOrder,
+    toppings,
+    toppingCategories
+}: OrderDetailsModalProps) {
+    const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setIsConfirmingDelete(false);
+            setCopied(false);
+        }
+    }, [isOpen]);
+
+    // Close on Escape
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isOpen) onClose();
+        };
+        document.addEventListener('keydown', handleEsc);
+        return () => document.removeEventListener('keydown', handleEsc);
+    }, [isOpen, onClose]);
+
+    if (!isOpen || !order) return null;
+
+    const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+    const StatusIcon = config.icon;
+    const isDelivery = order.type === 'delivery';
+    const isPending = order.status === 'pending';
+    const activeFlow = isDelivery ? STATUS_FLOW_DELIVERY : STATUS_FLOW_PICKUP;
+    const currentIdx = activeFlow.indexOf(order.status as any);
+
+    const copyPhone = () => {
+        navigator.clipboard.writeText(order.customer.phone);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const getNextStatus = () => {
+        if (order.status === 'cancelled') return null;
+        const idx = activeFlow.indexOf(order.status as any);
+        if (idx < 0 || idx >= activeFlow.length - 1) return null;
+        return activeFlow[idx + 1];
+    };
+
+    const nextStatus = getNextStatus();
+    const nextConfig = nextStatus ? STATUS_CONFIG[nextStatus] : null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-150">
+            {/* Backdrop */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={onClose}
+            />
+
+            {/* Modal */}
+            <div className="relative w-full sm:max-w-lg bg-white sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] sm:m-4 rounded-t-2xl">
+
+                {/* ── HEADER ────────────────────────── */}
+                <div className="relative px-5 pt-5 pb-4 border-b border-slate-100">
+                    {/* Close button */}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-10"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+
+                    {/* Order ID + badges */}
+                    <div className="flex items-center gap-2 flex-wrap pr-10 mb-2">
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                            #{order._id.slice(-6).toUpperCase()}
+                        </h2>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${isDelivery ? 'bg-violet-100 text-violet-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {isDelivery ? <Truck className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+                            {isDelivery ? 'Livraison' : 'Emporter'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${order.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
+                                {order.paymentMethod === 'cash' ? <Banknote className="w-3 h-3" /> : <CreditCard className="w-3 h-3" />}
+                                {order.paymentMethod === 'cash' ? 'Espèces' : 'Carte'}
+                                {order.paymentStatus === 'paid' ? ' ✓' : ' – À payer'}
+                            </span>
+                            {order.paymentMethod === 'cash' && onPaymentStatusChange && (
+                                <button
+                                    onClick={() => onPaymentStatusChange(order._id, order.paymentStatus === 'paid' ? 'unpaid' : 'paid')}
+                                    className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider transition-colors border ${
+                                        order.paymentStatus === 'paid'
+                                            ? 'bg-white border-red-200 text-red-600 hover:bg-red-50'
+                                            : 'bg-white border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+                                    }`}
+                                >
+                                    {order.paymentStatus === 'paid' ? 'Non payé ?' : 'Marquer payé ✓'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" />
+                        {new Date(order.createdAt).toLocaleString('fr-FR', {
+                            weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                        })}
+                        {order.scheduledTime && order.scheduledTime !== 'asap' && (
+                            <span className="ml-2 font-bold text-amber-600">⏰ Prévu: {order.scheduledTime}</span>
+                        )}
+                    </p>
+
+                    {/* Status stepper */}
+                    <div className="flex items-center gap-1 mt-4">
+                        {activeFlow.map((s, i) => {
+                            const stepConfig = STATUS_CONFIG[s];
+                            const StepIcon = stepConfig.icon;
+                            const isActive = order.status === s;
+                            const isPast = currentIdx >= 0 && i < currentIdx;
+                            const isFuture = currentIdx >= 0 && i > currentIdx;
+                            const isCancelled = order.status === 'cancelled';
+
+                            return (
+                                <div key={s} className="flex items-center flex-1">
+                                    <button
+                                        onClick={() => onStatusChange(order._id, s)}
+                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${isActive
+                                                ? `${stepConfig.bg} ${stepConfig.text} ring-2 ring-offset-1 ${stepConfig.border.replace('border-', 'ring-')}`
+                                                : isPast
+                                                    ? 'bg-emerald-50 text-emerald-600'
+                                                    : isCancelled
+                                                        ? 'bg-slate-50 text-slate-400'
+                                                        : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                                            }`}
+                                    >
+                                        <StepIcon className="w-3.5 h-3.5" />
+                                        <span className="hidden sm:inline">{stepConfig.label}</span>
+                                    </button>
+                                    {i < activeFlow.length - 1 && (
+                                        <div className={`w-4 h-0.5 mx-0.5 rounded-full shrink-0 ${isPast ? 'bg-emerald-300' : 'bg-slate-200'}`} />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {order.status === 'cancelled' && (
+                        <div className="mt-2 flex items-center gap-2 p-2 bg-red-50 border border-red-100 rounded-lg">
+                            <XCircle className="w-4 h-4 text-red-500" />
+                            <span className="text-xs font-bold text-red-700 uppercase tracking-wider">Commande annulée</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── BODY ────────────────────────── */}
+                <div className="flex-1 overflow-y-auto">
+
+                    {/* Customer & Delivery — compact card */}
+                    <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1.5 min-w-0">
+                                <p className="font-bold text-slate-900 text-base truncate">
+                                    {order.customer.firstName} {order.customer.lastName}
+                                </p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <a
+                                        href={`tel:${order.customer.phone}`}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                                    >
+                                        <Phone className="w-3.5 h-3.5" />
+                                        {order.customer.phone}
+                                    </a>
+                                    <button
+                                        onClick={copyPhone}
+                                        className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-white rounded-lg transition-colors"
+                                        title="Copier le numéro"
+                                    >
+                                        {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                                    <Mail className="w-3 h-3" />
+                                    {order.customer.email}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Delivery address */}
+                        {isDelivery && order.address && (
+                            <div className="mt-3 p-3 bg-white rounded-xl border border-slate-200">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-start gap-2 min-w-0">
+                                        <MapPin className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-slate-900">{order.address.street}</p>
+                                            <p className="text-xs text-slate-500">{order.address.zipCode} {order.address.city}</p>
+                                            {order.address.instructions && (
+                                                <div className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-100">
+                                                    <p className="text-xs text-amber-700">
+                                                        <span className="font-bold">📝 Note:</span> {order.address.instructions}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <a
+                                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${order.address.street}, ${order.address.zipCode} ${order.address.city}`)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="shrink-0 flex flex-col items-center justify-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg border border-slate-200 transition-colors"
+                                        title="Ouvrir dans Google Maps"
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">Itinéraire</span>
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ── ARTICLES ────────────────────────── */}
+                    <div className="px-5 py-4">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                            <Package className="w-3.5 h-3.5" />
+                            Articles ({order.items.length})
+                        </h3>
+
+                        <div className="space-y-2">
+                            {order.items.map((item: any, index: number) => {
+                                // Build toppings by category
+                                const toppingsByCategory: Record<string, { name: string; price: number }[]> = {};
+                                if (item.selectedToppings) {
+                                    item.selectedToppings.forEach((toppingGroup: any) => {
+                                        toppingGroup.toppingIds.forEach((tId: string, tIdx: number) => {
+                                            const topping = toppings?.find(t => t.toppingId === tId);
+                                            if (topping) {
+                                                const categoryName = toppingCategories?.find(c => c.categoryId === topping.categoryId)?.name || 'Options';
+                                                if (!toppingsByCategory[categoryName]) {
+                                                    toppingsByCategory[categoryName] = [];
+                                                }
+                                                toppingsByCategory[categoryName].push({
+                                                    name: topping.name,
+                                                    price: topping.price ?? 0,
+                                                });
+                                            }
+                                        });
+                                    });
+                                }
+
+                                return (
+                                    <div key={index} className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                        {/* Item header */}
+                                        <div className="flex items-center justify-between gap-3 mb-1">
+                                            <p className="font-bold text-slate-900 text-sm">{item.name}</p>
+                                            <p className="font-black text-slate-900 tabular-nums text-sm shrink-0">
+                                                {item.finalPrice.toFixed(2)}€
+                                            </p>
+                                        </div>
+
+                                        {/* Base price line */}
+                                        <p className="text-[11px] text-slate-400 mb-1">Prix de base: {item.price.toFixed(2)}€</p>
+
+                                        {/* Toppings - compact */}
+                                        {Object.keys(toppingsByCategory).length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-1.5">
+                                                {Object.entries(toppingsByCategory).map(([cat, tops]) => (
+                                                    tops.map((tp, tIdx) => (
+                                                        <span
+                                                            key={`${cat}-${tIdx}`}
+                                                            className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 font-medium"
+                                                        >
+                                                            {tp.name}
+                                                            {tp.price > 0 && (
+                                                                <span className="text-red-500 font-bold">+{tp.price.toFixed(0)}€</span>
+                                                            )}
+                                                        </span>
+                                                    ))
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── FOOTER ────────────────────────── */}
+                <div className="border-t border-slate-200 bg-white">
+                    {/* Total */}
+                    <div className="px-5 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            {isConfirmingDelete ? (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-red-600">Supprimer ?</span>
+                                    <button
+                                        onClick={() => onDeleteOrder(order._id)}
+                                        className="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                                    >
+                                        Oui
+                                    </button>
+                                    <button
+                                        onClick={() => setIsConfirmingDelete(false)}
+                                        className="px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                                    >
+                                        Non
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setIsConfirmingDelete(true)}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Supprimer"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-sm text-slate-500 font-medium">Total</span>
+                            <span className="text-3xl font-black text-slate-900 tabular-nums">{order.totalPrice.toFixed(2)}€</span>
+                        </div>
+                    </div>
+
+                    {/* Next action button */}
+                    {nextStatus && nextConfig && (
+                        <div className="px-5 pb-5 pt-1">
+                            <button
+                                onClick={() => onStatusChange(order._id, nextStatus)}
+                                className={`w-full py-4 rounded-xl text-sm font-black uppercase tracking-wider transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 ${
+                                    isPending
+                                        ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'
+                                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
+                                }`}
+                            >
+                                {(() => {
+                                    const NextIcon = nextConfig.icon;
+                                    return <NextIcon className="w-5 h-5" />;
+                                })()}
+                                {nextStatus === 'preparing' ? 'Accepter & Préparer' : nextStatus === 'delivering' ? 'Mettre en Livraison' : 'Marquer Terminée'}
+                            </button>
+                            {isPending && (
+                                <button
+                                    onClick={() => onStatusChange(order._id, 'cancelled')}
+                                    className="w-full mt-2 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-red-500 hover:bg-red-50 transition-colors border border-red-100"
+                                >
+                                    <XCircle className="w-4 h-4 inline mr-2" />
+                                    Refuser la commande
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {order.status === 'completed' && (
+                        <div className="px-5 pb-5 pt-1">
+                            <div className="w-full py-3 rounded-xl text-center text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-100">
+                                <CheckCircle className="w-4 h-4 inline mr-2" />
+                                Commande terminée ✓
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
