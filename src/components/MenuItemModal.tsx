@@ -31,12 +31,9 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
   const [selectedToppings, setSelectedToppings] = useState<Record<string, SelectedTopping[]>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Defensive check for the ID
-  const isValidMenuItemId = item?._id && typeof item._id === 'string' && !item._id.startsWith('k57');
-
   const availableCategories = useQuery(
     api.queries.getToppingsForMenuItem,
-    isValidMenuItemId ? { menuItemId: item._id } : "skip"
+    item?._id ? { menuItemId: item._id } : "skip"
   );
 
   useBodyScrollLock(isOpen);

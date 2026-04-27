@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from 'react';
-import { X, Upload, Trash2 } from 'lucide-react';
+import { X, Upload, Trash2, AlertTriangle } from 'lucide-react';
 import { Id } from '../../../../convex/_generated/dataModel';
 
 interface MenuItemFormData {
@@ -15,12 +15,14 @@ interface MenuItemFormData {
     displayOrder: number;
     categoryOrders: { category: string; order: number }[];
     active: boolean;
+    inStock: boolean;
 }
 
 interface MenuItemModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (formData: MenuItemFormData, selectedFile: File | null, toppingCategoryIds: string[]) => Promise<void>;
+    onDelete?: () => Promise<void>;
     editingItem: any | null;
     categories: any[] | undefined;
     toppingCategories: any[] | undefined;
@@ -31,10 +33,11 @@ export default function MenuItemModal({
     isOpen,
     onClose,
     onSubmit,
+    onDelete,
     editingItem,
     categories,
     toppingCategories,
-    onRemoveImage
+    onRemoveImage,
 }: MenuItemModalProps) {
     const [formData, setFormData] = useState<MenuItemFormData>({
         name: '',
@@ -46,16 +49,20 @@ export default function MenuItemModal({
         displayOrder: 0,
         categoryOrders: [],
         active: true,
+        inStock: true,
     });
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeletingImage, setIsDeletingImage] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [selectedToppingCategories, setSelectedToppingCategories] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        setShowDeleteConfirm(false);
         if (editingItem) {
             setFormData({
                 name: editingItem.name,
@@ -68,6 +75,7 @@ export default function MenuItemModal({
                 displayOrder: editingItem.displayOrder || 0,
                 categoryOrders: editingItem.categoryOrders || [],
                 active: editingItem.active !== false,
+                inStock: editingItem.inStock !== false,
             });
             setPreviewUrl(editingItem.image);
             const toppingIds = (editingItem.toppingCategoryIds as string[] | undefined) || [];
@@ -83,6 +91,7 @@ export default function MenuItemModal({
                 displayOrder: 0,
                 categoryOrders: [],
                 active: true,
+                inStock: true,
             });
             setPreviewUrl(null);
             setSelectedToppingCategories([]);
@@ -108,6 +117,17 @@ export default function MenuItemModal({
             await onSubmit(formData, selectedFile, selectedToppingCategories);
         } finally {
             setIsUploading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!onDelete) return;
+        setIsDeleting(true);
+        try {
+            await onDelete();
+            onClose();
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -159,14 +179,12 @@ export default function MenuItemModal({
                             />
                         </div>
 
-
                         <div className="col-span-2">
                             <label className="block text-sm font-medium text-slate-700 mb-2">Ordre d'affichage (par catégorie)</label>
                             <div className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
                                 {formData.categories.map((categorySlug) => {
                                     const categoryName = categories?.find(c => c.slug === categorySlug)?.name || categorySlug;
                                     const currentOrder = formData.categoryOrders?.find(o => o.category === categorySlug)?.order ?? 0;
-
                                     return (
                                         <div key={categorySlug} className="flex items-center gap-3">
                                             <label className="text-sm text-slate-600 w-32 truncate">{categoryName}:</label>
@@ -267,7 +285,7 @@ export default function MenuItemModal({
                             </div>
                         </div>
 
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
                                 id="popular"
@@ -275,10 +293,10 @@ export default function MenuItemModal({
                                 onChange={(e) => setFormData({ ...formData, popular: e.target.checked })}
                                 className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500"
                             />
-                            <label htmlFor="popular" className="ml-2 text-sm font-medium text-slate-700">Populaire</label>
+                            <label htmlFor="popular" className="text-sm font-medium text-slate-700">Populaire</label>
                         </div>
 
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
                                 id="active"
@@ -286,14 +304,23 @@ export default function MenuItemModal({
                                 onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
                                 className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500"
                             />
-                            <label htmlFor="active" className="ml-2 text-sm font-medium text-slate-700">Actif</label>
+                            <label htmlFor="active" className="text-sm font-medium text-slate-700">Actif</label>
                         </div>
 
-                        {/* Topping Categories selection logic omitted for brevity, should be restored if needed */}
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="inStock"
+                                checked={formData.inStock}
+                                onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+                                className="w-4 h-4 text-green-600 border-slate-300 rounded focus:ring-green-500"
+                            />
+                            <label htmlFor="inStock" className="text-sm font-medium text-slate-700">En stock</label>
+                        </div>
+
                         {toppingCategories && toppingCategories.length > 0 && (
                             <div className="col-span-2 border-t border-slate-200 pt-4 mt-2">
                                 <label className="block text-sm font-medium text-slate-700 mb-3">Catégories de Garnitures</label>
-                                {/* ... existing topping categories logic ... */}
                                 <div className="grid grid-cols-2 gap-2">
                                     {toppingCategories.map((cat) => (
                                         <button
@@ -307,8 +334,8 @@ export default function MenuItemModal({
                                                 }
                                             }}
                                             className={`flex items-center gap-2 p-2 border rounded-lg transition text-left ${selectedToppingCategories.includes(cat.categoryId)
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-slate-200 hover:bg-slate-50'
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-slate-200 hover:bg-slate-50'
                                                 }`}
                                         >
                                             <span className={selectedToppingCategories.includes(cat.categoryId) ? 'text-blue-500' : 'text-slate-400'}>
@@ -322,11 +349,52 @@ export default function MenuItemModal({
                         )}
                     </div>
 
-                    <div className="flex gap-3 pt-4">
-                        <button type="button" onClick={onClose} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg">Annuler</button>
-                        <button type="submit" disabled={isUploading} className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg disabled:opacity-50">
-                            {isUploading ? 'Téléchargement...' : editingItem ? 'Mettre à jour' : 'Créer'}
-                        </button>
+                    {/* Footer */}
+                    <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+                        {/* Delete — edit mode only */}
+                        {editingItem && onDelete && (
+                            <div className="flex items-center gap-2">
+                                {!showDeleteConfirm ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Supprimer</span>
+                                    </button>
+                                ) : (
+                                    <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
+                                        <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                                        <span className="text-xs text-red-700 font-medium hidden sm:inline">Supprimer définitivement ?</span>
+                                        <button
+                                            type="button"
+                                            disabled={isDeleting}
+                                            onClick={handleDelete}
+                                            className="px-2.5 py-1 bg-red-600 text-white text-xs font-semibold rounded hover:bg-red-700 transition disabled:opacity-50"
+                                        >
+                                            {isDeleting ? '...' : 'Oui'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowDeleteConfirm(false)}
+                                            className="px-2.5 py-1 bg-white border border-slate-300 text-slate-600 text-xs rounded hover:bg-slate-50 transition"
+                                        >
+                                            Non
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 flex-1 justify-end">
+                            <button type="button" onClick={onClose} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition text-sm">
+                                Annuler
+                            </button>
+                            <button type="submit" disabled={isUploading} className="px-6 py-2 bg-slate-900 text-white rounded-lg disabled:opacity-50 hover:bg-slate-800 transition text-sm font-medium">
+                                {isUploading ? 'Téléchargement...' : editingItem ? 'Mettre à jour' : 'Créer'}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

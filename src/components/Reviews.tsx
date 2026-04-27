@@ -6,6 +6,9 @@ import ReviewsCarousel from './ReviewsCarousel';
 
 export default function Reviews() {
   const reviewsData = useQuery(api.reviews.listActive);
+  const restaurantInfo = useQuery(api.restaurantInfo.get);
+
+  if (restaurantInfo !== undefined && restaurantInfo?.reviewsEnabled === false) return null;
 
   return (
     <section id="avis" className="py-20 relative overflow-hidden bg-warm-50">

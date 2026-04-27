@@ -16,7 +16,7 @@ type DaySchedule = {
   slots: TimeSlot[];
 };
 
-type SectionId = 'contact' | 'ordering' | 'hours' | 'holidays' | 'social' | 'delivery';
+type SectionId = 'contact' | 'ordering' | 'hours' | 'holidays' | 'social' | 'delivery' | 'sections';
 
 type DeliveryZone = {
   postalCode: string;
@@ -36,6 +36,7 @@ export default function SettingsPage() {
     holidays: false,
     social: false,
     delivery: false,
+    sections: false,
   });
 
   const toggleSection = (id: SectionId) => {
@@ -59,6 +60,8 @@ export default function SettingsPage() {
     deliveryFees: [] as DeliveryZone[],
     defaultDeliveryFee: 0,
     freeDeliveryThreshold: 0,
+    galleryEnabled: true,
+    reviewsEnabled: true,
   });
 
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
@@ -104,6 +107,8 @@ export default function SettingsPage() {
         deliveryFees: restaurantInfo.deliveryFees || [],
         defaultDeliveryFee: restaurantInfo.defaultDeliveryFee ?? 0,
         freeDeliveryThreshold: restaurantInfo.freeDeliveryThreshold ?? 0,
+        galleryEnabled: restaurantInfo.galleryEnabled ?? true,
+        reviewsEnabled: restaurantInfo.reviewsEnabled ?? true,
       });
 
       setHolidays(restaurantInfo.holidays || []);
@@ -164,6 +169,8 @@ export default function SettingsPage() {
         deliveryFees: deliveryZones.filter(z => z.postalCode.trim() !== ''),
         defaultDeliveryFee: formData.defaultDeliveryFee,
         freeDeliveryThreshold: formData.freeDeliveryThreshold,
+        galleryEnabled: formData.galleryEnabled,
+        reviewsEnabled: formData.reviewsEnabled,
       });
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
@@ -386,6 +393,58 @@ export default function SettingsPage() {
                         <span className="text-sm text-slate-600">€</span>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sections du Site */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection('sections')}
+              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
+            >
+              <h2 className="text-xl font-bold text-slate-900">Sections du Site</h2>
+              {expandedSections.sections ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
+            </button>
+
+            {expandedSections.sections && (
+              <div className="p-6 pt-0 border-t border-slate-100 mt-0">
+                <div className="mt-4 space-y-4">
+                  <p className="text-sm text-slate-500 mb-2">Afficher ou masquer des sections sur la page d'accueil.</p>
+
+                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                    <div>
+                      <h3 className="font-medium text-slate-900">Section Avis</h3>
+                      <p className="text-sm text-slate-500">Afficher les avis clients sur la page d'accueil</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.reviewsEnabled}
+                        onChange={(e) => setFormData({ ...formData, reviewsEnabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                    <div>
+                      <h3 className="font-medium text-slate-900">Section Galerie</h3>
+                      <p className="text-sm text-slate-500">Afficher la galerie photos sur la page d'accueil</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.galleryEnabled}
+                        onChange={(e) => setFormData({ ...formData, galleryEnabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </label>
                   </div>
                 </div>
               </div>

@@ -7,6 +7,9 @@ import FadeIn from './FadeIn';
 
 export default function Gallery() {
   const galleryImages = useQuery(api.gallery.listActive);
+  const restaurantInfo = useQuery(api.restaurantInfo.get);
+
+  if (restaurantInfo !== undefined && restaurantInfo?.galleryEnabled === false) return null;
 
   return (
     <section id="gallery" className="py-20 bg-white">

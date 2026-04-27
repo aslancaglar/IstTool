@@ -149,6 +149,30 @@ export const updateTopping = mutation({
   },
 });
 
+export const updateToppingCategoryDisplayOrder = mutation({
+  args: {
+    adminToken: v.string(),
+    id: v.id("toppingCategories"),
+    displayOrder: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+    await ctx.db.patch(args.id, { displayOrder: args.displayOrder });
+  },
+});
+
+export const updateToppingDisplayOrder = mutation({
+  args: {
+    adminToken: v.string(),
+    id: v.id("toppings"),
+    displayOrder: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+    await ctx.db.patch(args.id, { displayOrder: args.displayOrder });
+  },
+});
+
 export const removeTopping = mutation({
   args: {
     id: v.id("toppings"),

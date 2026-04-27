@@ -20,12 +20,9 @@ interface MenuItemProps {
 
 export default function MenuItem({ item, onOpenModal }: MenuItemProps) {
 
-  // Defensive check: only query toppings if the ID is valid for the menuItems table
-  const isValidMenuItemId = item?._id && typeof item._id === 'string' && !item._id.startsWith('k57');
-
   const toppings = useQuery(
-    (isValidMenuItemId ? api.queries.getToppingsForMenuItem : undefined) as any,
-    { menuItemId: item?._id }
+    api.queries.getToppingsForMenuItem,
+    item?._id ? { menuItemId: item._id } : "skip"
   );
   const hasCustomization = (toppings?.length || 0) > 0;
 

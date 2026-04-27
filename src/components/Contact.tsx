@@ -9,7 +9,7 @@ export default function Contact() {
 
   if (!restaurantInfo) {
     return (
-      <section id="contact" className="py-20 bg-warm-50">
+      <section id="contact" className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-gray-600">Chargement...</p>
         </div>
@@ -18,7 +18,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="py-20 bg-warm-50">
+    <section id="contact" className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
           <div className="text-center mb-16">

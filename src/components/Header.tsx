@@ -12,10 +12,8 @@ import OpenStatus from './OpenStatus';
 
 const navLinks = [
   { href: '/', label: 'Accueil', type: 'route' as const },
-  { href: '#apropos', label: 'A propos', type: 'hash' as const },
+  { href: '#apropos', label: 'À Propos', type: 'hash' as const },
   { href: '/menu', label: 'Menu', type: 'route' as const },
-  { href: '#avis', label: 'Avis', type: 'hash' as const },
-  { href: '#gallery', label: 'Galerie', type: 'hash' as const },
   { href: '#contact', label: 'Contact', type: 'hash' as const },
 ];
 

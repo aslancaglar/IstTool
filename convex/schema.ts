@@ -28,6 +28,7 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     price: v.number(),
+    priceWithFries: v.optional(v.number()),
     image: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
     categories: v.optional(v.array(v.string())),
@@ -40,6 +41,7 @@ export default defineSchema({
       order: v.number(),
     }))),
     active: v.optional(v.boolean()),
+    inStock: v.optional(v.boolean()),
   }).index("by_display_order", ["displayOrder"]),
 
   toppingCategories: defineTable({
@@ -97,6 +99,8 @@ export default defineSchema({
     }))),
     defaultDeliveryFee: v.optional(v.number()), // Fallback price for unmatched postal codes
     freeDeliveryThreshold: v.optional(v.number()), // Order amount for free delivery (0 = disabled)
+    galleryEnabled: v.optional(v.boolean()),
+    reviewsEnabled: v.optional(v.boolean()),
   }).index("by_key", ["key"]),
 
   users: defineTable({

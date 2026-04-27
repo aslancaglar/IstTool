@@ -61,7 +61,7 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
     if (!allMenuItems || !activeCategory) return [];
 
     return allMenuItems
-      .filter(item => item.categories?.includes(activeCategory) && item.active)
+      .filter(item => item.categories?.includes(activeCategory) && item.active && item.inStock !== false)
       .sort((a, b) => {
         const orderA = a.categoryOrders?.find(o => o.category === activeCategory)?.order ?? (a.displayOrder || 0);
         const orderB = b.categoryOrders?.find(o => o.category === activeCategory)?.order ?? (b.displayOrder || 0);

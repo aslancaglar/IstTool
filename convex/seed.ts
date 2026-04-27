@@ -214,7 +214,7 @@ export const seedMenuItemToppings = mutation({
     const allMenuItems = await ctx.db.query("menuItems").collect();
 
     const toppingRules = [
-      { categories: ['sandwiches', 'sandwiches-vegetarien', 'assiettes', 'durum', 'pizzas', 'box'], toppingCategories: ['sauces', 'crudites', 'supplements'] },
+      { categories: ['sandwiches', 'sandwiches-vegetarien', 'assiettes', 'durum', 'pizzas', 'box', 'pizzas-base-tomate', 'pizzas-base-creme', 'pizzas-speciales', 'paninis', 'burgers', 'tex-mex'], toppingCategories: ['sauces', 'crudites', 'supplements'] },
       { categories: ['tacos'], toppingCategories: ['viandes', 'sauces', 'supplements'] },
       { categories: ['salades'], toppingCategories: ['crudites'] },
       { categories: ['bowls', 'kapsalon'], toppingCategories: ['viandes', 'sauces', 'crudites', 'supplements'] },
@@ -289,6 +289,559 @@ export const seedMenuCategories = mutation({
     }
 
     return { success: true, inserted, skipped };
+  },
+});
+
+
+export const seedPizzasBaseTomate = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "pizzas-base-tomate";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Pizzas Base Tomate",
+        slug: categorySlug,
+        displayOrder: 0,
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'MARGHERITA', description: 'Sauce tomate, mozzarella', price: 10.00, image: '/pizzas/base-tomate/Margherita.jpg' },
+      { name: 'REGINA', description: 'Sauce tomate, mozzarella, champignons, jambon', price: 12.00, image: '/pizzas/base-tomate/regina.jpg' },
+      { name: 'AU THON', description: 'Sauce tomate, mozzarella, thon, oignon, poivron, olives noires', price: 12.00, image: '/pizzas/base-tomate/au-thon.jpg' },
+      { name: '4 FROMAGES', description: 'Sauce tomate, mozzarella, brie, chèvre, gorgonzola', price: 12.00, image: '/pizzas/base-tomate/4-fromages.jpg' },
+      { name: 'CAMPIONE', description: 'Sauce tomate, mozzarella, viande hachée, champignons', price: 12.00, image: '/pizzas/base-tomate/campione.jpg' },
+      { name: 'ORIENTALE', description: 'Sauce tomate, mozzarella, merguez, poivron, olives noires, oignon, oeuf', price: 12.00, image: '/pizzas/base-tomate/orientale.jpg' },
+      { name: 'ROYALE', description: 'Sauce tomate, mozzarella, merguez, viande hachée, poulet', price: 12.00, image: '/pizzas/base-tomate/royale.jpg' },
+      { name: '4 SAISONS', description: 'Sauce tomate, mozzarella, jambon, champignons, artichaut, olives noires', price: 12.00, image: '/pizzas/base-tomate/4saisons.jpg' },
+      { name: 'VÉGÉTARIENNE', description: 'Sauce tomate, mozzarella, champignons, poivron, oignon, artichaut, aubergine, olives noires', price: 12.00, image: '/pizzas/base-tomate/vegetarienne.jpg' },
+      { name: 'NAPOLITAINE', description: 'Sauce tomate, mozzarella, anchois, câpre, olives noires', price: 12.00, image: '/pizzas/base-tomate/napolitaine.jpg' },
+      { name: '4 JAMBONS', description: 'Sauce tomate, mozzarella, jambon, lardons, bacon, pepperoni', price: 13.50, image: '/pizzas/base-tomate/4jambons.jpg' },
+      { name: 'PEPPERONI', description: 'Sauce tomate, mozzarella, pepperoni, oeuf', price: 12.00, image: '/pizzas/base-tomate/pepperoni.jpg' },
+      { name: 'KEBAB', description: 'Sauce tomate, mozzarella, viande kebab, oignon, olives noires', price: 12.00, image: '/pizzas/base-tomate/kebab.jpg' },
+      { name: 'CALZONE', description: 'Sauce tomate, mozzarella, champignons, jaune d\'oeuf, jambon ou viande hachée ou poulet ou thon', price: 13.50, image: '/pizzas/base-tomate/calzone.jpg' },
+      { name: 'FRUITS DE MER', description: 'Sauce tomate, mozzarella, cocktail de fruits de mer', price: 12.00, image: '/pizzas/base-tomate/fruitsdemer.jpg' },
+      { name: 'HAWAÏENNE', description: 'Sauce tomate, mozzarella, jambon, ananas, maïs', price: 12.00, image: '/pizzas/base-tomate/hawaienne.jpg' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const removePizzaImages = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const categorySlug = "pizzas-base-tomate";
+    const items = await ctx.db
+      .query("menuItems")
+      .collect();
+    
+    const pizzaItems = items.filter(item => item.categories?.includes(categorySlug));
+    
+    for (const item of pizzaItems) {
+      await ctx.db.patch(item._id, {
+        image: "",
+      });
+    }
+
+    return { success: true, count: pizzaItems.length };
+  },
+});
+
+
+export const updatePizzaImagesFromFolder = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const categorySlug = "pizzas-base-tomate";
+    const items = await ctx.db
+      .query("menuItems")
+      .collect();
+    
+    const pizzaItems = items.filter(item => item.categories?.includes(categorySlug));
+    
+    const imageMap: Record<string, string> = {
+      'MARGHERITA': '/pizzas/base-tomate/Margherita.jpg',
+      'REGINA': '/pizzas/base-tomate/regina.jpg',
+      'AU THON': '/pizzas/base-tomate/au-thon.jpg',
+      '4 FROMAGES': '/pizzas/base-tomate/4-fromages.jpg',
+      'CAMPIONE': '/pizzas/base-tomate/campione.jpg',
+      'ORIENTALE': '/pizzas/base-tomate/orientale.jpg',
+      'ROYALE': '/pizzas/base-tomate/royale.jpg',
+      '4 SAISONS': '/pizzas/base-tomate/4saisons.jpg',
+      'VÉGÉTARIENNE': '/pizzas/base-tomate/vegetarienne.jpg',
+      'NAPOLITAINE': '/pizzas/base-tomate/napolitaine.jpg',
+      '4 JAMBONS': '/pizzas/base-tomate/4jambons.jpg',
+      'PEPPERONI': '/pizzas/base-tomate/pepperoni.jpg',
+      'KEBAB': '/pizzas/base-tomate/kebab.jpg',
+      'CALZONE': '/pizzas/base-tomate/calzone.jpg',
+      'FRUITS DE MER': '/pizzas/base-tomate/fruitsdemer.jpg',
+      'HAWAÏENNE': '/pizzas/base-tomate/hawaienne.jpg',
+    };
+
+    let updated = 0;
+    for (const item of pizzaItems) {
+      const newImage = imageMap[item.name];
+      if (newImage) {
+        await ctx.db.patch(item._id, {
+          image: newImage,
+        });
+        updated++;
+      }
+    }
+
+    return { success: true, updated };
+  },
+});
+
+
+export const seedPizzasBaseCreme = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "pizzas-base-creme";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Pizzas Base Crème",
+        slug: categorySlug,
+        displayOrder: 1,
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'SAUMON', description: 'Base crème, mozzarella, saumon, pomme de terre, oignon', price: 12.00, image: '/pizzas/base-creme/saumon.jpg' },
+      { name: 'CHÈVRE MIEL', description: 'Base crème, mozzarella, chèvre, miel', price: 12.00, image: '/pizzas/base-creme/chevre-miel.jpg' },
+      { name: 'RACLETTE', description: 'Base crème, mozzarella, jambon, pomme de terre, raclette', price: 12.00, image: '/pizzas/base-creme/raclette.jpg' },
+      { name: 'FLAMME', description: 'Base crème, mozzarella, lardons, oignon', price: 12.00, image: '/pizzas/base-creme/flamme.jpg' },
+      { name: 'CHICKEN', description: 'Base crème, mozzarella, champignons, poulet, poivron', price: 12.00, image: '/pizzas/base-creme/chicken.jpg' },
+      { name: '4 FROMAGES', description: 'Base crème, mozzarella, brie, chèvre, gorgonzola', price: 12.00, image: '/pizzas/base-creme/4fromages.jpg' },
+      { name: 'FC METZ', description: 'Base crème, mozzarella, brie, chèvre, gorgonzola', price: 12.00, image: '/pizzas/base-creme/fcmetz.jpg' },
+      { name: 'MONDO', description: 'Base crème, mozzarella, jambon, pomme de terre, champignons, reblochon, oignon', price: 12.00, image: '/pizzas/base-creme/mondo.jpg' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const updatePizzaCremeImagesFromFolder = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const categorySlug = "pizzas-base-creme";
+    const items = await ctx.db
+      .query("menuItems")
+      .collect();
+    
+    const pizzaItems = items.filter(item => item.categories?.includes(categorySlug));
+    
+    const imageMap: Record<string, string> = {
+      'SAUMON': '/pizzas/base-creme/saumon.jpg',
+      'CHÈVRE MIEL': '/pizzas/base-creme/chevre-miel.jpg',
+      'RACLETTE': '/pizzas/base-creme/raclette.jpg',
+      'FLAMME': '/pizzas/base-creme/flamme.jpg',
+      'CHICKEN': '/pizzas/base-creme/chicken.jpg',
+      '4 FROMAGES': '/pizzas/base-creme/4fromages.jpg',
+      'FC METZ': '/pizzas/base-creme/fcmetz.jpg',
+      'MONDO': '/pizzas/base-creme/mondo.jpg',
+    };
+
+    let updated = 0;
+    for (const item of pizzaItems) {
+      const newImage = imageMap[item.name];
+      if (newImage) {
+        await ctx.db.patch(item._id, {
+          image: newImage,
+        });
+        updated++;
+      }
+    }
+
+    return { success: true, updated };
+  },
+});
+
+
+export const seedPizzasSpeciales = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "pizzas-speciales";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Pizzas Spéciales",
+        slug: categorySlug,
+        displayOrder: 2, // After base crème
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'ALGÉRIENNE', description: 'Sauce algérienne, mozzarella, viande hachée, pomme de terre, poivron, olives noires', price: 13.50, image: '' },
+      { name: 'CURRY', description: 'Sauce curry, mozzarella, poulet, oignon, poivron', price: 13.50, image: '' },
+      { name: 'ANDALOUSE', description: 'Sauce andalouse, mozzarella, poulet, oignon, poivron, chèvre', price: 13.50, image: '' },
+      { name: 'BARBECUE', description: 'Sauce barbecue, mozzarella, viande hachée, oignon', price: 13.50, image: '' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const seedPaninis = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "paninis";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Paninis",
+        slug: categorySlug,
+        displayOrder: 3, // After special pizzas
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'PANINI MERGUEZ', description: 'Sauce tomate ou crème fraîche + boisson', price: 7.50, image: '' },
+      { name: 'POULET', description: 'Sauce tomate ou crème fraiche + boisson', price: 7.50, image: '' },
+      { name: 'VIANDE HACHÉE', description: 'Sauce tomate ou crème fraiche + boisson', price: 7.50, image: '' },
+      { name: 'SAUMON', description: 'Sauce tomate ou crème fraiche + boisson', price: 7.50, image: '' },
+      { name: '4 FROMAGES', description: 'Sauce tomate ou crème fraiche + boisson', price: 7.50, image: '' },
+      { name: 'THON', description: 'Sauce tomate ou crème fraiche + boisson', price: 7.50, image: '' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const seedBurgers = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "burgers";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Burgers",
+        slug: categorySlug,
+        displayOrder: 4, // After paninis
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'CHEESEBURGER', description: 'Steak, Cheddar, Crudités + Boisson 33cl', price: 6.50, image: '' },
+      { name: 'DOBLE CHEESE', description: '2 Steaks, 2 Cheddars, Crudités + Boisson 33cl', price: 8.50, image: '' },
+      { name: 'LE CHICKEN', description: 'Galette de poulet, galette de pomme de terre et 2 cheddars, Crudités + Boisson 33cl', price: 7.50, image: '' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const seedTacos = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "tacos";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Tacos",
+        slug: categorySlug,
+        displayOrder: 5, // After burgers
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'TACOS 1 VIANDE', description: '1 Viande au choix, servi avec un boisson 33cl', price: 7.00, image: '/tacos.jpeg' },
+      { name: 'TACOS 2 VIANDES', description: '2 Viandes au choix, servi avec un boisson 33cl', price: 9.00, image: '/tacos2.jpeg' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const seedTexMex = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "tex-mex";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Tex-Mex",
+        slug: categorySlug,
+        displayOrder: 6, // After tacos
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'FRITES', description: '', price: 3.50, image: '/frites.jpeg' },
+      { name: 'POTATOES', description: '', price: 3.50, image: '' },
+      { name: 'NUGGETS X8', description: 'Servi avec frites ou potatoes', price: 10.00, image: '' },
+      { name: 'NUGGETS X12', description: 'Servi avec frites ou potatoes', price: 13.00, image: '' },
+      { name: 'CHICKEN WINGS X10', description: 'Servi avec frites ou potatoes', price: 10.00, image: '' },
+      { name: 'CHICKEN WINGS X12', description: 'Servi avec frites ou potatoes', price: 13.00, image: '' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const seedSalades = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "salades";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Salades",
+        slug: categorySlug,
+        displayOrder: 7, // After tex-mex
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'SAUMON', description: 'Tomates cerises, saumon, avocat, oignon, pomme de terre', price: 7.50, image: '' },
+      { name: 'THON', description: 'Tomates cerises, thon, mais, olives noires, oeuf dur', price: 7.50, image: '' },
+      { name: 'CHÈVRE CHAUD', description: 'Tomates cerises, lardon, chèvre chaud', price: 7.50, image: '' },
+      { name: 'FERMIÈRE', description: 'Tomates cerises, poulet, pomme de terre, olives noires', price: 7.50, image: '/salade-poulet-min.jpg' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const seedDesserts = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "desserts";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Desserts",
+        slug: categorySlug,
+        displayOrder: 8, // After salades
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'TARTE AU DAIM', description: '', price: 4.00, image: '' },
+      { name: 'TIRAMISU', description: '', price: 4.00, image: '/tiramisu.jpeg' },
+      { name: 'BROWNIES', description: '', price: 4.00, image: '' },
+      { name: 'TARTE AU CITRON', description: '', price: 4.00, image: '' },
+      { name: "BEN & JERRY'S 100 ml", description: '', price: 3.00, image: '' },
+      { name: "BEN & JERRY'S 500 ml", description: '', price: 6.00, image: '' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
+  },
+});
+
+
+export const seedBoissons = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Create Category
+    const categorySlug = "boissons";
+    const existingCategory = await ctx.db
+      .query("menuCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
+      .first();
+    
+    if (!existingCategory) {
+      await ctx.db.insert("menuCategories", {
+        name: "Boissons",
+        slug: categorySlug,
+        displayOrder: 9, // After desserts
+        active: true,
+      });
+    }
+
+    // 2. Add Items
+    const items = [
+      { name: 'COCA COLA', description: '', price: 1.50, image: '' },
+      { name: 'COCA COLA ZÉRO', description: '', price: 1.50, image: '' },
+      { name: 'COCA CHERRY', description: '', price: 1.50, image: '' },
+      { name: 'ORANGINA', description: '', price: 1.50, image: '' },
+      { name: 'PERRIER', description: '', price: 1.50, image: '' },
+      { name: 'SEVEN UP', description: '', price: 1.50, image: '' },
+      { name: 'EAU MINÉRALE', description: '', price: 1.50, image: '' },
+      { name: 'SCHWEPPES AGRUMES', description: '', price: 1.50, image: '' },
+      { name: 'DADA', description: '', price: 1.50, image: '' },
+      { name: 'FANTA', description: '', price: 1.50, image: '' },
+      { name: 'OASIS', description: '', price: 1.50, image: '' },
+      { name: 'SPRITE', description: '', price: 1.50, image: '' },
+      { name: 'ICE TEA', description: '', price: 1.50, image: '' },
+      { name: 'FREEZ', description: '', price: 1.50, image: '' },
+      { name: 'RED BULL', description: '', price: 2.50, image: '' },
+    ];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      await ctx.db.insert("menuItems", {
+        ...item,
+        categories: [categorySlug],
+        active: true,
+        displayOrder: i,
+      });
+    }
+
+    return { success: true, count: items.length };
   },
 });
 

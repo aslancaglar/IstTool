@@ -44,6 +44,8 @@ export const upsert = mutation({
     }))),
     defaultDeliveryFee: v.optional(v.number()),
     freeDeliveryThreshold: v.optional(v.number()),
+    galleryEnabled: v.optional(v.boolean()),
+    reviewsEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -67,6 +69,8 @@ export const upsert = mutation({
         deliveryFees: args.deliveryFees,
         defaultDeliveryFee: args.defaultDeliveryFee,
         freeDeliveryThreshold: args.freeDeliveryThreshold,
+        galleryEnabled: args.galleryEnabled,
+        reviewsEnabled: args.reviewsEnabled,
       });
       return existing._id;
     } else {
@@ -84,6 +88,8 @@ export const upsert = mutation({
         deliveryFees: args.deliveryFees,
         defaultDeliveryFee: args.defaultDeliveryFee ?? 0,
         freeDeliveryThreshold: args.freeDeliveryThreshold ?? 0,
+        galleryEnabled: args.galleryEnabled ?? true,
+        reviewsEnabled: args.reviewsEnabled ?? true,
       });
       return id;
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, CheckCircle2, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Id } from '../../../../convex/_generated/dataModel';
 
@@ -8,15 +8,17 @@ interface MenuItemCardProps {
     item: any;
     categoryFilter: string;
     onEdit: (item: any) => void;
-    onDelete: (id: Id<'menuItems'>) => void;
+    onToggleStock: (id: Id<'menuItems'>, inStock: boolean) => void;
 }
 
 export default function MenuItemCard({
     item,
     categoryFilter,
     onEdit,
-    onDelete
+    onToggleStock,
 }: MenuItemCardProps) {
+    const isInStock = item.inStock !== false;
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition flex flex-col">
             <div className="aspect-video bg-slate-100 relative group">
@@ -30,6 +32,11 @@ export default function MenuItemCard({
                 {!item.active && (
                     <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
                         <span className="bg-gray-900/80 text-white text-xs px-2 py-1 rounded-full">Inactif</span>
+                    </div>
+                )}
+                {!isInStock && (
+                    <div className="absolute bottom-2 left-2 bg-amber-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                        Rupture
                     </div>
                 )}
                 {categoryFilter !== 'all' && (
@@ -59,14 +66,20 @@ export default function MenuItemCard({
                             className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition text-xs font-medium"
                         >
                             <Edit className="w-3.5 h-3.5" />
-                            Modifier
+                            <span className="hidden sm:inline">Modifier</span>
                         </button>
                         <button
-                            onClick={() => onDelete(item._id)}
-                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition text-xs font-medium"
+                            onClick={() => onToggleStock(item._id, !isInStock)}
+                            title={isInStock ? 'Marquer rupture de stock' : 'Marquer en stock'}
+                            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition text-xs font-medium ${isInStock
+                                ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                                : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                }`}
                         >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            Supprimer
+                            {isInStock
+                                ? <><CheckCircle2 className="w-3.5 h-3.5" /><span className="hidden sm:inline">En stock</span></>
+                                : <><XCircle className="w-3.5 h-3.5" /><span className="hidden sm:inline">Rupture</span></>
+                            }
                         </button>
                     </div>
                 </div>

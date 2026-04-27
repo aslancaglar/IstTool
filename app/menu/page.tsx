@@ -1,11 +1,16 @@
 "use client";
 
+import { useEffect } from 'react';
 import AppLoaderWrapper from '../../src/components/AppLoaderWrapper';
 import Menu from '../../src/components/Menu';
 import { useHeroVideoUrl } from '../../src/context/VideoContext';
 
 export default function MenuPage() {
     const videoUrl = useHeroVideoUrl();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     return (
         <AppLoaderWrapper>

@@ -39,7 +39,7 @@ export const listByCategory = query({
 
     // Filter items that have the requested category in their categories array
     const filteredItems = items.filter(item =>
-      item.active !== false && item.categories?.includes(args.category)
+      item.active !== false && item.inStock !== false && item.categories?.includes(args.category)
     );
 
     const sortedItems = filteredItems.sort((a, b) => {
@@ -114,6 +114,7 @@ export const create = mutation({
       order: v.number(),
     }))),
     active: v.optional(v.boolean()),
+    inStock: v.optional(v.boolean()),
     platformPrice: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -129,6 +130,7 @@ export const create = mutation({
       displayOrder: args.displayOrder ?? 0,
       categoryOrders: args.categoryOrders,
       active: args.active ?? true,
+      inStock: args.inStock ?? true,
       platformPrice: args.platformPrice,
     });
     return itemId;
@@ -152,13 +154,13 @@ export const update = mutation({
       order: v.number(),
     }))),
     active: v.optional(v.boolean()),
+    inStock: v.optional(v.boolean()),
     platformPrice: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
     const existingItem = await ctx.db.get(args.id);
 
-    // If there's a new storage ID and it's different from the old one, delete the old image
     if (existingItem?.imageStorageId &&
       args.imageStorageId &&
       existingItem.imageStorageId !== args.imageStorageId) {
@@ -176,6 +178,7 @@ export const update = mutation({
       displayOrder: args.displayOrder,
       categoryOrders: args.categoryOrders,
       active: args.active,
+      inStock: args.inStock,
       platformPrice: args.platformPrice,
     });
     return args.id;
@@ -217,6 +220,18 @@ export const removeImage = mutation({
     });
 
     return { success: true };
+  },
+});
+
+export const updateStock = mutation({
+  args: {
+    adminToken: v.string(),
+    id: v.id("menuItems"),
+    inStock: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+    await ctx.db.patch(args.id, { inStock: args.inStock });
   },
 });
 
