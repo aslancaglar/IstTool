@@ -124,7 +124,6 @@ function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick, di
           {topping.active === false && (
             <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full flex-shrink-0">Inactif</span>
           )}
-        </div>
         <p className="text-xs text-slate-500 mt-0.5">
           {topping.price ? `+${topping.price.toFixed(2)} €` : 'Gratuit'}
           {' · '}
