@@ -61,7 +61,8 @@ export default defineSchema({
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
   }).index("by_category", ["categoryId"])
-    .index("by_display_order", ["displayOrder"]),
+    .index("by_display_order", ["displayOrder"])
+    .index("by_topping_id", ["toppingId"]),
 
   menuItemToppings: defineTable({
     menuItemId: v.id("menuItems"),
@@ -153,6 +154,8 @@ export default defineSchema({
       finalPrice: v.number(),
     })),
     totalPrice: v.number(),
+    promoCode: v.optional(v.string()),
+    discountAmount: v.optional(v.number()),
     status: v.union(
       v.literal("pending"),
       v.literal("preparing"),
@@ -165,6 +168,40 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_status", ["status"])
     .index("by_created", ["createdAt"]),
+
+  promoCodes: defineTable({
+    code: v.string(),
+    discountType: v.union(
+      v.literal("fixed"),
+      v.literal("percentage"),
+      v.literal("free_delivery"),
+      v.literal("percent_off_items"),
+      v.literal("percent_off_specific_items"),
+      v.literal("bogo_same"),   // 1 acheté = 1 offert (même article)
+      v.literal("bogo_gift"),   // 1 acheté = X offert (autre article)
+    ),
+    discountValue: v.number(),
+    minOrderAmount: v.optional(v.number()),
+    maxUsageCount: v.optional(v.number()),
+    usageCount: v.number(),
+    active: v.boolean(),
+    expiresAt: v.optional(v.number()),
+    description: v.optional(v.string()),
+    // Happy hour: time window restriction (any discountType)
+    timeWindow: v.optional(v.object({
+      startHour: v.number(),
+      endHour: v.number(),
+    })),
+    // Percent off items: category slugs to apply discount to
+    applicableCategoryIds: v.optional(v.array(v.string())),
+    // Percent off specific items: menu item IDs to apply discount to
+    applicableMenuItemIds: v.optional(v.array(v.string())),
+    // BOGO gift: trigger item (must be in cart) → gift item (becomes free)
+    bogoTriggerItemId: v.optional(v.string()),
+    bogoGiftItemId: v.optional(v.string()),
+    // false = automatic campaign (no code), true/undefined = promo code (customer must enter)
+    requiresCode: v.optional(v.boolean()),
+  }).index("by_code", ["code"]),
 
   reviews: defineTable({
     userId: v.optional(v.id("users")),

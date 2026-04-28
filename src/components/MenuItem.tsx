@@ -16,9 +16,14 @@ interface MenuItemProps {
     popular?: boolean;
   };
   onOpenModal?: (item: any) => void;
+  discountPercent?: number;
+  promoBadge?: string;
 }
 
-export default function MenuItem({ item, onOpenModal }: MenuItemProps) {
+export default function MenuItem({ item, onOpenModal, discountPercent = 0, promoBadge }: MenuItemProps) {
+  const discountedPrice = discountPercent > 0
+    ? Math.round(item.price * (1 - discountPercent / 100) * 100) / 100
+    : null;
 
   const toppings = useQuery(
     api.queries.getToppingsForMenuItem,
@@ -50,6 +55,18 @@ export default function MenuItem({ item, onOpenModal }: MenuItemProps) {
               className="object-cover group-hover:scale-110 transition-transform duration-500"
             />
           )}
+          <div className="absolute top-4 left-4 flex flex-col gap-1">
+            {promoBadge && (
+              <span className="bg-purple-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow max-w-[130px] truncate">
+                {promoBadge}
+              </span>
+            )}
+            {discountPercent > 0 && (
+              <span className="bg-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
+                -{discountPercent}%
+              </span>
+            )}
+          </div>
           {item?.popular && (
             <span className="absolute top-4 right-4 bg-primary-500 text-white text-sm font-semibold px-4 py-1 rounded-full">
               Populaire
@@ -66,9 +83,16 @@ export default function MenuItem({ item, onOpenModal }: MenuItemProps) {
             <h3 className="text-xl font-bold text-gray-900 font-display">
               {item?.name || 'Article'}
             </h3>
-            <span className="text-xl font-bold text-primary-500 ml-2 font-display">
-              {(item?.price || 0).toFixed(2)}€
-            </span>
+            {discountedPrice !== null ? (
+              <div className="flex flex-col items-end ml-2 shrink-0">
+                <span className="text-xs text-gray-400 line-through leading-none">{item.price.toFixed(2)}€</span>
+                <span className="text-xl font-bold text-green-600 font-display leading-tight">{discountedPrice.toFixed(2)}€</span>
+              </div>
+            ) : (
+              <span className="text-xl font-bold text-primary-500 ml-2 font-display">
+                {(item?.price || 0).toFixed(2)}€
+              </span>
+            )}
           </div>
           <p className="text-gray-600 mb-4">{item?.description || ''}</p>
 

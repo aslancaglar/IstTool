@@ -9,6 +9,10 @@ import MenuItem from './MenuItem';
 import FadeIn from './FadeIn';
 import MenuCategoryTabs from './MenuCategoryTabs';
 
+function getCurrentParisHour(): number {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' })).getHours();
+}
+
 // Lazy-load the heavy modal component because it is rarely viewed on initial page load
 const MenuItemModal = dynamic(() => import('./MenuItemModal'), { ssr: false });
 
@@ -24,6 +28,53 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
 
   const menuCategories = useQuery(api.queries.getMenuCategories);
   const allMenuItems = useQuery(api.queries.getMenuItems);
+  const activeCampaigns = useQuery(api.promoCodes.listActiveCampaigns);
+
+  // Active campaigns filtered by time window
+  const effectiveCampaigns = useMemo(() => {
+    if (!activeCampaigns) return [];
+    const hour = getCurrentParisHour();
+    return activeCampaigns.filter(c =>
+      !c.timeWindow || (hour >= c.timeWindow.startHour && hour < c.timeWindow.endHour)
+    );
+  }, [activeCampaigns]);
+
+  // Returns discount info for a given item: percent off and/or a promo badge
+  const getItemPromo = useCallback((item: { _id: string; categories?: string[] }): { discountPercent: number; promoBadge?: string } => {
+    let discountPercent = 0;
+    let promoBadge: string | undefined;
+    for (const c of effectiveCampaigns) {
+      if (c.discountType === 'percentage') {
+        discountPercent = Math.max(discountPercent, c.discountValue);
+      } else if (c.discountType === 'percent_off_items') {
+        const cats = c.applicableCategoryIds ?? [];
+        if ((item.categories ?? []).some(cat => cats.includes(cat))) {
+          discountPercent = Math.max(discountPercent, c.discountValue);
+        }
+      } else if (c.discountType === 'percent_off_specific_items') {
+        const ids: string[] = (c as any).applicableMenuItemIds ?? [];
+        if (ids.includes(item._id as string)) {
+          discountPercent = Math.max(discountPercent, c.discountValue);
+        }
+      } else if (c.discountType === 'bogo_same') {
+        const ids: string[] = (c as any).applicableMenuItemIds ?? [];
+        if (ids.length === 0 || ids.includes(item._id as string)) {
+          promoBadge = '2 POUR 1';
+        }
+      } else if (c.discountType === 'bogo_gift') {
+        const triggerItemId: string = (c as any).bogoTriggerItemId ?? '';
+        const giftItemId: string = (c as any).bogoGiftItemId ?? '';
+        if (item._id === triggerItemId) {
+          const giftItem = allMenuItems?.find(m => m._id === giftItemId);
+          promoBadge = giftItem ? `+ ${giftItem.name} offert` : 'Offre cadeau';
+        } else if (item._id === giftItemId) {
+          const triggerItem = allMenuItems?.find(m => m._id === triggerItemId);
+          promoBadge = triggerItem ? `Offert avec ${triggerItem.name}` : 'Peut être offert';
+        }
+      }
+    }
+    return { discountPercent, promoBadge };
+  }, [effectiveCampaigns, allMenuItems]);
 
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [showRightGradient, setShowRightGradient] = useState(true);
@@ -142,6 +193,8 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
                     ...item,
                     description: item.description || ''
                   }}
+                  discountPercent={getItemPromo(item).discountPercent}
+                  promoBadge={getItemPromo(item).promoBadge}
                   onOpenModal={handleOpenModal}
                 />
               </div>

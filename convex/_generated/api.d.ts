@@ -18,6 +18,7 @@ import type * as lib_constants from "../lib/constants.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as menuItems from "../menuItems.js";
 import type * as mutations from "../mutations.js";
+import type * as promoCodes from "../promoCodes.js";
 import type * as queries from "../queries.js";
 import type * as restaurantInfo from "../restaurantInfo.js";
 import type * as reviews from "../reviews.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   "lib/storage": typeof lib_storage;
   menuItems: typeof menuItems;
   mutations: typeof mutations;
+  promoCodes: typeof promoCodes;
   queries: typeof queries;
   restaurantInfo: typeof restaurantInfo;
   reviews: typeof reviews;
