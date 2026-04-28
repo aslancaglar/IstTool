@@ -49,8 +49,8 @@ export const getToppingsForMenuItem = query({
             if (!menuItem || menuItem.inStock === false) return null;
             return {
               id: t.toppingId,
-              name: menuItem.name, // Use linked item's name
-              price: menuItem.price, // Use linked item's price
+              name: t.name || menuItem.name, // Prefer topping's own name if set
+              price: t.price !== undefined ? t.price : menuItem.price, // Prefer topping's own price if set
               displayOrder: t.displayOrder || 0
             };
           }
@@ -105,7 +105,10 @@ export const getOrder = query({
               if (topping.menuItemId) {
                 const linkedItem = await ctx.db.get(topping.menuItemId);
                 if (linkedItem) {
-                  return { name: linkedItem.name, price: linkedItem.price };
+                  return { 
+                    name: topping.name || linkedItem.name, 
+                    price: topping.price !== undefined ? topping.price : linkedItem.price 
+                  };
                 }
               }
               return { name: topping.name, price: topping.price ?? 0 };
@@ -179,7 +182,10 @@ export const getAllOrders = query({
               if (topping.menuItemId) {
                 const linkedItem = await ctx.db.get(topping.menuItemId);
                 if (linkedItem) {
-                  return { name: linkedItem.name, price: linkedItem.price };
+                  return { 
+                    name: topping.name || linkedItem.name, 
+                    price: topping.price !== undefined ? topping.price : linkedItem.price 
+                  };
                 }
               }
               return { name: topping.name, price: topping.price ?? 0 };

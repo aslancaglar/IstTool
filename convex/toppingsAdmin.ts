@@ -89,7 +89,11 @@ export const listToppings = query({
       if (t.menuItemId) {
         const menuItem = await ctx.db.get(t.menuItemId);
         if (menuItem) {
-          return { ...t, name: menuItem.name, price: menuItem.price };
+          return { 
+            ...t, 
+            name: t.name || menuItem.name, 
+            price: t.price !== undefined ? t.price : menuItem.price 
+          };
         }
       }
       return t;
@@ -109,7 +113,11 @@ export const listToppingsByCategory = query({
       if (t.menuItemId) {
         const menuItem = await ctx.db.get(t.menuItemId);
         if (menuItem) {
-          return { ...t, name: menuItem.name, price: menuItem.price };
+          return { 
+            ...t, 
+            name: t.name || menuItem.name, 
+            price: t.price !== undefined ? t.price : menuItem.price 
+          };
         }
       }
       return t;
