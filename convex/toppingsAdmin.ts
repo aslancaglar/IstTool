@@ -85,7 +85,16 @@ export const listToppings = query({
   args: {},
   handler: async (ctx) => {
     const toppings = await ctx.db.query("toppings").collect();
-    return toppings.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    const enriched = await Promise.all(toppings.map(async (t) => {
+      if (t.menuItemId) {
+        const menuItem = await ctx.db.get(t.menuItemId);
+        if (menuItem) {
+          return { ...t, name: menuItem.name, price: menuItem.price };
+        }
+      }
+      return t;
+    }));
+    return enriched.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   },
 });
 
@@ -96,7 +105,16 @@ export const listToppingsByCategory = query({
       .query("toppings")
       .withIndex("by_category", (q) => q.eq("categoryId", args.categoryId))
       .collect();
-    return toppings.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    const enriched = await Promise.all(toppings.map(async (t) => {
+      if (t.menuItemId) {
+        const menuItem = await ctx.db.get(t.menuItemId);
+        if (menuItem) {
+          return { ...t, name: menuItem.name, price: menuItem.price };
+        }
+      }
+      return t;
+    }));
+    return enriched.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   },
 });
 
