@@ -47,6 +47,12 @@ export const getToppingsForMenuItem = query({
           if (t.menuItemId) {
             const menuItem = await ctx.db.get(t.menuItemId);
             if (!menuItem || menuItem.inStock === false) return null;
+            return {
+              id: t.toppingId,
+              name: menuItem.name, // Use linked item's name
+              price: menuItem.price, // Use linked item's price
+              displayOrder: t.displayOrder || 0
+            };
           }
           
           return {
@@ -96,6 +102,12 @@ export const getOrder = query({
           const toppingDetails = await Promise.all(toppingGroup.toppingIds.map(async (id) => {
             const topping = await ctx.db.query("toppings").filter(q => q.eq(q.field("toppingId"), id)).first();
             if (topping) {
+              if (topping.menuItemId) {
+                const linkedItem = await ctx.db.get(topping.menuItemId);
+                if (linkedItem) {
+                  return { name: linkedItem.name, price: linkedItem.price };
+                }
+              }
               return { name: topping.name, price: topping.price ?? 0 };
             }
             return { name: id, price: 0 };
@@ -164,6 +176,12 @@ export const getAllOrders = query({
           const toppingDetails = await Promise.all(toppingGroup.toppingIds.map(async (id) => {
             const topping = await ctx.db.query("toppings").filter(q => q.eq(q.field("toppingId"), id)).first();
             if (topping) {
+              if (topping.menuItemId) {
+                const linkedItem = await ctx.db.get(topping.menuItemId);
+                if (linkedItem) {
+                  return { name: linkedItem.name, price: linkedItem.price };
+                }
+              }
               return { name: topping.name, price: topping.price ?? 0 };
             }
             return { name: id, price: 0 };

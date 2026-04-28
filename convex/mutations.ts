@@ -91,9 +91,8 @@ export const createOrder = mutation({
               if (!linkedItem || linkedItem.inStock === false) {
                 throw new Error(`Garniture indisponible (rupture): ${topping.name}`);
               }
-            }
-
-            if (topping.price) {
+              verifiedPrice += linkedItem.price;
+            } else if (topping.price) {
               verifiedPrice += topping.price;
             }
           }
