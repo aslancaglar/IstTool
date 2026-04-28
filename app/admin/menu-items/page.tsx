@@ -65,19 +65,25 @@ function SortableSidebarItem({ id, isSelected, label, count, active, onSelect, o
 
 // ── Sortable article card ─────────────────────────────────────────────────────
 
-function SortableArticleCard({ item, categoryFilter, onEdit, onToggleStock }: {
+function SortableArticleCard({ item, categoryFilter, onEdit, onToggleStock, disabled }: {
   item: any; categoryFilter: string;
   onEdit: (item: any) => void;
   onToggleStock: (id: Id<'menuItems'>, inStock: boolean) => void;
+  disabled?: boolean;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item._id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
+    id: item._id,
+    disabled
+  });
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={isDragging ? 'opacity-30' : ''}>
       <div className="relative group/card">
-        <div className="absolute top-0 inset-x-0 h-7 flex items-center justify-center cursor-grab active:cursor-grabbing z-10 opacity-60 lg:opacity-0 lg:group-hover/card:opacity-100 transition-opacity rounded-t-xl bg-gradient-to-b from-black/30 to-transparent"
-          {...attributes} {...listeners}>
-          <GripVertical className="w-4 h-4 text-white drop-shadow" />
-        </div>
+        {!disabled && (
+          <div className="absolute top-0 inset-x-0 h-7 flex items-center justify-center cursor-grab active:cursor-grabbing z-10 opacity-60 lg:opacity-0 lg:group-hover/card:opacity-100 transition-opacity rounded-t-xl bg-gradient-to-b from-black/30 to-transparent"
+            {...attributes} {...listeners}>
+            <GripVertical className="w-4 h-4 text-white drop-shadow" />
+          </div>
+        )}
         <MenuItemCard item={item} categoryFilter={categoryFilter} onEdit={onEdit} onToggleStock={onToggleStock} />
       </div>
     </div>
@@ -86,18 +92,24 @@ function SortableArticleCard({ item, categoryFilter, onEdit, onToggleStock }: {
 
 // ── Sortable topping row ──────────────────────────────────────────────────────
 
-function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick }: {
+function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick, disabled }: {
   topping: any; toppingCategories: any[] | undefined;
   onEdit: (t: any) => void; onDeleteClick: (id: Id<'toppings'>) => void;
+  disabled?: boolean;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: topping._id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
+    id: topping._id,
+    disabled
+  });
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`group flex items-center gap-3 bg-white rounded-xl border border-slate-200 px-3 py-3 shadow-sm ${isDragging ? 'opacity-30' : 'hover:border-slate-300'}`}>
-      <button className="flex-shrink-0 p-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 touch-none"
-        {...attributes} {...listeners} tabIndex={-1}>
-        <GripVertical className="w-4 h-4" />
-      </button>
+      {!disabled && (
+        <button className="flex-shrink-0 p-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 touch-none"
+          {...attributes} {...listeners} tabIndex={-1}>
+          <GripVertical className="w-4 h-4" />
+        </button>
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="font-semibold text-slate-900 text-sm truncate">{topping.name}</p>
@@ -614,17 +626,26 @@ export default function MenuItemsPage() {
                     <X className="w-3 h-3" /> Tout
                   </button>
                 )}
-                <p className="ml-auto text-xs text-slate-400 hidden sm:flex items-center gap-1">
-                  <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
-                </p>
-              </div>
+                  {categoryFilter !== 'all' && (
+                    <p className="ml-auto text-xs text-slate-400 hidden sm:flex items-center gap-1">
+                      <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
+                    </p>
+                  )}
+                </div>
 
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleArticleDragStart} onDragEnd={handleArticleDragEnd}>
                 <SortableContext items={displayedArticles.map(a => a._id)} strategy={rectSortingStrategy}>
                   {displayedArticles.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                       {displayedArticles.map(item => (
-                        <SortableArticleCard key={item._id} item={item} categoryFilter={categoryFilter} onEdit={handleEditArticle} onToggleStock={handleToggleStock} />
+                        <SortableArticleCard 
+                          key={item._id} 
+                          item={item} 
+                          categoryFilter={categoryFilter} 
+                          onEdit={handleEditArticle} 
+                          onToggleStock={handleToggleStock}
+                          disabled={categoryFilter === 'all'}
+                        />
                       ))}
                     </div>
                   ) : (
@@ -683,19 +704,26 @@ export default function MenuItemsPage() {
                     <X className="w-3 h-3" /> Tout
                   </button>
                 )}
-                <p className="ml-auto text-xs text-slate-400 flex items-center gap-1">
-                  <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
-                </p>
-              </div>
+                  {toppingCategoryFilter !== 'all' && (
+                    <p className="ml-auto text-xs text-slate-400 flex items-center gap-1">
+                      <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
+                    </p>
+                  )}
+                </div>
 
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleToppingDragStart} onDragEnd={handleToppingDragEnd}>
                 <SortableContext items={displayedToppings.map((t: any) => t._id)} strategy={verticalListSortingStrategy}>
                   {displayedToppings.length > 0 ? (
                     <div className="space-y-2">
                       {displayedToppings.map((topping: any) => (
-                        <SortableTopping key={topping._id} topping={topping} toppingCategories={toppingCategories}
+                        <SortableTopping 
+                          key={topping._id} 
+                          topping={topping} 
+                          toppingCategories={toppingCategories}
                           onEdit={handleEditTopping}
-                          onDeleteClick={(id) => setToppingConfirmModal({ isOpen: true, id })} />
+                          onDeleteClick={(id) => setToppingConfirmModal({ isOpen: true, id })}
+                          disabled={toppingCategoryFilter === 'all'}
+                        />
                       ))}
                     </div>
                   ) : (
