@@ -60,9 +60,11 @@ export default defineSchema({
     categoryId: v.string(),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    menuItemId: v.optional(v.id("menuItems")),
   }).index("by_category", ["categoryId"])
     .index("by_display_order", ["displayOrder"])
-    .index("by_topping_id", ["toppingId"]),
+    .index("by_topping_id", ["toppingId"])
+    .index("by_menu_item", ["menuItemId"]),
 
   menuItemToppings: defineTable({
     menuItemId: v.id("menuItems"),

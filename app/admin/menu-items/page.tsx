@@ -32,6 +32,7 @@ interface ToppingCategoryFormData {
 interface ToppingFormData {
   toppingId: string; name: string; price: number;
   categoryId: string; displayOrder: number; active: boolean;
+  menuItemId?: Id<'menuItems'>;
 }
 
 // ── Shared sortable sidebar row ───────────────────────────────────────────────
@@ -111,8 +112,15 @@ function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick, di
         </button>
       )}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <p className="font-semibold text-slate-900 text-sm truncate">{topping.name}</p>
+          {topping.menuItemId && (
+            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-blue-100 flex-shrink-0">
+              <LayoutGrid className="w-2.5 h-2.5" />
+              Article lié
+            </span>
+          )}
+        </div>
           {topping.active === false && (
             <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full flex-shrink-0">Inactif</span>
           )}
@@ -197,7 +205,9 @@ export default function MenuItemsPage() {
   // ── Topping UI state ─────────────────────────────────────────────────────────
   const [isToppingModalOpen, setIsToppingModalOpen] = useState(false);
   const [editingToppingId, setEditingToppingId] = useState<Id<'toppings'> | null>(null);
-  const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({ toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true });
+  const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({ 
+    toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true, menuItemId: undefined 
+  });
   const [toppingConfirmModal, setToppingConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppings'> | null }>({ isOpen: false, id: null });
 
   // ── DnD state ────────────────────────────────────────────────────────────────
@@ -440,13 +450,20 @@ export default function MenuItemsPage() {
   // ── Topping handlers ──────────────────────────────────────────────────────────
   const handleCreateTopping = () => {
     setEditingToppingId(null);
-    setToppingFormData({ toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '', displayOrder: allToppings?.length || 0, active: true });
+    setToppingFormData({ 
+      toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '', 
+      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined 
+    });
     setIsToppingModalOpen(true);
     setActiveTab('garnitures');
   };
   const handleEditTopping = (topping: any) => {
     setEditingToppingId(topping._id);
-    setToppingFormData({ toppingId: topping.toppingId, name: topping.name, price: topping.price || 0, categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0, active: topping.active !== false });
+    setToppingFormData({ 
+      toppingId: topping.toppingId, name: topping.name, price: topping.price || 0, 
+      categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0, 
+      active: topping.active !== false, menuItemId: topping.menuItemId 
+    });
     setIsToppingModalOpen(true);
   };
   const handleToppingSubmit = async (e: React.FormEvent) => {
@@ -852,6 +869,30 @@ export default function MenuItemsPage() {
                 <label className="block text-sm font-medium text-slate-700 mb-2">Prix (€)</label>
                 <input type="number" step="0.01" min="0" value={toppingFormData.price} onChange={(e) => setToppingFormData({ ...toppingFormData, price: parseFloat(e.target.value) || 0 })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" />
                 <p className="text-xs text-slate-500 mt-1">0 = gratuit</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Lier à un article du menu (Optionnel)</label>
+                <select 
+                  value={toppingFormData.menuItemId || ""} 
+                  onChange={(e) => {
+                    const selectedId = e.target.value as Id<'menuItems'> | "";
+                    const item = menuItems?.find(i => i._id === selectedId);
+                    setToppingFormData({ 
+                      ...toppingFormData, 
+                      menuItemId: selectedId || undefined,
+                      // Automatically fill name and price if they are empty
+                      name: toppingFormData.name || (item?.name || ""),
+                      price: toppingFormData.price || (item?.price || 0)
+                    });
+                  }} 
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-sm"
+                >
+                  <option value="">Aucun article lié</option>
+                  {menuItems?.map(item => (
+                    <option key={item._id} value={item._id}>{item.name} ({item.price.toFixed(2)}€)</option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500 mt-1">L'article sélectionné sera traité comme une garniture.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Catégorie</label>

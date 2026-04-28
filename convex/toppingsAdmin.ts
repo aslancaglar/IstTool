@@ -109,6 +109,7 @@ export const createTopping = mutation({
     categoryId: v.string(),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    menuItemId: v.optional(v.id("menuItems")),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -119,6 +120,7 @@ export const createTopping = mutation({
       categoryId: args.categoryId,
       displayOrder: args.displayOrder ?? 0,
       active: args.active ?? true,
+      menuItemId: args.menuItemId,
     });
     return id;
   },
@@ -134,6 +136,7 @@ export const updateTopping = mutation({
     categoryId: v.string(),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    menuItemId: v.optional(v.id("menuItems")),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -144,6 +147,7 @@ export const updateTopping = mutation({
       categoryId: args.categoryId,
       displayOrder: args.displayOrder,
       active: args.active,
+      menuItemId: args.menuItemId,
     });
     return args.id;
   },
