@@ -624,36 +624,61 @@ export const seedDesserts = mutation({
 export const seedBoissons = mutation({
   args: {},
   handler: async (ctx) => {
-    // 1. Create Category
     const categorySlug = "boissons";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
+    console.log("Updating Boissons category with new items...");
+    
+    // 1. Get current boissons to delete them
+    const existingBoissons = await ctx.db
+      .query("menuItems")
+      .collect();
 
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Boissons",
-        slug: categorySlug,
-        displayOrder: 9, // After desserts
-        active: true,
-      });
+    // Filter items that actually contain 'boissons' in their categories array
+    const toDelete = existingBoissons.filter(item => item.categories && item.categories.includes(categorySlug));
+
+    for (const item of toDelete) {
+      await ctx.db.delete(item._id);
     }
 
-    // 2. Add Items
-    const items: any[] = [];
+    const newBoissons = [
+      { name: "Fanta Orange", price: 2.30, description: "33cl", popular: false },
+      { name: "Coca-Cola Cherry", price: 2.30, description: "33cl", popular: true },
+      { name: "Orangina", price: 2.30, description: "33cl", popular: false },
+      { name: "Perrier", price: 2.30, description: "33cl", popular: false },
+      { name: "7 Up", price: 2.30, description: "33cl", popular: false },
+      { name: "Schweppes Agrumes", price: 2.30, description: "33cl", popular: false },
+      { name: "Sprite", price: 2.30, description: "33cl", popular: false },
+      { name: "Red Bull", price: 3.50, description: "33cl", popular: false },
+      { name: "Coca Cola 1.5L", price: 4.50, description: "1.5L", popular: true },
+      { name: "Fanta Orange 1.5L", price: 4.50, description: "1.5L", popular: false },
+      { name: "Monster Energy 50cl", price: 3.50, description: "50cl", popular: false },
+      { name: "Coca-Cola", price: 2.30, description: "33cl", popular: true },
+      { name: "Coca-Cola Zéro", price: 2.30, description: "33cl", popular: true },
+      { name: "Ice Tea", price: 2.30, description: "33cl", popular: false },
+      { name: "Oasis", price: 2.30, description: "33cl", popular: false },
+      { name: "Eau Minérale", price: 2.30, description: "33cl", popular: false },
+      { name: "Dada", price: 2.30, description: "33cl", popular: false },
+      { name: "Ice Tea 1.5L", price: 4.50, description: "1.5L", popular: false },
+      { name: "Oasis 2L", price: 5.00, description: "2L", popular: false },
+    ];
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    let inserted = 0;
+    for (let i = 0; i < newBoissons.length; i++) {
+      const b = newBoissons[i];
       await ctx.db.insert("menuItems", {
-        ...item,
+        name: b.name,
+        price: b.price,
+        description: b.description,
+        popular: b.popular,
         categories: [categorySlug],
         active: true,
-        displayOrder: i,
+        displayOrder: 100 + i, // High order to keep them together
+        image: "",
+        categoryOrders: []
       });
+      inserted++;
     }
 
-    return { success: true, count: items.length };
+    return { success: true, deleted: toDelete.length, inserted };
   },
 });
 
@@ -962,5 +987,7 @@ export const importData = mutation({
     return { success: true };
   },
 });
+
+
 
 
