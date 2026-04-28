@@ -61,6 +61,7 @@ export default defineSchema({
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
+    specialPrice: v.optional(v.number()),
   }).index("by_category", ["categoryId"])
     .index("by_display_order", ["displayOrder"])
     .index("by_topping_id", ["toppingId"])

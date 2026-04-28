@@ -33,6 +33,7 @@ interface ToppingFormData {
   toppingId: string; name: string; price: number;
   categoryId: string; displayOrder: number; active: boolean;
   menuItemId?: Id<'menuItems'>;
+  specialPrice?: number;
 }
 
 // ── Shared sortable sidebar row ───────────────────────────────────────────────
@@ -120,14 +121,24 @@ function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick, di
               Article lié
             </span>
           )}
-        </div>
-          {topping.active === false && (
-            <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full flex-shrink-0">Inactif</span>
+          {topping.specialPrice !== undefined && (
+            <span className="text-[9px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter flex-shrink-0 shadow-sm">
+              Override
+            </span>
           )}
-        <p className="text-xs text-slate-500 mt-0.5">
-          {topping.price ? `+${topping.price.toFixed(2)} €` : 'Gratuit'}
-          {' · '}
+        </div>
+        <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+          <span className="font-bold text-blue-600">
+            {topping.effectivePrice ? `+${topping.effectivePrice.toFixed(2)} €` : 'Gratuit'}
+          </span>
+          <span className="text-slate-300">·</span>
           <span className="text-slate-400">{toppingCategories?.find((c: any) => c.categoryId === topping.categoryId)?.name ?? topping.categoryId}</span>
+          {topping.active === false && (
+            <>
+              <span className="text-slate-300">·</span>
+              <span className="text-[10px] text-red-500 font-medium">Inactif</span>
+            </>
+          )}
         </p>
       </div>
       <div className="flex gap-1 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition ml-auto">
@@ -205,7 +216,8 @@ export default function MenuItemsPage() {
   const [isToppingModalOpen, setIsToppingModalOpen] = useState(false);
   const [editingToppingId, setEditingToppingId] = useState<Id<'toppings'> | null>(null);
   const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({ 
-    toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true, menuItemId: undefined 
+    toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true, 
+    menuItemId: undefined, specialPrice: undefined 
   });
   const [toppingConfirmModal, setToppingConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppings'> | null }>({ isOpen: false, id: null });
 
@@ -451,7 +463,7 @@ export default function MenuItemsPage() {
     setEditingToppingId(null);
     setToppingFormData({ 
       toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '', 
-      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined 
+      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined, specialPrice: undefined 
     });
     setIsToppingModalOpen(true);
     setActiveTab('garnitures');
@@ -461,7 +473,8 @@ export default function MenuItemsPage() {
     setToppingFormData({ 
       toppingId: topping.toppingId, name: topping.name, price: topping.price || 0, 
       categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0, 
-      active: topping.active !== false, menuItemId: topping.menuItemId 
+      active: topping.active !== false, menuItemId: topping.menuItemId,
+      specialPrice: topping.specialPrice
     });
     setIsToppingModalOpen(true);
   };
@@ -867,7 +880,18 @@ export default function MenuItemsPage() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Prix (€)</label>
                 <input type="number" step="0.01" min="0" value={toppingFormData.price} onChange={(e) => setToppingFormData({ ...toppingFormData, price: parseFloat(e.target.value) || 0 })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" />
-                <p className="text-xs text-slate-500 mt-1">0 = gratuit</p>
+                <p className="text-xs text-slate-500 mt-1">0 = gratuit. Utilisé si aucun article n'est lié.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Prix Spécial (Override) (€)</label>
+                <input 
+                  type="number" step="0.01" min="0" 
+                  value={toppingFormData.specialPrice ?? ""} 
+                  onChange={(e) => setToppingFormData({ ...toppingFormData, specialPrice: e.target.value ? parseFloat(e.target.value) : undefined })} 
+                  className="w-full px-4 py-2 border border-blue-200 bg-blue-50/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                  placeholder="Laisser vide pour prix par défaut"
+                />
+                <p className="text-xs text-blue-600 mt-1">Si rempli, ce prix remplace le prix de l'article lié.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Lier à un article du menu (Optionnel)</label>

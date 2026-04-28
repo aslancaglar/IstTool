@@ -92,11 +92,14 @@ export const listToppings = query({
           return { 
             ...t, 
             name: t.name || menuItem.name, 
-            price: t.price !== undefined ? t.price : menuItem.price 
+            effectivePrice: t.specialPrice !== undefined ? t.specialPrice : menuItem.price 
           };
         }
       }
-      return t;
+      return { 
+        ...t, 
+        effectivePrice: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0) 
+      };
     }));
     return enriched.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   },
@@ -116,11 +119,14 @@ export const listToppingsByCategory = query({
           return { 
             ...t, 
             name: t.name || menuItem.name, 
-            price: t.price !== undefined ? t.price : menuItem.price 
+            effectivePrice: t.specialPrice !== undefined ? t.specialPrice : menuItem.price 
           };
         }
       }
-      return t;
+      return { 
+        ...t, 
+        effectivePrice: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0) 
+      };
     }));
     return enriched.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   },
@@ -136,6 +142,7 @@ export const createTopping = mutation({
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
+    specialPrice: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -147,6 +154,7 @@ export const createTopping = mutation({
       displayOrder: args.displayOrder ?? 0,
       active: args.active ?? true,
       menuItemId: args.menuItemId,
+      specialPrice: args.specialPrice,
     });
     return id;
   },
@@ -163,6 +171,7 @@ export const updateTopping = mutation({
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
+    specialPrice: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -174,6 +183,7 @@ export const updateTopping = mutation({
       displayOrder: args.displayOrder,
       active: args.active,
       menuItemId: args.menuItemId,
+      specialPrice: args.specialPrice,
     });
     return args.id;
   },

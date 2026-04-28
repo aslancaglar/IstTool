@@ -49,8 +49,10 @@ export const getToppingsForMenuItem = query({
             if (!menuItem || menuItem.inStock === false) return null;
             return {
               id: t.toppingId,
-              name: t.name || menuItem.name, // Prefer topping's own name if set
-              price: t.price !== undefined ? t.price : menuItem.price, // Prefer topping's own price if set
+              name: t.name || menuItem.name,
+              price: t.price ?? 0, // Base price
+              specialPrice: t.specialPrice,
+              effectivePrice: t.specialPrice !== undefined ? t.specialPrice : menuItem.price,
               displayOrder: t.displayOrder || 0
             };
           }
@@ -58,7 +60,9 @@ export const getToppingsForMenuItem = query({
           return {
             id: t.toppingId,
             name: t.name,
-            price: t.price,
+            price: t.price ?? 0,
+            specialPrice: t.specialPrice,
+            effectivePrice: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0),
             displayOrder: t.displayOrder || 0
           };
         }));
@@ -107,11 +111,18 @@ export const getOrder = query({
                 if (linkedItem) {
                   return { 
                     name: topping.name || linkedItem.name, 
-                    price: topping.price !== undefined ? topping.price : linkedItem.price 
+                    price: topping.price ?? 0,
+                    specialPrice: topping.specialPrice,
+                    effectivePrice: topping.specialPrice !== undefined ? topping.specialPrice : linkedItem.price 
                   };
                 }
               }
-              return { name: topping.name, price: topping.price ?? 0 };
+              return { 
+                name: topping.name, 
+                price: topping.price ?? 0,
+                specialPrice: topping.specialPrice,
+                effectivePrice: topping.specialPrice !== undefined ? topping.specialPrice : (topping.price ?? 0)
+              };
             }
             return { name: id, price: 0 };
           }));
@@ -184,11 +195,18 @@ export const getAllOrders = query({
                 if (linkedItem) {
                   return { 
                     name: topping.name || linkedItem.name, 
-                    price: topping.price !== undefined ? topping.price : linkedItem.price 
+                    price: topping.price ?? 0,
+                    specialPrice: topping.specialPrice,
+                    effectivePrice: topping.specialPrice !== undefined ? topping.specialPrice : linkedItem.price 
                   };
                 }
               }
-              return { name: topping.name, price: topping.price ?? 0 };
+              return { 
+                name: topping.name, 
+                price: topping.price ?? 0,
+                specialPrice: topping.specialPrice,
+                effectivePrice: topping.specialPrice !== undefined ? topping.specialPrice : (topping.price ?? 0)
+              };
             }
             return { name: id, price: 0 };
           }));
