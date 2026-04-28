@@ -41,14 +41,26 @@ export const getToppingsForMenuItem = query({
           .withIndex("by_category", (q) => q.eq("categoryId", category.categoryId))
           .collect();
 
-        const activeToppings = toppings
-          .filter(t => t.active !== false)
-          .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
-          .map((t) => ({
+        const toppingData = await Promise.all(toppings.map(async (t) => {
+          if (t.active === false) return null;
+          
+          if (t.menuItemId) {
+            const menuItem = await ctx.db.get(t.menuItemId);
+            if (!menuItem || menuItem.inStock === false) return null;
+          }
+          
+          return {
             id: t.toppingId,
             name: t.name,
             price: t.price,
-          }));
+            displayOrder: t.displayOrder || 0
+          };
+        }));
+
+        const activeToppings = toppingData
+          .filter((t): t is NonNullable<typeof t> => t !== null)
+          .sort((a, b) => a.displayOrder - b.displayOrder)
+          .map(({ displayOrder, ...rest }) => rest);
 
         if (activeToppings.length === 0) return null;
 

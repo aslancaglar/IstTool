@@ -81,7 +81,19 @@ export const createOrder = mutation({
               .query("toppings")
               .filter((q) => q.eq(q.field("toppingId"), toppingId))
               .first();
-            if (topping?.price) {
+            
+            if (!topping || topping.active === false) {
+              throw new Error(`Garniture indisponible: ${toppingId}`);
+            }
+
+            if (topping.menuItemId) {
+              const linkedItem = await ctx.db.get(topping.menuItemId);
+              if (!linkedItem || linkedItem.inStock === false) {
+                throw new Error(`Garniture indisponible (rupture): ${topping.name}`);
+              }
+            }
+
+            if (topping.price) {
               verifiedPrice += topping.price;
             }
           }
