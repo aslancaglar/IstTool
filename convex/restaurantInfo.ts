@@ -41,6 +41,7 @@ export const upsert = mutation({
       postalCode: v.string(),
       price: v.number(),
       name: v.optional(v.string()),
+      freeDeliveryThreshold: v.optional(v.number()),
     }))),
     defaultDeliveryFee: v.optional(v.number()),
     freeDeliveryThreshold: v.optional(v.number()),

@@ -138,15 +138,40 @@ export default function MobileStickyCart() {
         {/* Footer */}
         <div className="border-t border-gray-100 px-5 py-4 space-y-4 bg-gray-50 rounded-b-3xl">
           {/* Free Delivery Progress */}
-          {restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0 && (
-            <div className="px-5 pb-1">
-              <FreeDeliveryBar
-                currentTotal={totalPrice}
-                threshold={restaurantInfo.freeDeliveryThreshold}
-                compact
-              />
-            </div>
-          )}
+          {(() => {
+            const { useAuth } = require('../context/AuthContext');
+            const { calculateDeliveryFee } = require('../utils/deliveryFeeCalculator');
+            const { user } = useAuth();
+            
+            // 1. Prioritize general threshold if it exists
+            let effectiveThreshold = restaurantInfo?.freeDeliveryThreshold;
+            
+            // 2. If no general threshold and user is logged in, try to find zone-specific threshold
+            if ((!effectiveThreshold || effectiveThreshold <= 0) && user?.zipCode) {
+              const zoneResult = calculateDeliveryFee(user.zipCode, restaurantInfo?.deliveryFees);
+              if (zoneResult.matched && zoneResult.freeDeliveryThreshold) {
+                effectiveThreshold = zoneResult.freeDeliveryThreshold;
+              }
+            }
+
+            // 3. Show if we have a threshold AND (general threshold exists OR user is logged in)
+            const showBar = effectiveThreshold && effectiveThreshold > 0 && (
+              (restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0) || 
+              user
+            );
+
+            if (!showBar) return null;
+
+            return (
+              <div className="px-5 pb-1">
+                <FreeDeliveryBar
+                  currentTotal={totalPrice}
+                  threshold={effectiveThreshold!}
+                  compact
+                />
+              </div>
+            );
+          })()}
 
           {/* Total */}
           <div className="flex items-center justify-between">

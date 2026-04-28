@@ -2,12 +2,14 @@ interface DeliveryFee {
   postalCode: string;
   price: number;
   name?: string;
+  freeDeliveryThreshold?: number;
 }
 
 interface DeliveryFeeResult {
   price: number;
   zoneName?: string;
   matched: boolean;
+  freeDeliveryThreshold?: number;
 }
 
 /**
@@ -37,7 +39,12 @@ export function calculateDeliveryFee(
       const endNum = parseInt(end, 10);
       
       if (!isNaN(postalNum) && postalNum >= startNum && postalNum <= endNum) {
-        return { price: fee.price, zoneName: fee.name, matched: true };
+        return { 
+          price: fee.price, 
+          zoneName: fee.name, 
+          matched: true,
+          freeDeliveryThreshold: fee.freeDeliveryThreshold 
+        };
       }
       continue;
     }
@@ -47,14 +54,24 @@ export function calculateDeliveryFee(
       const regexPattern = pattern.replace(/\*/g, '.*');
       const regex = new RegExp(`^${regexPattern}$`);
       if (regex.test(cleanPostalCode)) {
-        return { price: fee.price, zoneName: fee.name, matched: true };
+        return { 
+          price: fee.price, 
+          zoneName: fee.name, 
+          matched: true,
+          freeDeliveryThreshold: fee.freeDeliveryThreshold 
+        };
       }
       continue;
     }
     
     // Exact match
     if (pattern === cleanPostalCode) {
-      return { price: fee.price, zoneName: fee.name, matched: true };
+      return { 
+        price: fee.price, 
+        zoneName: fee.name, 
+        matched: true,
+        freeDeliveryThreshold: fee.freeDeliveryThreshold 
+      };
     }
   }
 

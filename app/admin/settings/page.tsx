@@ -22,6 +22,7 @@ type DeliveryZone = {
   postalCode: string;
   price: number;
   name?: string;
+  freeDeliveryThreshold?: number;
 };
 
 export default function SettingsPage() {
@@ -229,7 +230,7 @@ export default function SettingsPage() {
 
   // Delivery zone management functions
   const addDeliveryZone = () => {
-    setDeliveryZones([...deliveryZones, { postalCode: '', price: 0, name: '' }]);
+    setDeliveryZones([...deliveryZones, { postalCode: '', price: 0, name: '', freeDeliveryThreshold: undefined }]);
   };
 
   const removeDeliveryZone = (index: number) => {
@@ -552,6 +553,20 @@ export default function SettingsPage() {
                                 onChange={(e) => updateDeliveryZone(index, 'price', parseFloat(e.target.value) || 0)}
                                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                                 placeholder="0.00"
+                              />
+                            </div>
+                            <div className="md:col-start-3">
+                              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                                Livraison gratuite dès (€)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={zone.freeDeliveryThreshold ?? ''}
+                                onChange={(e) => updateDeliveryZone(index, 'freeDeliveryThreshold', e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                placeholder="Laisser vide pour désactiver"
                               />
                             </div>
                           </div>

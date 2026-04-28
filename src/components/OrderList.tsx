@@ -145,12 +145,37 @@ export default function OrderList({ isOpen, onClose }: OrderListProps) {
               Vider la commande
             </button>
 
-            {restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0 && (
-              <FreeDeliveryBar
-                currentTotal={getTotalPrice()}
-                threshold={restaurantInfo.freeDeliveryThreshold}
-              />
-            )}
+            {(() => {
+              const { useAuth } = require('../context/AuthContext');
+              const { calculateDeliveryFee } = require('../utils/deliveryFeeCalculator');
+              const { user } = useAuth();
+              
+              // 1. Prioritize general threshold if it exists
+              let effectiveThreshold = restaurantInfo?.freeDeliveryThreshold;
+              
+              // 2. If no general threshold and user is logged in, try to find zone-specific threshold
+              if ((!effectiveThreshold || effectiveThreshold <= 0) && user?.zipCode) {
+                const zoneResult = calculateDeliveryFee(user.zipCode, restaurantInfo?.deliveryFees);
+                if (zoneResult.matched && zoneResult.freeDeliveryThreshold) {
+                  effectiveThreshold = zoneResult.freeDeliveryThreshold;
+                }
+              }
+
+              // 3. Show if we have a threshold AND (general threshold exists OR user is logged in)
+              const showBar = effectiveThreshold && effectiveThreshold > 0 && (
+                (restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0) || 
+                user
+              );
+
+              if (!showBar) return null;
+
+              return (
+                <FreeDeliveryBar
+                  currentTotal={getTotalPrice()}
+                  threshold={effectiveThreshold!}
+                />
+              );
+            })()}
 
             <div className="flex items-center justify-between text-lg font-bold">
               <span className="text-gray-900 font-display">Total</span>

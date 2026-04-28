@@ -55,7 +55,13 @@ export default function CheckoutPage() {
         if (orderType !== 'delivery' || !address.zipCode) return { price: 0, matched: false };
         const feeInfo = calculateDeliveryFee(address.zipCode, restaurantInfo?.deliveryFees, restaurantInfo?.defaultDeliveryFee ?? 0);
 
+        // 1. Check general threshold
         if (restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0 && subtotal >= restaurantInfo.freeDeliveryThreshold) {
+            return { ...feeInfo, price: 0 };
+        }
+
+        // 2. Check zone-specific threshold
+        if (feeInfo.matched && feeInfo.freeDeliveryThreshold && feeInfo.freeDeliveryThreshold > 0 && subtotal >= feeInfo.freeDeliveryThreshold) {
             return { ...feeInfo, price: 0 };
         }
 
@@ -372,7 +378,9 @@ export default function CheckoutPage() {
                             totalWithDelivery={subtotal + effectiveDeliveryFee}
                             orderType={orderType}
                             isDeliverySupported={isDeliverySupported}
-                            freeDeliveryThreshold={restaurantInfo?.freeDeliveryThreshold}
+                            freeDeliveryThreshold={(restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0) 
+                                ? restaurantInfo.freeDeliveryThreshold 
+                                : (deliveryFeeInfo.matched ? deliveryFeeInfo.freeDeliveryThreshold : undefined)}
                             validatePromo={validatePromo}
                             onPromoApplied={handlePromoApplied}
                             onPromoRemoved={handlePromoRemoved}

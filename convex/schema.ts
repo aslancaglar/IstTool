@@ -100,6 +100,7 @@ export default defineSchema({
       postalCode: v.string(), // Can be exact, wildcard (57*), or range (57190-57199)
       price: v.number(),
       name: v.optional(v.string()), // e.g., "Zone A", "Zone B"
+      freeDeliveryThreshold: v.optional(v.number()),
     }))),
     defaultDeliveryFee: v.optional(v.number()), // Fallback price for unmatched postal codes
     freeDeliveryThreshold: v.optional(v.number()), // Order amount for free delivery (0 = disabled)
