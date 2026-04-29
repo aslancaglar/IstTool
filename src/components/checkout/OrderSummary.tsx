@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ShoppingBag, Tag, Truck, Percent, CheckCircle2, X, Loader2, Zap } from 'lucide-react';
+import { ShoppingBag, Tag, Truck, Percent, CheckCircle2, X, Loader2, Sparkles } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import FreeDeliveryBar from '../FreeDeliveryBar';
 
@@ -95,71 +95,66 @@ export default function OrderSummary({
         : Math.max(0, subtotal - totalDiscount);
 
     return (
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
             {/* Header */}
-            <div className="p-6 pb-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 font-display">
-                    <ShoppingBag className="w-5 h-5 text-red-500" />
+            <div className="p-5 bg-gradient-to-r from-orange-50 to-rose-50 border-b border-orange-100 flex items-center justify-between">
+                <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center shadow">
+                        <ShoppingBag className="w-3.5 h-3.5 text-white" />
+                    </div>
                     Mon Panier
                 </h2>
-                <span className="bg-white px-3 py-1 rounded-full text-xs font-bold text-gray-500 border border-gray-100 shadow-sm">
+                <span className="bg-white px-2.5 py-1 rounded-full text-xs font-bold text-orange-500 border border-orange-100 shadow-sm">
                     {orderItems.length} article{orderItems.length > 1 ? 's' : ''}
                 </span>
             </div>
 
-            {/* Items List */}
-            <div className="p-6 space-y-4 max-h-[40vh] overflow-y-auto no-scrollbar">
+            {/* Items */}
+            <div className="p-5 space-y-3 max-h-[38vh] overflow-y-auto no-scrollbar">
                 {orderItems.map((item) => (
-                    <div key={item.id} className="flex gap-4 group">
-                        <div className="w-14 h-14 rounded-2xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100 group-hover:border-red-100 transition-colors">
+                    <div key={item.id} className="flex gap-3 group p-2 rounded-xl hover:bg-orange-50/50 transition-colors">
+                        <div className="w-12 h-12 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100 group-hover:border-orange-200 transition-colors shadow-sm">
                             {item.image ? (
-                                <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={item.name} />
+                                <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.name} />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                    <ShoppingBag className="w-6 h-6 text-gray-200" />
+                                    <ShoppingBag className="w-5 h-5 text-gray-200" />
                                 </div>
                             )}
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            <div className="flex items-center gap-2">
-                                <p className="text-sm font-bold text-gray-900 truncate group-hover:text-red-600 transition-colors">{item.name}</p>
-                                <span className="text-xs font-bold text-gray-400 shrink-0">{formatPrice(item.basePrice)}</span>
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-bold text-gray-800 truncate group-hover:text-orange-600 transition-colors">{item.name}</p>
+                                <p className="text-sm font-black text-gray-900 shrink-0">{formatPrice(item.totalPrice)}</p>
                             </div>
                             {item.selectedToppings && item.selectedToppings.length > 0 && (
-                                <div className="mt-1 space-y-0.5">
+                                <div className="mt-0.5 space-y-0.5">
                                     {item.selectedToppings.map((topping: any, idx: number) => (
                                         <div key={`${topping.toppingId}-${idx}`} className="flex items-center justify-between gap-2">
-                                            <span className="text-[10px] text-gray-400 truncate">
-                                                + {topping.name}
-                                            </span>
+                                            <span className="text-[10px] text-gray-400 truncate">+ {topping.name}</span>
                                             {typeof topping.price === 'number' && topping.price > 0 && (
-                                                <span className="text-[10px] text-red-400 font-bold flex-shrink-0">
-                                                    +{topping.price.toFixed(2)}€
-                                                </span>
+                                                <span className="text-[10px] text-orange-400 font-bold shrink-0">+{topping.price.toFixed(2)}€</span>
                                             )}
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
-                        <p className="text-sm font-black text-gray-900 self-center">
-                            {formatPrice(item.totalPrice)}
-                        </p>
                     </div>
                 ))}
             </div>
 
             {/* Active Campaigns */}
             {appliedCampaigns.length > 0 && (
-                <div className="px-6 pb-2 space-y-1.5">
+                <div className="px-5 pb-3 space-y-2">
                     {appliedCampaigns.map(c => (
-                        <div key={c.id} className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
-                            <span className="text-xs text-green-700 font-semibold flex-1 truncate">
-                                {c.description ?? (c.discountType === 'percentage' ? `-${c.discountValue}% sur la commande` : c.discountType === 'percent_off_items' ? `-${c.discountValue}% sur articles` : c.discountType === 'fixed' ? `-${c.discountValue.toFixed(2)}€` : 'Livraison offerte')}
+                        <div key={c.id} className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl px-3 py-2">
+                            <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            <span className="text-xs text-emerald-700 font-semibold flex-1 truncate">
+                                {c.description ?? (c.discountType === 'percentage' ? `-${c.discountValue}%` : c.discountType === 'fixed' ? `-${c.discountValue.toFixed(2)}€` : 'Livraison offerte')}
                             </span>
-                            <span className="text-xs font-bold text-green-700 shrink-0">
-                                {c.isFreeDelivery ? 'Livraison offerte' : `-${formatPrice(c.computedDiscount)}`}
+                            <span className="text-xs font-bold text-emerald-700 shrink-0">
+                                {c.isFreeDelivery ? 'Offerte' : `-${formatPrice(c.computedDiscount)}`}
                             </span>
                         </div>
                     ))}
@@ -168,21 +163,21 @@ export default function OrderSummary({
 
             {/* Promo Code */}
             {validatePromo && (
-                <div className="px-6 pb-2">
+                <div className="px-5 pb-3">
                     {appliedPromoCode ? (
-                        <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
+                        <div className="flex items-center justify-between bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl px-4 py-2.5">
                             <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                                 <div>
-                                    <span className="text-sm font-bold text-green-700 font-mono">{appliedPromoCode}</span>
+                                    <span className="text-sm font-bold text-emerald-700 font-mono">{appliedPromoCode}</span>
                                     {freeDeliveryFromPromo
-                                        ? <span className="text-xs text-green-600 ml-2">Livraison offerte</span>
-                                        : <span className="text-xs text-green-600 ml-2">-{formatPrice(discountAmount)}</span>
+                                        ? <span className="text-xs text-emerald-600 ml-2">Livraison offerte</span>
+                                        : <span className="text-xs text-emerald-600 ml-2">-{formatPrice(discountAmount)}</span>
                                     }
                                 </div>
                             </div>
-                            <button onClick={handleRemovePromo} className="p-1 text-green-400 hover:text-green-700 transition">
-                                <X className="w-4 h-4" />
+                            <button onClick={handleRemovePromo} className="p-1 text-emerald-400 hover:text-emerald-700 rounded-full hover:bg-emerald-100 transition">
+                                <X className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     ) : (
@@ -195,13 +190,13 @@ export default function OrderSummary({
                                         onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(''); }}
                                         onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
                                         placeholder="Code promo"
-                                        className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 font-mono"
+                                        className="w-full pl-8 pr-3 py-2.5 text-sm border-2 border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-300 font-mono bg-white transition-all"
                                     />
                                 </div>
                                 <button
                                     onClick={handleApplyPromo}
                                     disabled={!promoInput.trim() || isValidating}
-                                    className="px-3 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-700 transition disabled:opacity-40 flex items-center gap-1.5"
+                                    className="px-3.5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-40 flex items-center gap-1.5 shadow-sm shadow-emerald-500/20"
                                 >
                                     {isValidating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Percent className="w-3.5 h-3.5" />}
                                     Appliquer
@@ -216,64 +211,63 @@ export default function OrderSummary({
             )}
 
             {/* Totals */}
-            <div className="p-6 bg-gray-50/50 border-t border-gray-100 space-y-3">
+            <div className="p-5 bg-gradient-to-b from-gray-50/50 to-orange-50/30 border-t border-gray-100 space-y-2.5">
                 {orderType === 'delivery' && freeDeliveryThreshold && freeDeliveryThreshold > 0 && (
-                    <div className="mb-1">
-                        <FreeDeliveryBar
-                            currentTotal={subtotal}
-                            threshold={freeDeliveryThreshold}
-                        />
+                    <div className="mb-2">
+                        <FreeDeliveryBar currentTotal={subtotal} threshold={freeDeliveryThreshold} />
                     </div>
                 )}
 
-                <div className="flex justify-between text-sm text-gray-500">
-                    <span className="flex items-center gap-2">
-                        <Tag className="w-4 h-4" />
+                <div className="flex justify-between text-sm">
+                    <span className="text-gray-500 flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5" />
                         Sous-total
                     </span>
-                    <span className="font-bold text-gray-900">{formatPrice(subtotal)}</span>
+                    <span className="font-bold text-gray-800">{formatPrice(subtotal)}</span>
                 </div>
 
                 {campaignDiscount > 0 && (
-                    <div className="flex justify-between text-sm text-green-600">
-                        <span className="flex items-center gap-2">
-                            <Percent className="w-4 h-4" />
+                    <div className="flex justify-between text-sm">
+                        <span className="text-emerald-600 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5" />
                             Promotions actives
                         </span>
-                        <span className="font-bold">-{formatPrice(campaignDiscount)}</span>
+                        <span className="font-bold text-emerald-600">-{formatPrice(campaignDiscount)}</span>
                     </div>
                 )}
                 {discountAmount > 0 && (
-                    <div className="flex justify-between text-sm text-green-600">
-                        <span className="flex items-center gap-2">
-                            <Percent className="w-4 h-4" />
+                    <div className="flex justify-between text-sm">
+                        <span className="text-emerald-600 flex items-center gap-1.5">
+                            <Percent className="w-3.5 h-3.5" />
                             Code promo
                         </span>
-                        <span className="font-bold">-{formatPrice(discountAmount)}</span>
+                        <span className="font-bold text-emerald-600">-{formatPrice(discountAmount)}</span>
                     </div>
                 )}
 
                 {orderType === 'delivery' && (
-                    <div className="flex justify-between text-sm text-gray-500">
-                        <span className="flex items-center gap-2">
-                            <Truck className={`w-4 h-4 ${!isDeliverySupported ? 'text-red-500' : ''}`} />
+                    <div className="flex justify-between text-sm">
+                        <span className={`flex items-center gap-1.5 ${!isDeliverySupported ? 'text-red-500' : 'text-gray-500'}`}>
+                            <Truck className="w-3.5 h-3.5" />
                             Frais de livraison
                         </span>
-                        <span className={`font-bold ${!isDeliverySupported ? 'text-red-500' : 'text-gray-900'}`}>
+                        <span className={`font-bold ${!isDeliverySupported ? 'text-red-500' : shownDeliveryFee === 0 ? 'text-emerald-600' : 'text-gray-800'}`}>
                             {isDeliverySupported ? (shownDeliveryFee === 0 ? 'OFFERT' : formatPrice(shownDeliveryFee)) : 'Non supporté'}
                         </span>
                     </div>
                 )}
 
-                <div className="pt-4 mt-2 border-t border-gray-200 flex justify-between items-end">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 leading-none mb-1">Total à payer</span>
-                        <span className="text-3xl font-black text-red-600 font-display tabular-nums">
+                <div className="pt-4 mt-2 border-t border-orange-100 flex items-end justify-between">
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 mb-0.5">Total à payer</p>
+                        <p className="text-3xl font-black bg-gradient-to-r from-orange-500 to-rose-600 bg-clip-text text-transparent tabular-nums">
                             {formatPrice(displayTotal)}
-                        </span>
+                        </p>
                     </div>
                     {orderType === 'delivery' && shownDeliveryFee === 0 && isDeliverySupported && (
-                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold uppercase mb-2">Livraison Offerte</span>
+                        <span className="text-[10px] bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 px-2.5 py-1.5 rounded-full font-bold uppercase border border-emerald-200 mb-1">
+                            Livraison Offerte
+                        </span>
                     )}
                 </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { User, MapPin, Edit, CheckCircle2, X } from 'lucide-react';
+import { User, MapPin, Edit2, CheckCircle2, X, AlertTriangle } from 'lucide-react';
 
 interface CustomerInfoSectionProps {
     user: any;
@@ -25,6 +25,26 @@ interface CustomerInfoSectionProps {
     handleSaveUserInfo: () => Promise<void>;
 }
 
+function SectionTitle({ icon: Icon, label, color }: { icon: any; label: string; color: string }) {
+    return (
+        <div className="flex items-center gap-2 mb-4">
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${color}`}>
+                <Icon className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-bold text-gray-700 text-sm uppercase tracking-wider">{label}</span>
+        </div>
+    );
+}
+
+function InputField({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
+    return (
+        <div className="space-y-1.5">
+            <label className={`text-[10px] font-black uppercase tracking-widest pl-1 ${color}`}>{label}</label>
+            {children}
+        </div>
+    );
+}
+
 export default function CustomerInfoSection({
     user,
     customer,
@@ -39,56 +59,53 @@ export default function CustomerInfoSection({
 }: CustomerInfoSectionProps) {
     if (!isEditingInfo && user) {
         return (
-            <div className="space-y-6 pt-6 border-t border-gray-100 animate-in fade-in duration-500">
+            <div className="space-y-5 pt-6 border-t border-gray-100 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-gray-900 flex items-center gap-2 font-display uppercase tracking-wider text-sm">
-                        <User className="w-5 h-5 text-red-500" />
-                        Mes informations
-                    </h3>
+                    <SectionTitle icon={User} label="Mes informations" color="bg-gradient-to-br from-violet-400 to-purple-500" />
                     <button
                         onClick={() => setIsEditingInfo(true)}
-                        className="text-xs font-black text-red-500 hover:text-red-600 flex items-center gap-1.5 transition-all bg-red-50 px-3 py-1.5 rounded-full uppercase"
+                        className="flex items-center gap-1.5 text-xs font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-full transition-colors border border-violet-200"
                     >
-                        <Edit className="w-3.5 h-3.5" />
+                        <Edit2 className="w-3 h-3" />
                         Modifier
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm group hover:border-red-100 transition-colors">
-                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-3">Contact</p>
-                        <p className="font-bold text-gray-900 text-lg">{customer.firstName} {customer.lastName}</p>
-                        <div className="mt-2 space-y-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-5 bg-gradient-to-br from-violet-50/60 to-purple-50/60 rounded-2xl border border-violet-100 hover:border-violet-200 transition-colors">
+                        <p className="text-[10px] text-violet-400 font-black uppercase tracking-[0.2em] mb-3">Contact</p>
+                        <p className="font-bold text-gray-900 text-base">{customer.firstName} {customer.lastName}</p>
+                        <div className="mt-2 space-y-1.5">
                             <p className="text-sm text-gray-500 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
                                 {customer.email}
                             </p>
                             <p className="text-sm text-gray-500 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
                                 {customer.phone}
                             </p>
                         </div>
                     </div>
 
-                    <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm group hover:border-red-100 transition-colors">
-                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-3">
+                    <div className="p-5 bg-gradient-to-br from-teal-50/60 to-cyan-50/60 rounded-2xl border border-teal-100 hover:border-teal-200 transition-colors">
+                        <p className="text-[10px] text-teal-500 font-black uppercase tracking-[0.2em] mb-3">
                             {orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse'}
                         </p>
                         {address.street ? (
                             <div className="space-y-1">
-                                <p className="font-bold text-gray-900 text-lg">{address.street}</p>
+                                <p className="font-bold text-gray-900 text-base">{address.street}</p>
                                 <p className="text-sm text-gray-500">{address.zipCode} {address.city}</p>
                                 {address.instructions && (
-                                    <div className="mt-3 p-2 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Note pour le livreur:</p>
+                                    <div className="mt-3 p-2.5 bg-white/70 rounded-xl border border-dashed border-teal-200">
+                                        <p className="text-[10px] text-teal-500 font-bold uppercase mb-1">Note pour le livreur:</p>
                                         <p className="text-xs text-gray-600 italic leading-relaxed">"{address.instructions}"</p>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center h-full py-4 bg-amber-50 rounded-2xl border border-amber-100">
-                                <MapPin className="w-8 h-8 text-amber-500 mb-2 opacity-50" />
-                                <p className="text-sm text-amber-700 font-bold uppercase tracking-wider">
+                            <div className="flex flex-col items-center justify-center py-4">
+                                <MapPin className="w-7 h-7 text-teal-300 mb-2" />
+                                <p className="text-sm text-teal-600 font-bold uppercase tracking-wider">
                                     {orderType === 'delivery' ? 'Adresse manquante' : 'Non renseignée'}
                                 </p>
                             </div>
@@ -99,141 +116,130 @@ export default function CustomerInfoSection({
         );
     }
 
+    const inputClass = "w-full bg-white border-2 border-gray-100 rounded-xl p-3.5 focus:ring-2 focus:ring-violet-400 focus:border-violet-300 outline-none transition-all font-medium text-sm placeholder:text-gray-300 text-gray-800";
+
     return (
         <div className="space-y-6 pt-6 border-t border-gray-100 animate-in slide-in-from-top-4 duration-500">
-            <div className="flex items-center justify-between mb-2">
-                <h3 className="font-bold text-gray-900 flex items-center gap-2 font-display uppercase tracking-wider text-sm">
-                    <User className="w-5 h-5 text-red-500" />
-                    Édition des informations
-                </h3>
+            <div className="flex items-center justify-between">
+                <SectionTitle icon={User} label="Édition des informations" color="bg-gradient-to-br from-violet-400 to-purple-500" />
                 {user && (
                     <button
                         onClick={() => setIsEditingInfo(false)}
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-4 h-4" />
                     </button>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Prénom</label>
-                    <input
-                        type="text"
-                        value={customer.firstName}
-                        onChange={e => setCustomer({ ...customer, firstName: e.target.value })}
-                        className="w-full bg-gray-50 border-gray-100 border-2 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-bold placeholder:font-normal placeholder:text-gray-300"
-                        placeholder="Ex: Jean"
-                    />
+            <div className="p-5 bg-gradient-to-br from-violet-50/50 to-purple-50/50 rounded-2xl border border-violet-100 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField label="Prénom" color="text-violet-500">
+                        <input
+                            type="text"
+                            value={customer.firstName}
+                            onChange={e => setCustomer({ ...customer, firstName: e.target.value })}
+                            className={inputClass}
+                            placeholder="Ex: Jean"
+                        />
+                    </InputField>
+                    <InputField label="Nom" color="text-violet-500">
+                        <input
+                            type="text"
+                            value={customer.lastName}
+                            onChange={e => setCustomer({ ...customer, lastName: e.target.value })}
+                            className={inputClass}
+                            placeholder="Ex: Dupont"
+                        />
+                    </InputField>
                 </div>
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Nom</label>
-                    <input
-                        type="text"
-                        value={customer.lastName}
-                        onChange={e => setCustomer({ ...customer, lastName: e.target.value })}
-                        className="w-full bg-gray-50 border-gray-100 border-2 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-bold placeholder:font-normal placeholder:text-gray-300"
-                        placeholder="Ex: Dupont"
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Email</label>
-                    <input
-                        type="email"
-                        value={customer.email}
-                        onChange={e => setCustomer({ ...customer, email: e.target.value })}
-                        className="w-full bg-gray-50 border-gray-100 border-2 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-bold placeholder:font-normal placeholder:text-gray-300"
-                        placeholder="votre@email.com"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Téléphone</label>
-                    <input
-                        type="tel"
-                        value={customer.phone}
-                        onChange={e => setCustomer({ ...customer, phone: e.target.value })}
-                        className="w-full bg-gray-50 border-gray-100 border-2 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-bold placeholder:font-normal placeholder:text-gray-300"
-                        placeholder="06 12 34 56 78"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField label="Email" color="text-violet-500">
+                        <input
+                            type="email"
+                            value={customer.email}
+                            onChange={e => setCustomer({ ...customer, email: e.target.value })}
+                            className={inputClass}
+                            placeholder="votre@email.com"
+                        />
+                    </InputField>
+                    <InputField label="Téléphone" color="text-violet-500">
+                        <input
+                            type="tel"
+                            value={customer.phone}
+                            onChange={e => setCustomer({ ...customer, phone: e.target.value })}
+                            className={inputClass}
+                            placeholder="06 12 34 56 78"
+                        />
+                    </InputField>
                 </div>
             </div>
 
-            <div className="space-y-4 pt-6 mt-6 border-t border-gray-50">
-                <h3 className="font-bold text-gray-900 flex items-center gap-2 font-display uppercase tracking-wider text-sm">
-                    <MapPin className="w-5 h-5 text-red-500" />
-                    {orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse (Optionnelle)'}
-                </h3>
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Rue et Numéro</label>
+            <div className="space-y-4 pt-2">
+                <SectionTitle
+                    icon={MapPin}
+                    label={orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse (Optionnelle)'}
+                    color="bg-gradient-to-br from-teal-400 to-cyan-500"
+                />
+                <div className="p-5 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 rounded-2xl border border-teal-100 space-y-4">
+                    <InputField label="Rue et Numéro" color="text-teal-600">
                         <input
                             type="text"
                             value={address.street}
                             onChange={e => setAddress({ ...address, street: e.target.value })}
-                            className="w-full bg-gray-50 border-gray-100 border-2 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 outline-none transition-all font-bold placeholder:font-normal placeholder:text-gray-300"
+                            className={inputClass}
                             placeholder="Numéro et nom de rue"
                         />
-                    </div>
+                    </InputField>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Ville</label>
+                        <InputField label="Ville" color="text-teal-600">
                             <input
                                 type="text"
                                 value={address.city}
                                 onChange={e => setAddress({ ...address, city: e.target.value })}
-                                className="w-full bg-gray-50 border-gray-100 border-2 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 outline-none transition-all font-bold placeholder:font-normal placeholder:text-gray-300"
+                                className={inputClass}
                                 placeholder="Ville"
                             />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Code Postal</label>
+                        </InputField>
+                        <InputField label="Code Postal" color="text-teal-600">
                             <input
                                 type="text"
                                 value={address.zipCode}
                                 onChange={e => setAddress({ ...address, zipCode: e.target.value })}
-                                className={`w-full bg-gray-50 border-2 rounded-2xl p-4 focus:ring-2 focus:outline-none transition-all font-bold placeholder:font-normal placeholder:text-gray-300 ${!isDeliverySupported && address.zipCode
-                                    ? 'border-red-200 focus:ring-red-500 bg-red-50'
-                                    : 'border-gray-100 focus:ring-red-500'
-                                    }`}
+                                className={`${inputClass} ${!isDeliverySupported && address.zipCode ? 'border-red-200 focus:ring-red-400 bg-red-50' : ''}`}
                                 placeholder="Ex: 57100"
                             />
-                        </div>
+                        </InputField>
                     </div>
 
                     {!isDeliverySupported && address.zipCode && (
-                        <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex gap-3 animate-in shake duration-500">
-                            <Info className="w-5 h-5 text-red-500 shrink-0" />
-                            <div className="space-y-1">
-                                <p className="text-red-800 font-bold text-xs uppercase tracking-wider">Zone non desservie</p>
-                                <p className="text-red-600 text-[10px] font-medium leading-relaxed">
-                                    Désolé, nous ne livrons pas encore à <span className="font-bold underline">{address.zipCode}</span>.
-                                    Veuillez choisir "À emporter" ou une autre adresse.
+                        <div className="p-4 bg-red-50 rounded-xl border border-red-200 flex gap-3">
+                            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-red-700 font-bold text-xs uppercase tracking-wider mb-0.5">Zone non desservie</p>
+                                <p className="text-red-600 text-[11px] leading-relaxed">
+                                    Désolé, nous ne livrons pas encore à <span className="font-bold underline">{address.zipCode}</span>. Choisissez "À emporter" ou une autre adresse.
                                 </p>
                             </div>
                         </div>
                     )}
 
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Instructions (Optionnel)</label>
+                    <InputField label="Instructions (Optionnel)" color="text-teal-600">
                         <textarea
                             value={address.instructions}
                             onChange={e => setAddress({ ...address, instructions: e.target.value })}
-                            className="w-full bg-gray-50 border-gray-100 border-2 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 min-h-[100px] outline-none transition-all font-medium placeholder:font-normal placeholder:text-gray-300 resize-none"
+                            className={`${inputClass} min-h-[90px] resize-none`}
                             placeholder="Digicode, bâtiment, étage..."
                         />
-                    </div>
+                    </InputField>
                 </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-6">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 {user && (
                     <button
                         onClick={() => setIsEditingInfo(false)}
-                        className="flex-1 px-6 py-4 rounded-2xl border-2 border-gray-100 text-gray-500 font-bold uppercase tracking-widest text-xs hover:bg-gray-50 transition-all"
+                        className="flex-1 px-6 py-3.5 rounded-xl border-2 border-gray-100 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-all"
                     >
                         Annuler
                     </button>
@@ -241,32 +247,12 @@ export default function CustomerInfoSection({
                 <button
                     onClick={handleSaveUserInfo}
                     disabled={!customer.firstName || !customer.lastName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported))}
-                    className="flex-[2] bg-gray-900 shadow-xl shadow-gray-900/10 text-white font-black py-4 rounded-2xl hover:bg-black hover:scale-[1.02] transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:grayscale flex items-center justify-center gap-3 uppercase tracking-tighter text-sm"
+                    className="flex-[2] bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25 text-white font-bold py-3.5 rounded-xl hover:from-violet-600 hover:to-purple-700 hover:scale-[1.02] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2.5 text-sm"
                 >
+                    <CheckCircle2 className="w-4.5 h-4.5" />
                     Enregistrer les informations
-                    <CheckCircle2 className="w-5 h-5" />
                 </button>
             </div>
         </div>
-    );
-}
-
-// Simple internal icon for Info since I didn't import it initially
-function Info(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />
-        </svg>
     );
 }

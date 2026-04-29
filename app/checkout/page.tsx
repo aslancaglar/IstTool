@@ -289,31 +289,36 @@ export default function CheckoutPage() {
     };
 
     if (!isInitialized || isRedirecting) return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20">
-            <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-rose-50 pt-20">
+            <div className="w-12 h-12 border-4 border-orange-400 border-t-transparent rounded-full animate-spin" />
         </div>
     );
 
     if (orderItems.length === 0) return (
-        <div className="flex flex-col min-h-screen bg-gray-50 pt-32 items-center justify-center p-4">
-            <ShoppingBag className="w-16 h-16 text-gray-200 mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Votre panier est vide</h2>
-            <button onClick={() => router.push('/menu')} className="bg-red-500 text-white font-bold px-8 py-3 rounded-xl hover:bg-red-600 transition-all shadow-lg">Voir le menu</button>
+        <div className="flex flex-col min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 pt-32 items-center justify-center p-4">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-100 to-rose-100 flex items-center justify-center mb-5 shadow-sm">
+                <ShoppingBag className="w-10 h-10 text-orange-300" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Votre panier est vide</h2>
+            <p className="text-gray-400 text-sm mb-6">Ajoutez des articles pour continuer</p>
+            <button onClick={() => router.push('/menu')} className="bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold px-8 py-3 rounded-xl hover:from-orange-600 hover:to-rose-700 transition-all shadow-lg shadow-orange-500/25">
+                Voir le menu
+            </button>
         </div>
     );
 
     return (
-        <div className="bg-gray-50 min-h-screen flex flex-col">
+        <div className="bg-gradient-to-br from-orange-50/60 via-white to-rose-50/60 min-h-screen flex flex-col">
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-32 pb-20">
-                <div className="mb-8">
+                <div className="mb-6">
                     <CheckoutStepper currentStep={step} />
                 </div>
-                <div className={`flex ${step === 'payment' ? 'flex-col-reverse' : 'flex-col'} lg:flex-row gap-8 items-start`}>
+                <div className={`flex ${step === 'payment' ? 'flex-col-reverse' : 'flex-col'} lg:flex-row gap-6 items-start`}>
                     {/* Left Column: Flow */}
-                    <div className="w-full lg:flex-1 space-y-6">
-                        <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 p-8 md:p-12 transition-all">
+                    <div className="w-full lg:flex-1 space-y-4">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-6 md:p-8 transition-all">
                             {step === 'details' ? (
-                                <div className="space-y-10">
+                                <div className="space-y-8">
                                     <OrderTypeSelector
                                         orderType={orderType}
                                         setOrderType={setOrderType}
@@ -337,9 +342,10 @@ export default function CheckoutPage() {
                                     <button
                                         onClick={() => setStep('payment')}
                                         disabled={!customer.firstName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported))}
-                                        className="w-full bg-red-600 text-white font-black py-5 rounded-2xl hover:bg-black transition-all shadow-xl shadow-red-600/20 disabled:opacity-30 flex items-center justify-center gap-3 uppercase tracking-tighter text-sm"
+                                        className="w-full bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all shadow-xl shadow-orange-500/20 disabled:opacity-30 disabled:scale-100 flex items-center justify-center gap-3 text-base"
                                     >
                                         Continuer vers le paiement
+                                        <ArrowLeft className="w-5 h-5 rotate-180" />
                                     </button>
                                 </div>
                             ) : (
@@ -362,14 +368,14 @@ export default function CheckoutPage() {
                         </div>
 
                         {step === 'payment' && (
-                            <button onClick={() => setStep('details')} className="flex items-center gap-2 text-gray-400 font-bold uppercase tracking-widest text-[10px] hover:text-red-500 transition-colors ml-4 pt-2">
-                                <ArrowLeft className="w-3 h-3" /> Retour aux détails
+                            <button onClick={() => setStep('details')} className="flex items-center gap-2 text-gray-400 font-medium text-sm hover:text-orange-500 transition-colors ml-2">
+                                <ArrowLeft className="w-4 h-4" /> Retour aux détails
                             </button>
                         )}
                     </div>
 
                     {/* Right Column: Summary */}
-                    <aside className="w-full lg:w-[400px] shrink-0 lg:sticky lg:top-24">
+                    <aside className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-24">
                         <OrderSummary
                             orderItems={orderItems}
                             subtotal={subtotal}
@@ -378,8 +384,8 @@ export default function CheckoutPage() {
                             totalWithDelivery={subtotal + effectiveDeliveryFee}
                             orderType={orderType}
                             isDeliverySupported={isDeliverySupported}
-                            freeDeliveryThreshold={(restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0) 
-                                ? restaurantInfo.freeDeliveryThreshold 
+                            freeDeliveryThreshold={(restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0)
+                                ? restaurantInfo.freeDeliveryThreshold
                                 : (deliveryFeeInfo.matched ? deliveryFeeInfo.freeDeliveryThreshold : undefined)}
                             validatePromo={validatePromo}
                             onPromoApplied={handlePromoApplied}
@@ -396,11 +402,11 @@ export default function CheckoutPage() {
 
             {/* Toast Notifications */}
             {toast?.show && (
-                <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 ${toast.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-500 text-white'}`}>
+                <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 ${toast.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white' : 'bg-gradient-to-r from-red-500 to-rose-600 text-white'}`}>
                     <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
                         <ShoppingBag className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-sm tracking-wide">{toast.message}</span>
+                    <span className="font-bold text-sm">{toast.message}</span>
                 </div>
             )}
         </div>
