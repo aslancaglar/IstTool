@@ -330,6 +330,11 @@ export default function CheckoutPage() {
 
     const continueDisabled = !orderType || !customer.firstName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported));
 
+    const goToPayment = () => {
+        setStep('payment');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div className="bg-gradient-to-br from-orange-50/60 via-white to-rose-50/60 min-h-screen flex flex-col">
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-32 pb-20 lg:pb-20">
@@ -375,7 +380,7 @@ export default function CheckoutPage() {
 
                             {/* Continue button — desktop only inline */}
                             <button
-                                onClick={() => setStep('payment')}
+                                onClick={() => goToPayment()}
                                 disabled={continueDisabled}
                                 className="hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all shadow-xl shadow-orange-500/20 disabled:opacity-30 disabled:scale-100 items-center justify-center gap-3 text-base"
                             >
@@ -480,7 +485,7 @@ export default function CheckoutPage() {
             {step === 'details' && (
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3">
                     <button
-                        onClick={() => !continueDisabled && setStep('payment')}
+                        onClick={() => !continueDisabled && goToPayment()}
                         className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
                             continueDisabled
                                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
