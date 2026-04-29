@@ -100,12 +100,27 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
     }
   }, []);
 
-  // When categories load, default to the first one
+
+  // MEMOIZATION: Only show categories that have at least one active item in stock
+  const availableCategories = useMemo(() => {
+    if (!menuCategories || !allMenuItems) return [];
+    
+    return menuCategories.filter(category => {
+      return allMenuItems.some(item => 
+        item.categories?.includes(category.slug) && 
+        item.active && 
+        item.inStock !== false
+      );
+    });
+  }, [menuCategories, allMenuItems]);
+
+  // When categories load, default to the first available one
   useEffect(() => {
-    if (menuCategories && menuCategories.length > 0 && !activeCategory) {
-      setActiveCategory(menuCategories[0].slug);
+    if (availableCategories.length > 0 && !activeCategory) {
+      setActiveCategory(availableCategories[0].slug);
     }
-  }, [menuCategories, activeCategory]);
+  }, [availableCategories, activeCategory]);
+
 
   // MEMOIZATION: Prevent this heavy array filtering/sorting from running on EVERY render
   const filteredItems = useMemo(() => {
@@ -137,28 +152,28 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
           </FadeIn>
         )}
 
-        {!menuCategories ? (
+
+        {(!menuCategories || !allMenuItems) ? (
           <div className="flex gap-3 justify-center mb-12 overflow-hidden">
             {[1, 2, 3, 4, 5].map((i) => (
               <Skeleton key={i} className="h-12 w-28 rounded-full flex-shrink-0" />
             ))}
           </div>
-        ) : (
+        ) : availableCategories.length > 0 ? (
           <MenuCategoryTabs
-            categories={menuCategories.map(c => ({ slug: c.slug, name: c.name }))}
+            categories={availableCategories.map(c => ({ slug: c.slug, name: c.name }))}
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
             showRightGradient={showRightGradient}
             onScroll={() => {
-              // The child ref is isolated, so we'll let the child manage its own gradient logic,
-              // or handle it by passing a callback. For now, since the child runs onScroll,
-              // we can update parent state via an event.
               const el = document.querySelector('.overflow-x-auto') as HTMLDivElement;
               checkScroll(el);
             }}
             hasInteractedRef={hasUserInteracted}
           />
-        )}
+        ) : null}
+
+
 
         {!allMenuItems ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
