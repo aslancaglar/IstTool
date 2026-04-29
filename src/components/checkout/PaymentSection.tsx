@@ -6,7 +6,7 @@ import StripePaymentForm from '../StripePaymentForm';
 import { formatPrice } from '../../utils/formatters';
 
 interface PaymentSectionProps {
-    paymentMethod: 'stripe' | 'cash';
+    paymentMethod: 'stripe' | 'cash' | null;
     setPaymentMethod: (method: 'stripe' | 'cash') => void;
     showStripeForm: boolean;
     setShowStripeForm: (show: boolean) => void;
@@ -19,6 +19,7 @@ interface PaymentSectionProps {
     handleSubmit: () => Promise<void>;
     isSubmitting: boolean;
     totalPrice: number;
+    hideSubmitButton?: boolean;
 }
 
 export default function PaymentSection({
@@ -34,10 +35,11 @@ export default function PaymentSection({
     handleStripeError,
     handleSubmit,
     isSubmitting,
-    totalPrice
+    totalPrice,
+    hideSubmitButton = false,
 }: PaymentSectionProps) {
     return (
-        <div className="space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-indigo-400 to-violet-500">
@@ -165,7 +167,7 @@ export default function PaymentSection({
                 </div>
             )}
 
-            {(!showStripeForm || paymentMethod === 'cash') && (
+            {!hideSubmitButton && paymentMethod && (!showStripeForm || paymentMethod === 'cash') && (
                 <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || (paymentMethod === 'stripe' && !showStripeForm)}

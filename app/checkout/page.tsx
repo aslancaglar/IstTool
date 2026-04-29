@@ -34,7 +34,7 @@ export default function CheckoutPage() {
     const [scheduledTime] = useState<string>('asap');
     const [customer, setCustomer] = useState({ firstName: '', lastName: '', email: '', phone: '' });
     const [address, setAddress] = useState({ street: '', city: '', zipCode: '', instructions: '' });
-    const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cash'>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cash' | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditingInfo, setIsEditingInfo] = useState(false);
     const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -307,48 +307,103 @@ export default function CheckoutPage() {
         </div>
     );
 
+    const orderSummaryProps = {
+        orderItems,
+        subtotal,
+        deliveryFee: deliveryFeeInfo.price,
+        effectiveDeliveryFee,
+        totalWithDelivery: subtotal + effectiveDeliveryFee,
+        orderType,
+        isDeliverySupported,
+        freeDeliveryThreshold: (restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0)
+            ? restaurantInfo.freeDeliveryThreshold
+            : (deliveryFeeInfo.matched ? deliveryFeeInfo.freeDeliveryThreshold : undefined),
+        validatePromo,
+        onPromoApplied: handlePromoApplied,
+        onPromoRemoved: handlePromoRemoved,
+        appliedPromoCode,
+        discountAmount,
+        freeDeliveryFromPromo,
+        appliedCampaigns: appliedCampaignList,
+        campaignDiscount,
+    };
+
+    const continueDisabled = !customer.firstName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported));
+
     return (
         <div className="bg-gradient-to-br from-orange-50/60 via-white to-rose-50/60 min-h-screen flex flex-col">
-            <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-32 pb-20">
+            <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-32 pb-20 lg:pb-20">
                 <div className="mb-6">
                     <CheckoutStepper currentStep={step} />
                 </div>
-                <div className={`flex ${step === 'payment' ? 'flex-col-reverse' : 'flex-col'} lg:flex-row gap-6 items-start`}>
-                    {/* Left Column: Flow */}
-                    <div className="w-full lg:flex-1 space-y-4">
-                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-6 md:p-8 transition-all">
-                            {step === 'details' ? (
-                                <div className="space-y-8">
-                                    <OrderTypeSelector
-                                        orderType={orderType}
-                                        setOrderType={setOrderType}
-                                        restaurantInfo={restaurantInfo}
-                                        isDefaultAddressOutsideZone={isDefaultAddressOutsideZone}
-                                    />
 
-                                    <CustomerInfoSection
-                                        user={user}
-                                        customer={customer}
-                                        setCustomer={setCustomer}
-                                        address={address}
-                                        setAddress={setAddress}
-                                        orderType={orderType}
-                                        isEditingInfo={isEditingInfo}
-                                        setIsEditingInfo={setIsEditingInfo}
-                                        isDeliverySupported={isDeliverySupported}
-                                        handleSaveUserInfo={handleSaveUserInfo}
-                                    />
+                {step === 'details' ? (
+                    /* ── Step 1: mobile stacked order, desktop 2-col ── */
+                    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start pb-28 lg:pb-0">
+                        {/* Left column */}
+                        <div className="w-full lg:flex-1 flex flex-col gap-4">
+                            {/* 1. Mode de récupération */}
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-5 md:p-6">
+                                <OrderTypeSelector
+                                    orderType={orderType}
+                                    setOrderType={setOrderType}
+                                    restaurantInfo={restaurantInfo}
+                                    isDefaultAddressOutsideZone={isDefaultAddressOutsideZone}
+                                />
+                            </div>
 
-                                    <button
-                                        onClick={() => setStep('payment')}
-                                        disabled={!customer.firstName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported))}
-                                        className="w-full bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all shadow-xl shadow-orange-500/20 disabled:opacity-30 disabled:scale-100 flex items-center justify-center gap-3 text-base"
-                                    >
-                                        Continuer vers le paiement
-                                        <ArrowLeft className="w-5 h-5 rotate-180" />
-                                    </button>
-                                </div>
-                            ) : (
+                            {/* 2. Mon Panier — mobile only (desktop uses aside) */}
+                            <div className="lg:hidden">
+                                <OrderSummary {...orderSummaryProps} />
+                            </div>
+
+                            {/* 3. Mes informations */}
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-5 md:p-6">
+                                <CustomerInfoSection
+                                    user={user}
+                                    customer={customer}
+                                    setCustomer={setCustomer}
+                                    address={address}
+                                    setAddress={setAddress}
+                                    orderType={orderType}
+                                    isEditingInfo={isEditingInfo}
+                                    setIsEditingInfo={setIsEditingInfo}
+                                    isDeliverySupported={isDeliverySupported}
+                                    handleSaveUserInfo={handleSaveUserInfo}
+                                />
+                            </div>
+
+                            {/* Continue button — desktop only inline */}
+                            <button
+                                onClick={() => setStep('payment')}
+                                disabled={continueDisabled}
+                                className="hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all shadow-xl shadow-orange-500/20 disabled:opacity-30 disabled:scale-100 items-center justify-center gap-3 text-base"
+                            >
+                                Continuer vers le paiement
+                                <ArrowLeft className="w-5 h-5 rotate-180" />
+                            </button>
+                        </div>
+
+                        {/* Right sidebar — desktop only */}
+                        <aside className="hidden lg:block lg:w-[380px] shrink-0 lg:sticky lg:top-24">
+                            <OrderSummary {...orderSummaryProps} />
+                        </aside>
+                    </div>
+                ) : (
+                    /* ── Step 2: payment ── */
+                    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start pb-28 lg:pb-0">
+                        <div className="w-full lg:flex-1 flex flex-col gap-4">
+                            {/* Back button — top, visible */}
+                            <button
+                                onClick={() => setStep('details')}
+                                className="flex items-center gap-2.5 self-start bg-white/80 backdrop-blur-sm border border-white shadow-sm text-gray-600 font-semibold text-sm px-4 py-2.5 rounded-xl hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                Retour aux détails
+                            </button>
+
+                            {/* Payment method + conditional forms */}
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-5 md:p-6">
                                 <PaymentSection
                                     paymentMethod={paymentMethod}
                                     setPaymentMethod={setPaymentMethod}
@@ -360,45 +415,80 @@ export default function CheckoutPage() {
                                     createPaymentIntent={createPaymentIntent}
                                     handleStripeSuccess={(pid) => handleFinalOrder('stripe', 'paid', pid)}
                                     handleStripeError={setStripeError}
-                                    handleSubmit={() => handleFinalOrder('cash', 'unpaid')}
+                                    handleSubmit={() => handleFinalOrder(paymentMethod === 'cash' ? 'cash' : 'stripe', paymentMethod === 'cash' ? 'unpaid' : 'paid')}
                                     isSubmitting={isSubmitting}
                                     totalPrice={finalTotal}
+                                    hideSubmitButton
                                 />
+                            </div>
+
+                            {/* OrderSummary — mobile only */}
+                            <div className="lg:hidden">
+                                <OrderSummary {...orderSummaryProps} />
+                            </div>
+
+                            {/* Confirm button — desktop only inline */}
+                            {paymentMethod && (!showStripeForm || paymentMethod === 'cash') && (
+                                <button
+                                    onClick={() => handleFinalOrder(paymentMethod === 'cash' ? 'cash' : 'stripe', paymentMethod === 'cash' ? 'unpaid' : 'paid')}
+                                    disabled={isSubmitting || (paymentMethod === 'stripe' && !showStripeForm)}
+                                    className={`hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 shadow-xl shadow-orange-500/25 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${isSubmitting ? 'animate-pulse' : ''}`}
+                                >
+                                    {isSubmitting
+                                        ? <><ShoppingBag className="w-5 h-5 animate-bounce" /> Traitement en cours...</>
+                                        : <>{paymentMethod === 'stripe' ? 'Continuer' : 'Confirmer ma commande'} <ArrowLeft className="w-5 h-5 rotate-180" /></>
+                                    }
+                                </button>
                             )}
                         </div>
 
-                        {step === 'payment' && (
-                            <button onClick={() => setStep('details')} className="flex items-center gap-2 text-gray-400 font-medium text-sm hover:text-orange-500 transition-colors ml-2">
-                                <ArrowLeft className="w-4 h-4" /> Retour aux détails
-                            </button>
-                        )}
+                        {/* Sidebar — desktop only */}
+                        <aside className="hidden lg:block lg:w-[380px] shrink-0 lg:sticky lg:top-24">
+                            <OrderSummary {...orderSummaryProps} />
+                        </aside>
                     </div>
-
-                    {/* Right Column: Summary */}
-                    <aside className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-24">
-                        <OrderSummary
-                            orderItems={orderItems}
-                            subtotal={subtotal}
-                            deliveryFee={deliveryFeeInfo.price}
-                            effectiveDeliveryFee={effectiveDeliveryFee}
-                            totalWithDelivery={subtotal + effectiveDeliveryFee}
-                            orderType={orderType}
-                            isDeliverySupported={isDeliverySupported}
-                            freeDeliveryThreshold={(restaurantInfo?.freeDeliveryThreshold && restaurantInfo.freeDeliveryThreshold > 0)
-                                ? restaurantInfo.freeDeliveryThreshold
-                                : (deliveryFeeInfo.matched ? deliveryFeeInfo.freeDeliveryThreshold : undefined)}
-                            validatePromo={validatePromo}
-                            onPromoApplied={handlePromoApplied}
-                            onPromoRemoved={handlePromoRemoved}
-                            appliedPromoCode={appliedPromoCode}
-                            discountAmount={discountAmount}
-                            freeDeliveryFromPromo={freeDeliveryFromPromo}
-                            appliedCampaigns={appliedCampaignList}
-                            campaignDiscount={campaignDiscount}
-                        />
-                    </aside>
-                </div>
+                )}
             </main>
+
+            {/* Fixed bottom CTA — mobile only, step 2 */}
+            {step === 'payment' && (
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3">
+                    {(() => {
+                        const ready = !!paymentMethod && (!showStripeForm || paymentMethod === 'cash') && !isSubmitting;
+                        return (
+                            <button
+                                onClick={() => ready && paymentMethod && handleFinalOrder(paymentMethod === 'cash' ? 'cash' : 'stripe', paymentMethod === 'cash' ? 'unpaid' : 'paid')}
+                                className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
+                                    isSubmitting
+                                        ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 animate-pulse'
+                                        : ready
+                                        ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 active:scale-[0.98]'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                }`}
+                            >
+                                {isSubmitting
+                                    ? <><ShoppingBag className="w-5 h-5 animate-bounce" /> Traitement en cours...</>
+                                    : <>Confirmer ma commande <ArrowLeft className="w-5 h-5 rotate-180" /></>
+                                }
+                            </button>
+                        );
+                    })()}
+                </div>
+            )}
+
+            {/* Fixed bottom CTA — mobile only, step 1 */}
+            {step === 'details' && (
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3">
+                    <button
+                        onClick={() => setStep('payment')}
+                        disabled={continueDisabled}
+                        className="w-full bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 disabled:opacity-35 disabled:active:scale-100 flex items-center justify-center gap-3 text-base"
+                    >
+                        Continuer vers le paiement
+                        <ArrowLeft className="w-5 h-5 rotate-180" />
+                    </button>
+                </div>
+            )}
 
             {/* Toast Notifications */}
             {toast?.show && (
