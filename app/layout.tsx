@@ -14,27 +14,71 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://mondopizza.fr'),
-    title: 'Mondo Pizza - Le vrai goût de la pizza italienne',
-    description: 'Restaurant de pizza authentique. Savourez nos pizzas fraîches et faites maison avec des ingrédients de qualité. Commandez en ligne ou sur place.',
+    title: {
+        default: 'Mondo Pizza Metz | Pizzas Artisanales, Burgers & Livraison à Metz',
+        template: '%s | Mondo Pizza Metz',
+    },
+    description: 'Mondo Pizza à Metz : pizzas artisanales faites maison, burgers, tacos et livraison rapide. Pâte fraîche, ingrédients de qualité. Commandez en ligne ! ☎ 03 87 38 09 45',
+    keywords: [
+        'pizza metz',
+        'pizzeria metz',
+        'pizza livraison metz',
+        'commander pizza metz',
+        'pizza artisanale metz',
+        'meilleure pizza metz',
+        'pizza maison metz',
+        'restaurant pizza metz',
+        'mondo pizza',
+        'pizza à emporter metz',
+        'pizza moselle',
+        'burger metz',
+        'tacos metz',
+        'livraison repas metz',
+    ],
+    authors: [{ name: 'Mondo Pizza Metz' }],
+    creator: 'Mondo Pizza',
+    publisher: 'Mondo Pizza',
+    alternates: {
+        canonical: 'https://mondopizza.fr',
+    },
     icons: {
         icon: '/LogoMondo.png',
         shortcut: '/LogoMondo.png',
         apple: '/LogoMondo.png',
     },
     openGraph: {
-        title: 'Mondo Pizza - Le vrai goût de la pizza',
-        description: 'Restaurant de pizza authentique. Savourez nos pizzas fraîches et faites maison avec des ingrédients de qualité.',
+        title: 'Mondo Pizza Metz | Pizzas Artisanales & Livraison',
+        description: 'Pizzas artisanales faites maison à Metz. Pâte fraîche, ingrédients de qualité, livraison rapide. Commandez en ligne dès maintenant !',
         url: 'https://mondopizza.fr/',
-        siteName: 'Mondo Pizza',
-        images: [{ url: '/LogoMondo.png' }],
+        siteName: 'Mondo Pizza Metz',
+        images: [{
+            url: '/MondoHeroImage-min.jpg',
+            width: 1200,
+            height: 630,
+            alt: 'Mondo Pizza Metz - Pizzas artisanales',
+        }],
         locale: 'fr_FR',
         type: 'website',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Mondo Pizza - Le vrai goût de la pizza',
-        description: 'Restaurant de pizza authentique. Pizzas fraîches et faites maison.',
-        images: ['/LogoMondo.png'],
+        title: 'Mondo Pizza Metz | Pizzas Artisanales & Livraison',
+        description: 'Pizzas artisanales faites maison à Metz. Commandez en ligne !',
+        images: ['/MondoHeroImage-min.jpg'],
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+        },
+    },
+    verification: {
+        google: undefined,
     },
 };
 
@@ -51,6 +95,59 @@ export default function RootLayout({
                 <link
                     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Titan+One&family=Inter:wght@300;400;500;600;700;800&display=swap"
                     rel="stylesheet"
+                />
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'Restaurant',
+                            name: 'Mondo Pizza',
+                            image: 'https://mondopizza.fr/MondoHeroImage-min.jpg',
+                            url: 'https://mondopizza.fr',
+                            telephone: '+33387380945',
+                            priceRange: '€€',
+                            servesCuisine: ['Pizza', 'Italienne', 'Burger', 'Tacos'],
+                            address: {
+                                '@type': 'PostalAddress',
+                                streetAddress: '',
+                                addressLocality: 'Metz',
+                                postalCode: '57000',
+                                addressRegion: 'Moselle',
+                                addressCountry: 'FR',
+                            },
+                            geo: {
+                                '@type': 'GeoCoordinates',
+                                latitude: 49.1193,
+                                longitude: 6.1757,
+                            },
+                            openingHoursSpecification: [
+                                {
+                                    '@type': 'OpeningHoursSpecification',
+                                    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                                    opens: '11:00',
+                                    closes: '14:00',
+                                },
+                                {
+                                    '@type': 'OpeningHoursSpecification',
+                                    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                                    opens: '17:30',
+                                    closes: '23:00',
+                                },
+                                {
+                                    '@type': 'OpeningHoursSpecification',
+                                    dayOfWeek: ['Saturday', 'Sunday'],
+                                    opens: '17:30',
+                                    closes: '23:00',
+                                },
+                            ],
+                            hasMenu: 'https://mondopizza.fr/menu',
+                            acceptsReservations: false,
+                            currenciesAccepted: 'EUR',
+                            paymentAccepted: 'Cash, Credit Card',
+                            sameAs: [],
+                        }),
+                    }}
                 />
             </head>
             <body>

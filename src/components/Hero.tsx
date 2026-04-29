@@ -29,7 +29,7 @@ export default function Hero() {
               <span className="text-secondary-400">ça te dit ?</span>
             </h1>
             <p className="text-lg md:text-xl text-white/90 mb-8 max-w-lg leading-relaxed">
-              On ne peut pas acheter le bonheur, mais on peut acheter nos pizzas, et franchement, c’est à peu près la même chose.
+              La pizzeria incontournable de Metz. Pizzas artisanales faites maison, livrées ou à emporter. On ne peut pas acheter le bonheur, mais nos pizzas, c'est à peu près la même chose.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
