@@ -24,7 +24,7 @@ export default function LoginPage() {
             if (success) {
                 router.push('/admin');
             } else {
-                setError('Nom d\'utilisateur ou mot de passe invalide. Assurez-vous d\'avoir exécuté seed:createAdminUser.');
+                setError('Nom d\'utilisateur ou mot de passe invalide.');
             }
         } catch (err) {
             console.error('Login error:', err);
@@ -50,11 +50,7 @@ export default function LoginPage() {
                     Entrez vos identifiants pour accéder au tableau de bord
                 </p>
 
-                <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm mb-6">
-                    <p className="font-semibold mb-1">Première configuration ?</p>
-                    <p>Exécutez <code className="bg-blue-100 px-1 rounded">seed:createAdminUser</code> dans le tableau de bord Convex, puis utilisez :</p>
-                    <p className="mt-1">Nom d'utilisateur : <strong>admin</strong> | Mot de passe : <strong>admin123</strong></p>
-                </div>
+
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
