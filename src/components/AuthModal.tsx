@@ -125,13 +125,16 @@ export default function AuthModal() {
 
         <div className="p-6 max-h-[80vh] overflow-y-auto">
           {mode === "login" ? (
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <form onSubmit={handleLoginSubmit} autoComplete="on" className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Email</label>
+                <label htmlFor="login-email" className="text-sm font-bold text-gray-700">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
+                    id="login-email"
                     type="email"
+                    name="email"
+                    autoComplete="email"
                     required
                     value={loginForm.email}
                     onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
@@ -142,11 +145,14 @@ export default function AuthModal() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Mot de passe</label>
+                <label htmlFor="login-password" className="text-sm font-bold text-gray-700">Mot de passe</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
+                    id="login-password"
                     type="password"
+                    name="password"
+                    autoComplete="current-password"
                     required
                     value={loginForm.password}
                     onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
@@ -172,14 +178,17 @@ export default function AuthModal() {
               </button>
             </form>
           ) : (
-            <form onSubmit={handleSignupSubmit} className="space-y-3">
+            <form onSubmit={handleSignupSubmit} autoComplete="on" className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Prénom</label>
+                  <label htmlFor="signup-firstName" className="text-sm font-bold text-gray-700">Prénom</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
-                      name="firstName"
+                      id="signup-firstName"
+                      type="text"
+                      name="given-name"
+                      autoComplete="given-name"
                       required
                       value={signupForm.firstName}
                       onChange={(e) => setSignupForm((prev) => ({ ...prev, firstName: e.target.value }))}
@@ -189,11 +198,14 @@ export default function AuthModal() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Nom</label>
+                  <label htmlFor="signup-lastName" className="text-sm font-bold text-gray-700">Nom</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
-                      name="lastName"
+                      id="signup-lastName"
+                      type="text"
+                      name="family-name"
+                      autoComplete="family-name"
                       required
                       value={signupForm.lastName}
                       onChange={(e) => setSignupForm((prev) => ({ ...prev, lastName: e.target.value }))}
@@ -205,11 +217,14 @@ export default function AuthModal() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Email</label>
+                <label htmlFor="signup-email" className="text-sm font-bold text-gray-700">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
+                    id="signup-email"
                     type="email"
+                    name="email"
+                    autoComplete="email"
                     required
                     value={signupForm.email}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, email: e.target.value }))}
@@ -220,11 +235,14 @@ export default function AuthModal() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Téléphone</label>
+                <label htmlFor="signup-phone" className="text-sm font-bold text-gray-700">Téléphone</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
+                    id="signup-phone"
                     type="tel"
+                    name="tel"
+                    autoComplete="tel"
                     required
                     value={signupForm.phone}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, phone: e.target.value }))}
@@ -241,6 +259,10 @@ export default function AuthModal() {
                 </p>
                 <div className="relative">
                   <input
+                    id="signup-street"
+                    type="text"
+                    name="street-address"
+                    autoComplete="street-address"
                     required
                     value={signupForm.street}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, street: e.target.value }))}
@@ -251,6 +273,10 @@ export default function AuthModal() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
                     <input
+                      id="signup-city"
+                      type="text"
+                      name="address-level2"
+                      autoComplete="address-level2"
                       required
                       value={signupForm.city}
                       onChange={(e) => setSignupForm((prev) => ({ ...prev, city: e.target.value }))}
@@ -260,6 +286,10 @@ export default function AuthModal() {
                   </div>
                   <div className="relative">
                     <input
+                      id="signup-zipCode"
+                      type="text"
+                      name="postal-code"
+                      autoComplete="postal-code"
                       required
                       value={signupForm.zipCode}
                       onChange={(e) => setSignupForm((prev) => ({ ...prev, zipCode: e.target.value }))}
@@ -272,11 +302,14 @@ export default function AuthModal() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Mot de passe</label>
+                  <label htmlFor="signup-password" className="text-sm font-bold text-gray-700">Mot de passe</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
+                      id="signup-password"
                       type="password"
+                      name="new-password"
+                      autoComplete="new-password"
                       required
                       value={signupForm.password}
                       onChange={(e) => setSignupForm((prev) => ({ ...prev, password: e.target.value }))}
@@ -286,11 +319,14 @@ export default function AuthModal() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Confirmer</label>
+                  <label htmlFor="signup-confirmPassword" className="text-sm font-bold text-gray-700">Confirmer</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
+                      id="signup-confirmPassword"
                       type="password"
+                      name="confirm-password"
+                      autoComplete="new-password"
                       required
                       value={signupForm.confirmPassword}
                       onChange={(e) => setSignupForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
