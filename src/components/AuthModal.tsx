@@ -90,11 +90,21 @@ export default function AuthModal() {
       close();
       router.push(redirectPath);
     } catch (err: any) {
-      setError(err?.message || "Une erreur est survenue lors de l'inscription");
+      const raw: string = err?.message ?? "";
+      if (raw.toLowerCase().includes("already exists") || raw.toLowerCase().includes("email already")) {
+        setError("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.");
+      } else if (raw.toLowerCase().includes("password")) {
+        setError("Le mot de passe ne respecte pas les exigences de sécurité.");
+      } else if (raw.toLowerCase().includes("invalid email")) {
+        setError("L'adresse email n'est pas valide.");
+      } else {
+        setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
 
   if (!isOpen) return null;
 
@@ -163,8 +173,9 @@ export default function AuthModal() {
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium">
-                  {error}
+                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm font-medium flex items-start gap-2">
+                  <span className="mt-0.5 text-red-500 flex-shrink-0">⚠</span>
+                  <span className="break-words min-w-0">{error}</span>
                 </div>
               )}
 
@@ -338,10 +349,12 @@ export default function AuthModal() {
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium">
-                  {error}
+                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm font-medium flex items-start gap-2">
+                  <span className="mt-0.5 text-red-500 flex-shrink-0">⚠</span>
+                  <span className="break-words min-w-0">{error}</span>
                 </div>
               )}
+
 
               <button
                 type="submit"
