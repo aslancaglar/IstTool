@@ -30,7 +30,7 @@ interface OrderSummaryProps {
     deliveryFee: number;
     effectiveDeliveryFee?: number;
     totalWithDelivery: number;
-    orderType: 'pickup' | 'delivery';
+    orderType: 'pickup' | 'delivery' | null;
     isDeliverySupported: boolean;
     freeDeliveryThreshold?: number;
     onPromoApplied?: (code: string, discount: number, isFreeDelivery?: boolean) => void;

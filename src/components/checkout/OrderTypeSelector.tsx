@@ -4,7 +4,7 @@ import React from 'react';
 import { Store, Truck, Info, Check } from 'lucide-react';
 
 interface OrderTypeSelectorProps {
-    orderType: 'pickup' | 'delivery';
+    orderType: 'pickup' | 'delivery' | null;
     setOrderType: (type: 'pickup' | 'delivery') => void;
     restaurantInfo: any;
     isDefaultAddressOutsideZone: boolean;

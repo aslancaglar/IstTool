@@ -30,7 +30,7 @@ export default function CheckoutPage() {
 
     // State
     const [step, setStep] = useState<Step>('details');
-    const [orderType, setOrderType] = useState<'pickup' | 'delivery'>('pickup');
+    const [orderType, setOrderType] = useState<'pickup' | 'delivery' | null>(null);
     const [scheduledTime] = useState<string>('asap');
     const [customer, setCustomer] = useState({ firstName: '', lastName: '', email: '', phone: '' });
     const [address, setAddress] = useState({ street: '', city: '', zipCode: '', instructions: '' });
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
         return await convex.query(api.promoCodes.validate, {
             code,
             orderSubtotal: subtotal,
-            orderType,
+            orderType: orderType ?? 'pickup',
             items: orderItems.map(item => ({
                 menuItemId: item.menuItemId,
                 price: item.totalPrice,
@@ -256,7 +256,7 @@ export default function CheckoutPage() {
             const orderId = await createOrder({
                 sessionToken: sessionToken ?? undefined,
                 customer,
-                type: orderType,
+                type: orderType!,
                 address: orderType === 'delivery' ? address : undefined,
                 scheduledTime,
                 paymentMethod: pMethod,
@@ -328,7 +328,7 @@ export default function CheckoutPage() {
         campaignDiscount,
     };
 
-    const continueDisabled = !customer.firstName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported));
+    const continueDisabled = !orderType || !customer.firstName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported));
 
     return (
         <div className="bg-gradient-to-br from-orange-50/60 via-white to-rose-50/60 min-h-screen flex flex-col">
@@ -480,9 +480,12 @@ export default function CheckoutPage() {
             {step === 'details' && (
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3">
                     <button
-                        onClick={() => setStep('payment')}
-                        disabled={continueDisabled}
-                        className="w-full bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 disabled:opacity-35 disabled:active:scale-100 flex items-center justify-center gap-3 text-base"
+                        onClick={() => !continueDisabled && setStep('payment')}
+                        className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
+                            continueDisabled
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 active:scale-[0.98]'
+                        }`}
                     >
                         Continuer vers le paiement
                         <ArrowLeft className="w-5 h-5 rotate-180" />

@@ -18,7 +18,7 @@ interface CustomerInfoSectionProps {
         instructions: string;
     };
     setAddress: (address: any) => void;
-    orderType: 'pickup' | 'delivery';
+    orderType: 'pickup' | 'delivery' | null;
     isEditingInfo: boolean;
     setIsEditingInfo: (isEditing: boolean) => void;
     isDeliverySupported: boolean;
