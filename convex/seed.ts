@@ -362,7 +362,97 @@ export const updatePizzaCremeImagesFromFolder = mutation({
 });
 
 
+export const updateBurgerImagesFromFolder = mutation({
+
+  args: {},
+  handler: async (ctx) => {
+    const items = await ctx.db
+      .query("menuItems")
+      .collect();
+
+
+    const imageMap: Record<string, string> = {
+      'DOBLE CHEESE': '/burgers/doublecheese.jpg',
+      'CHEESEBURGER': '/burgers/cheeseburger.jpg',
+      'LE CHICKEN': '/burgers/chicken.jpg',
+    };
+
+
+    let updated = 0;
+    for (const item of items) {
+      const newImage = imageMap[item.name];
+      if (newImage) {
+        await ctx.db.patch(item._id, {
+          image: newImage,
+        });
+        updated++;
+      }
+    }
+
+    return { success: true, updated };
+  },
+});
+
+
+
+export const updateTacoImagesFromFolder = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const items = await ctx.db
+      .query("menuItems")
+      .collect();
+
+    const tacoItems = items.filter(item => item.categories?.includes("tacos"));
+
+    let updated = 0;
+    for (const item of tacoItems) {
+      await ctx.db.patch(item._id, {
+        image: "/tacos/tacos.jpg",
+      });
+      updated++;
+    }
+
+    return { success: true, updated };
+  },
+});
+
+
+
+export const updateTexMexImagesFromFolder = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const items = await ctx.db
+      .query("menuItems")
+      .collect();
+
+    const imageMap: Record<string, string> = {
+      'FRITES': '/tex-mex/frites.jpg',
+      'POTATOES': '/tex-mex/potatoes.jpg',
+      'NUGGETS X8': '/tex-mex/nuggets.jpg',
+      'NUGGETS X12': '/tex-mex/nuggets.jpg',
+      'CHICKEN WINGS X10': '/tex-mex/wings.jpg',
+      'CHICKEN WINGS X12': '/tex-mex/wings.jpg',
+    };
+
+    let updated = 0;
+    for (const item of items) {
+      const newImage = imageMap[item.name];
+      if (newImage) {
+        await ctx.db.patch(item._id, {
+          image: newImage,
+        });
+        updated++;
+      }
+    }
+
+    return { success: true, updated };
+  },
+});
+
+
 export const seedPizzasSpeciales = mutation({
+
+
   args: {},
   handler: async (ctx) => {
     // 1. Create Category
@@ -693,16 +783,25 @@ export const seedRestaurantInfo = mutation({
       .first();
     if (existing) return { success: true, skipped: true };
 
+
     await ctx.db.insert("restaurantInfo", {
       key: "main",
       address: "",
       phone: "",
       email: "",
+
       hours: [
-        { day: 'Lun - Sam', time: '11h00 - 15h00 et 17h00 - 00h00' },
-        { day: 'Dim', time: '17h00 - 00h00' },
+        { day: 'Lundi', time: '11h00 - 14h00 et 17h30 - 23h00' },
+        { day: 'Mardi', time: '11h00 - 14h00 et 17h30 - 23h00' },
+        { day: 'Mercredi', time: '11h00 - 14h00 et 17h30 - 23h00' },
+        { day: 'Jeudi', time: '11h00 - 14h00 et 17h30 - 23h00' },
+        { day: 'Vendredi', time: '11h00 - 14h00 et 17h30 - 23h00' },
+        { day: 'Samedi', time: '17h30 - 23h00' },
+        { day: 'Dimanche', time: '17h30 - 23h00' },
       ],
+
       socialLinks: {
+
         facebook: "",
         instagram: "",
         twitter: "",
@@ -713,7 +812,11 @@ export const seedRestaurantInfo = mutation({
 });
 
 
+
+
 export const seedReviews = mutation({
+
+
   args: {},
   handler: async (ctx) => {
     const reviews: any[] = [];

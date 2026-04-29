@@ -5,6 +5,8 @@ import { useOrder } from '../context/OrderContext';
 import FreeDeliveryBar from './FreeDeliveryBar';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import { useAuth } from '../context/AuthContext';
+import { calculateDeliveryFee } from '../utils/deliveryFeeCalculator';
 
 interface OrderListProps {
   isOpen: boolean;
@@ -13,6 +15,7 @@ interface OrderListProps {
 
 export default function OrderList({ isOpen, onClose }: OrderListProps) {
   const { orderItems, removeFromOrder, clearOrder, getTotalPrice } = useOrder();
+  const { user } = useAuth();
   const restaurantInfo = useQuery(api.restaurantInfo.get);
 
   if (!isOpen) return null;
@@ -146,10 +149,6 @@ export default function OrderList({ isOpen, onClose }: OrderListProps) {
             </button>
 
             {(() => {
-              const { useAuth } = require('../context/AuthContext');
-              const { calculateDeliveryFee } = require('../utils/deliveryFeeCalculator');
-              const { user } = useAuth();
-              
               // 1. Prioritize general threshold if it exists
               let effectiveThreshold = restaurantInfo?.freeDeliveryThreshold;
               

@@ -9,8 +9,12 @@ import { api } from '../../convex/_generated/api';
 import { formatPrice } from '../utils/formatters';
 import FreeDeliveryBar from './FreeDeliveryBar';
 
+import { useAuth } from '../context/AuthContext';
+import { calculateDeliveryFee } from '../utils/deliveryFeeCalculator';
+
 export default function MobileStickyCart() {
   const { getItemCount, getTotalPrice, orderItems, removeFromOrder, clearOrder, isInitialized } = useOrder();
+  const { user } = useAuth();
   const restaurantInfo = useQuery(api.restaurantInfo.get);
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
@@ -139,10 +143,6 @@ export default function MobileStickyCart() {
         <div className="border-t border-gray-100 px-5 py-4 space-y-4 bg-gray-50 rounded-b-3xl">
           {/* Free Delivery Progress */}
           {(() => {
-            const { useAuth } = require('../context/AuthContext');
-            const { calculateDeliveryFee } = require('../utils/deliveryFeeCalculator');
-            const { user } = useAuth();
-            
             // 1. Prioritize general threshold if it exists
             let effectiveThreshold = restaurantInfo?.freeDeliveryThreshold;
             
