@@ -13,6 +13,7 @@ import type * as categories from "../categories.js";
 import type * as data_snapshot from "../data/snapshot.js";
 import type * as files from "../files.js";
 import type * as gallery from "../gallery.js";
+import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_constants from "../lib/constants.js";
 import type * as lib_storage from "../lib/storage.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   "data/snapshot": typeof data_snapshot;
   files: typeof files;
   gallery: typeof gallery;
+  http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/constants": typeof lib_constants;
   "lib/storage": typeof lib_storage;
