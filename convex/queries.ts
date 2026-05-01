@@ -86,6 +86,21 @@ export const getToppingsForMenuItem = query({
   },
 });
 
+export const getToppingsByIds = query({
+  args: { toppingIds: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const results = [];
+    for (const id of args.toppingIds) {
+      const topping = await ctx.db
+        .query("toppings")
+        .filter((q) => q.eq(q.field("toppingId"), id))
+        .first();
+      if (topping) results.push(topping);
+    }
+    return results;
+  },
+});
+
 export const getOrder = query({
   args: {
     orderId: v.id("orders"),

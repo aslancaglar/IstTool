@@ -1,1024 +1,283 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { snapshot } from "./data/snapshot";
-
-export const seedToppingCategories = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const toppingCategories = snapshot?.toppingCategories || [];
-
-    let inserted = 0;
-    let skipped = 0;
-    for (const category of toppingCategories) {
-      // Skip if a category with this categoryId already exists
-      const existing = await ctx.db
-        .query("toppingCategories")
-        .filter((q) => q.eq(q.field("categoryId"), category.categoryId))
-        .first();
-      if (existing) { skipped++; continue; }
-      const { _id, _creationTime, ...rest } = category;
-      await ctx.db.insert("toppingCategories", rest);
-      inserted++;
-    }
-
-    return { success: true, inserted, skipped };
-  },
-});
-
-
-export const seedToppings = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const toppings = snapshot?.toppings || [];
-
-    let inserted = 0;
-    let skipped = 0;
-    for (const topping of toppings) {
-      // Skip if a topping with this toppingId already exists
-      const existing = await ctx.db
-        .query("toppings")
-        .filter((q) => q.eq(q.field("toppingId"), topping.toppingId))
-        .first();
-      if (existing) { skipped++; continue; }
-      const { _id, _creationTime, ...rest } = topping;
-      await ctx.db.insert("toppings", rest);
-      inserted++;
-    }
-
-    return { success: true, inserted, skipped };
-  },
-});
-
-
-export const seedNewSupplements = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const supplements: any[] = [];
-
-    let inserted = 0;
-    let skipped = 0;
-    for (let i = 0; i < supplements.length; i++) {
-      const topping = supplements[i];
-      const existing = await ctx.db
-        .query("toppings")
-        .withIndex("by_topping_id", (q) => q.eq("toppingId", topping.toppingId))
-        .first();
-
-      if (existing) {
-        skipped++;
-        continue;
-      }
-
-      await ctx.db.insert("toppings", {
-        ...topping,
-        displayOrder: i + 10, // Start after existing ones
-        active: true,
-      });
-      inserted++;
-    }
-
-    return { success: true, inserted, skipped };
-  },
-});
-
-
-
-export const seedMenuItems = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const menuItems: any[] = [];
-
-    let inserted = 0;
-    let skipped = 0;
-    for (let i = 0; i < menuItems.length; i++) {
-      const item = menuItems[i];
-      // Skip if a menu item with this name already exists
-      const existing = await ctx.db
-        .query("menuItems")
-        .filter((q) => q.eq(q.field("name"), item.name))
-        .first();
-      if (existing) { skipped++; continue; }
-      const { _id, _creationTime, ...rest } = item;
-      await ctx.db.insert("menuItems", {
-        // @ts-ignore
-        ...rest,
-        displayOrder: i,
-        active: true,
-      });
-      inserted++;
-    }
-
-    return { success: true, inserted, skipped };
-  },
-});
-
-
-export const seedMenuItemToppings = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const allMenuItems = await ctx.db.query("menuItems").collect();
-
-    const toppingRules = [
-      { categories: ['pizzas-base-tomate', 'pizzas-base-creme', 'pizzas-speciales', 'paninis', 'burgers', 'tex-mex'], toppingCategories: ['sauces', 'crudites', 'supplements'] },
-      { categories: ['tacos'], toppingCategories: ['viandes', 'sauces', 'supplements'] },
-      { categories: ['salades'], toppingCategories: ['crudites'] },
-      { categories: ['bowls', 'kapsalon'], toppingCategories: ['viandes', 'sauces', 'crudites', 'supplements'] },
-    ];
-
-    let insertedCount = 0;
-    let skippedCount = 0;
-
-    for (const item of allMenuItems) {
-      // Skip items that already have topping assignments
-      const existingAssignment = await ctx.db
-        .query("menuItemToppings")
-        .withIndex("by_menu_item", (q) => q.eq("menuItemId", item._id))
-        .first();
-      if (existingAssignment) { skippedCount++; continue; }
-
-      const rule = toppingRules.find(r => r.categories.some(c => item.categories?.includes(c)));
-
-      if (rule) {
-        for (const categoryId of rule.toppingCategories) {
-          await ctx.db.insert("menuItemToppings", {
-            menuItemId: item._id,
-            toppingCategoryId: categoryId,
-          });
-          insertedCount++;
-        }
-      } else if (item.categories?.includes('barquettes') && (item.name.includes('Frites') || item.name.includes('Viande') || item.name.includes('Blé'))) {
-        await ctx.db.insert("menuItemToppings", {
-          menuItemId: item._id,
-          toppingCategoryId: 'sauces',
-        });
-        insertedCount++;
-      }
-    }
-
-    return { success: true, inserted: insertedCount, skipped: skippedCount };
-  },
-});
-
-
-export const seedMenuCategories = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const categories: any[] = [];
-
-    let inserted = 0;
-    let skipped = 0;
-    for (const category of categories) {
-      // Skip if a category with this slug already exists
-      const existing = await ctx.db
-        .query("menuCategories")
-        .withIndex("by_slug", (q) => q.eq("slug", category.slug))
-        .first();
-      if (existing) { skipped++; continue; }
-      const { _id, _creationTime, ...rest } = category;
-      await ctx.db.insert("menuCategories", rest);
-      inserted++;
-    }
-
-    return { success: true, inserted, skipped };
-  },
-});
-
-
-export const seedPizzasBaseTomate = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "pizzas-base-tomate";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Pizzas Base Tomate",
-        slug: categorySlug,
-        displayOrder: 0,
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const removePizzaImages = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const categorySlug = "pizzas-base-tomate";
-    const items = await ctx.db
-      .query("menuItems")
-      .collect();
-
-    const pizzaItems = items.filter(item => item.categories?.includes(categorySlug));
-
-    for (const item of pizzaItems) {
-      await ctx.db.patch(item._id, {
-        image: "",
-      });
-    }
-
-    return { success: true, count: pizzaItems.length };
-  },
-});
-
-
-export const updatePizzaImagesFromFolder = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const categorySlug = "pizzas-base-tomate";
-    const items = await ctx.db
-      .query("menuItems")
-      .collect();
-
-    const pizzaItems = items.filter(item => item.categories?.includes(categorySlug));
-
-    const imageMap: Record<string, string> = {
-      'MARGHERITA': '/pizzas/base-tomate/Margherita.jpg',
-      'REGINA': '/pizzas/base-tomate/regina.jpg',
-      'AU THON': '/pizzas/base-tomate/au-thon.jpg',
-      '4 FROMAGES': '/pizzas/base-tomate/4-fromages.jpg',
-      'CAMPIONE': '/pizzas/base-tomate/campione.jpg',
-      'ORIENTALE': '/pizzas/base-tomate/orientale.jpg',
-      'ROYALE': '/pizzas/base-tomate/royale.jpg',
-      '4 SAISONS': '/pizzas/base-tomate/4saisons.jpg',
-      'VÉGÉTARIENNE': '/pizzas/base-tomate/vegetarienne.jpg',
-      'NAPOLITAINE': '/pizzas/base-tomate/napolitaine.jpg',
-      '4 JAMBONS': '/pizzas/base-tomate/4jambons.jpg',
-      'PEPPERONI': '/pizzas/base-tomate/pepperoni.jpg',
-      'KEBAB': '/pizzas/base-tomate/kebab.jpg',
-      'CALZONE': '/pizzas/base-tomate/calzone.jpg',
-      'FRUITS DE MER': '/pizzas/base-tomate/fruitsdemer.jpg',
-      'HAWAÏENNE': '/pizzas/base-tomate/hawaienne.jpg',
-    };
-
-    let updated = 0;
-    for (const item of pizzaItems) {
-      const newImage = imageMap[item.name];
-      if (newImage) {
-        await ctx.db.patch(item._id, {
-          image: newImage,
-        });
-        updated++;
-      }
-    }
-
-    return { success: true, updated };
-  },
-});
-
-
-export const seedPizzasBaseCreme = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "pizzas-base-creme";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Pizzas Base Crème",
-        slug: categorySlug,
-        displayOrder: 1,
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const updatePizzaCremeImagesFromFolder = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const categorySlug = "pizzas-base-creme";
-    const items = await ctx.db
-      .query("menuItems")
-      .collect();
-
-    const pizzaItems = items.filter(item => item.categories?.includes(categorySlug));
-
-    const imageMap: Record<string, string> = {
-      'SAUMON': '/pizzas/base-creme/saumon.jpg',
-      'CHÈVRE MIEL': '/pizzas/base-creme/chevre-miel.jpg',
-      'RACLETTE': '/pizzas/base-creme/raclette.jpg',
-      'FLAMME': '/pizzas/base-creme/flamme.jpg',
-      'CHICKEN': '/pizzas/base-creme/chicken.jpg',
-      '4 FROMAGES': '/pizzas/base-creme/4fromages.jpg',
-      'FC METZ': '/pizzas/base-creme/fcmetz.jpg',
-      'MONDO': '/pizzas/base-creme/mondo.jpg',
-    };
-
-    let updated = 0;
-    for (const item of pizzaItems) {
-      const newImage = imageMap[item.name];
-      if (newImage) {
-        await ctx.db.patch(item._id, {
-          image: newImage,
-        });
-        updated++;
-      }
-    }
-
-    return { success: true, updated };
-  },
-});
-
-
-export const updateBurgerImagesFromFolder = mutation({
-
-  args: {},
-  handler: async (ctx) => {
-    const items = await ctx.db
-      .query("menuItems")
-      .collect();
-
-
-    const imageMap: Record<string, string> = {
-      'DOBLE CHEESE': '/burgers/doublecheese.jpg',
-      'CHEESEBURGER': '/burgers/cheeseburger.jpg',
-      'LE CHICKEN': '/burgers/chicken.jpg',
-    };
-
-
-    let updated = 0;
-    for (const item of items) {
-      const newImage = imageMap[item.name];
-      if (newImage) {
-        await ctx.db.patch(item._id, {
-          image: newImage,
-        });
-        updated++;
-      }
-    }
-
-    return { success: true, updated };
-  },
-});
-
-
-
-export const updateTacoImagesFromFolder = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const items = await ctx.db
-      .query("menuItems")
-      .collect();
-
-    const tacoItems = items.filter(item => item.categories?.includes("tacos"));
-
-    let updated = 0;
-    for (const item of tacoItems) {
-      await ctx.db.patch(item._id, {
-        image: "/tacos/tacos.jpg",
-      });
-      updated++;
-    }
-
-    return { success: true, updated };
-  },
-});
-
-
-
-export const updateTexMexImagesFromFolder = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const items = await ctx.db
-      .query("menuItems")
-      .collect();
-
-    const imageMap: Record<string, string> = {
-      'FRITES': '/tex-mex/frites.jpg',
-      'POTATOES': '/tex-mex/potatoes.jpg',
-      'NUGGETS X8': '/tex-mex/nuggets.jpg',
-      'NUGGETS X12': '/tex-mex/nuggets.jpg',
-      'CHICKEN WINGS X10': '/tex-mex/wings.jpg',
-      'CHICKEN WINGS X12': '/tex-mex/wings.jpg',
-    };
-
-    let updated = 0;
-    for (const item of items) {
-      const newImage = imageMap[item.name];
-      if (newImage) {
-        await ctx.db.patch(item._id, {
-          image: newImage,
-        });
-        updated++;
-      }
-    }
-
-    return { success: true, updated };
-  },
-});
-
-
-export const seedPizzasSpeciales = mutation({
-
-
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "pizzas-speciales";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Pizzas Spéciales",
-        slug: categorySlug,
-        displayOrder: 2, // After base crème
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const seedPaninis = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "paninis";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Paninis",
-        slug: categorySlug,
-        displayOrder: 3, // After special pizzas
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const seedBurgers = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "burgers";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Burgers",
-        slug: categorySlug,
-        displayOrder: 4, // After paninis
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const seedTacos = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "tacos";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Tacos",
-        slug: categorySlug,
-        displayOrder: 5, // After burgers
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const seedTexMex = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "tex-mex";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Tex-Mex",
-        slug: categorySlug,
-        displayOrder: 6, // After tacos
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const seedSalades = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "salades";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Salades",
-        slug: categorySlug,
-        displayOrder: 7, // After tex-mex
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const seedDesserts = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // 1. Create Category
-    const categorySlug = "desserts";
-    const existingCategory = await ctx.db
-      .query("menuCategories")
-      .withIndex("by_slug", (q) => q.eq("slug", categorySlug))
-      .first();
-
-    if (!existingCategory) {
-      await ctx.db.insert("menuCategories", {
-        name: "Desserts",
-        slug: categorySlug,
-        displayOrder: 8, // After salades
-        active: true,
-      });
-    }
-
-    // 2. Add Items
-    const items: any[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      await ctx.db.insert("menuItems", {
-        ...item,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: i,
-      });
-    }
-
-    return { success: true, count: items.length };
-  },
-});
-
-
-export const seedBoissons = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const categorySlug = "boissons";
-    console.log("Updating Boissons category with new items...");
+import { MutationCtx } from "./_generated/server";
+
+// Internal helper functions
+async function runSeedCategories(ctx: MutationCtx) {
+  const categories = [
+    { name: "Pizzas Base Tomate", slug: "pizzas-base-tomate", displayOrder: 0, active: true },
+    { name: "Pizzas Base Crème", slug: "pizzas-base-creme", displayOrder: 1, active: true },
+    { name: "Pizzas Spéciales", slug: "pizzas-speciales", displayOrder: 2, active: true },
+    { name: "Paninis", slug: "paninis", displayOrder: 3, active: true },
+    { name: "Burgers", slug: "burgers", displayOrder: 4, active: true },
+    { name: "Tacos", slug: "tacos", displayOrder: 5, active: true },
+    { name: "Tex-Mex", slug: "tex-mex", displayOrder: 6, active: true },
+    { name: "Salades", slug: "salades", displayOrder: 7, active: true },
+    { name: "Desserts", slug: "desserts", displayOrder: 8, active: true },
+    { name: "Boissons", slug: "boissons", displayOrder: 9, active: true },
+  ];
+
+  for (const cat of categories) {
+    await ctx.db.insert("menuCategories", cat);
+  }
+}
+
+async function runSeedToppingCategories(ctx: MutationCtx) {
+  const categories = [
+    { categoryId: "sauces", name: "Sauces", minSelection: 0, maxSelection: 3, displayOrder: 3, active: true },
+    { categoryId: "crudites", name: "Crudités", minSelection: 0, maxSelection: 4, displayOrder: 4, active: true },
+    { categoryId: "supplements", name: "Suppléments", minSelection: 0, maxSelection: 10, displayOrder: 5, active: true },
+    { categoryId: "viandes", name: "1 Viandes", minSelection: 1, maxSelection: 1, displayOrder: 1, active: true },
+    { categoryId: "2-viandes", name: "2 Vaindes", minSelection: 1, maxSelection: 2, displayOrder: 2, active: true },
+    { categoryId: "taille", name: "Taille Pizza", minSelection: 0, maxSelection: 1, displayOrder: 0, active: true },
+  ];
+
+  for (const cat of categories) {
+    await ctx.db.insert("toppingCategories", cat);
+  }
+}
+
+async function runSeedToppings(ctx: MutationCtx) {
+  const toppings = [
+    { toppingId: "sauce-blanche", name: "Sauce Blanche", price: 0, categoryId: "sauces", displayOrder: 0, active: true },
+    { toppingId: "sauce-andalouse", name: "Sauce Andalouse", price: 0, categoryId: "sauces", displayOrder: 1, active: true },
+    { toppingId: "salade", name: "Salade", price: 0, categoryId: "crudites", displayOrder: 11, active: true },
+    { toppingId: "tomate", name: "Tomate", price: 0, categoryId: "crudites", displayOrder: 12, active: true },
+    { toppingId: "oignon", name: "Oignon", price: 0, categoryId: "crudites", displayOrder: 13, active: true },
+    { toppingId: "chou-rouge", name: "Chou Rouge", price: 0, categoryId: "crudites", displayOrder: 14, active: true },
+    { toppingId: "mais", name: "Maïs", price: 0, categoryId: "crudites", displayOrder: 15, active: true },
+    { toppingId: "olives-noires", name: "Olives Noires", price: 0, categoryId: "crudites", displayOrder: 16, active: true },
+    { toppingId: "mozzarella-extra", name: "Extra Mozzarella", price: 1.5, categoryId: "supplements", displayOrder: 17, active: true },
+    { toppingId: "cheddar", name: "Cheddar", price: 1, categoryId: "supplements", displayOrder: 18, active: true },
+    { toppingId: "feta", name: "Feta", price: 1.5, categoryId: "supplements", displayOrder: 19, active: true },
+    { toppingId: "chevre", name: "Chèvre", price: 1.5, categoryId: "supplements", displayOrder: 20, active: true },
+    { toppingId: "brie", name: "Brie", price: 1.5, categoryId: "supplements", displayOrder: 21, active: true },
+    { toppingId: "gorgonzola", name: "Gorgonzola", price: 1.5, categoryId: "supplements", displayOrder: 22, active: true },
+    { toppingId: "raclette", name: "Raclette", price: 1.5, categoryId: "supplements", displayOrder: 23, active: true },
+    { toppingId: "reblochon", name: "Reblochon", price: 1.5, categoryId: "supplements", displayOrder: 24, active: true },
+    { toppingId: "champignons", name: "Champignons", price: 1, categoryId: "supplements", displayOrder: 25, active: true },
+    { toppingId: "poivrons", name: "Poivrons", price: 1, categoryId: "supplements", displayOrder: 26, active: true },
+    { toppingId: "oignons-pizza", name: "Oignons", price: 1, categoryId: "supplements", displayOrder: 27, active: true },
+    { toppingId: "olives-pizza", name: "Olives", price: 1, categoryId: "supplements", displayOrder: 28, active: true },
+    { toppingId: "oeuf", name: "Oeuf", price: 1, categoryId: "supplements", displayOrder: 29, active: true },
+    { toppingId: "pomme-de-terre", name: "Pomme de Terre", price: 1, categoryId: "supplements", displayOrder: 30, active: true },
+    { toppingId: "ananas", name: "Ananas", price: 1, categoryId: "supplements", displayOrder: 31, active: true },
+    { toppingId: "miel", name: "Miel", price: 0.5, categoryId: "supplements", displayOrder: 32, active: true },
+    { toppingId: "poulet", name: "Escalope de Poulet", price: 0, categoryId: "viandes", displayOrder: 34, active: true },
+    { toppingId: "viande-hachee", name: "Steak", price: 0, categoryId: "viandes", displayOrder: 33, active: true },
+    { toppingId: "merguez", name: "Poulet Tandoori", price: 0, categoryId: "viandes", displayOrder: 35, active: true },
+    { toppingId: "kebab-topping", name: "Chicken Chika", price: 0, categoryId: "viandes", displayOrder: 36, active: true },
+    { toppingId: "jambon", name: "Viande Kebab", price: 0, categoryId: "viandes", displayOrder: 37, active: true },
+    { toppingId: "lardons", name: "Cordon Bleu", price: 0, categoryId: "viandes", displayOrder: 38, active: true },
+    { toppingId: "bacon", name: "Tenders", price: 0, categoryId: "viandes", displayOrder: 39, active: true },
+    { toppingId: "pepperoni", name: "Nuggets", price: 0, categoryId: "viandes", displayOrder: 40, active: true },
+    { toppingId: "topping-1777547095472", name: "Steak", price: 0, categoryId: "2-viandes", displayOrder: 32, active: true },
+    { toppingId: "topping-1777547112484", name: "Escalope de Poulet", price: 0, categoryId: "2-viandes", displayOrder: 33, active: true },
+    { toppingId: "topping-1777547122429", name: "Poulet Tandoori", price: 0, categoryId: "2-viandes", displayOrder: 34, active: true },
+    { toppingId: "topping-1777547130221", name: "Chicken Chika", price: 0, categoryId: "2-viandes", displayOrder: 35, active: true },
+    { toppingId: "topping-1777547142493", name: "Viande Kebab", price: 0, categoryId: "2-viandes", displayOrder: 36, active: true },
+    { toppingId: "topping-1777547159751", name: "Cordon Bleu", price: 0, categoryId: "2-viandes", displayOrder: 37, active: true },
+    { toppingId: "topping-1777547171719", name: "Tenders", price: 0, categoryId: "2-viandes", displayOrder: 38, active: true },
+    { toppingId: "topping-1777547187042", name: "Nuggets", price: 0, categoryId: "2-viandes", displayOrder: 39, active: true },
+    { toppingId: "topping-1777548068398", name: "33 CM", price: 3, categoryId: "taille", displayOrder: 41, active: true },
+    { toppingId: "topping-1777548084889", name: "29 CM", price: 0, categoryId: "taille", displayOrder: 40, active: true },
+  ];
+
+  for (const topping of toppings) {
+    await ctx.db.insert("toppings", topping);
+  }
+}
+
+async function runSeedMenuItems(ctx: MutationCtx) {
+  const items = [
+    { name: "MARGHERITA", description: "Sauce tomate, mozzarella", price: 8.5, image: "/pizzas/base-tomate/Margherita.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 0, inStock: true },
+    { name: "REGINA", description: "Sauce tomate, mozzarella, champignons, jambon", price: 10, image: "/pizzas/base-tomate/regina.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 1, inStock: true },
+    { name: "THON", description: "Sauce tomate, mozzarella, thon, oignon, poivron, olive noire", price: 10, image: "/pizzas/base-tomate/au-thon.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 2, inStock: true },
+    { name: "4 FROMAGES", description: "Sauce tomate, mozzarella, brie, chèvre, gorgonzola", price: 10, image: "/pizzas/base-tomate/4-fromages.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 3, inStock: true },
+    { name: "CAMPIONE", description: "Sauce tomate, mozzarella, viande hachée, champignons", price: 10, image: "/pizzas/base-tomate/campione.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 4, inStock: true },
+    { name: "ORIENTALE", description: "Sauce tomate, mozzarella, merguez, poivron, olives noires, oignon, oeuf", price: 10, image: "/pizzas/base-tomate/orientale.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 5, inStock: true },
+    { name: "ROYALE", description: "Sauce tomate, mozzarella, merguez, viande hachée, poulet", price: 10, image: "/pizzas/base-tomate/royale.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 6, inStock: true },
+    { name: "VÉGÉTARIENNE", description: "Sauce tomate, mozzarella, champignons, poivron, artichaut, aubergine, olives noires", price: 10, image: "/pizzas/base-tomate/vegetarienne.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 8, inStock: true },
+    { name: "NAPOLITAINE", description: "Sauce tomate, mozzarella, anchois, câpre, olives noires", price: 10, image: "/pizzas/base-tomate/napolitaine.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 9, inStock: true },
+    { name: "4 JAMBONS", description: "Sauce tomate, mozzarella, jambon, lardons, bacon, pepperoni", price: 11.5, image: "/pizzas/base-tomate/4jambons.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 10, inStock: true },
+    { name: "PEPPERONI", description: "Sauce tomate, mozzarella, pepperoni, oeuf", price: 10, image: "/pizzas/base-tomate/pepperoni.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 11, inStock: true },
+    { name: "KEBAB", description: "Sauce tomate, mozzarella, viande kebab, oignon, olives noires", price: 10, image: "/pizzas/base-tomate/kebab.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 12, inStock: true },
+    { name: "CALZONE", description: "Sauce tomate, mozzarella, champignons, jaune d'oeuf, jambon ou viande hachée ou poulet ou thon", price: 13.5, image: "/pizzas/base-tomate/calzone.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 13, inStock: false },
+    { name: "FRUITS DE MER", description: "Sauce tomate, mozzarella, cocktail de fruits de mer", price: 10, image: "/pizzas/base-tomate/fruitsdemer.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 14, inStock: true },
+    { name: "HAWAÏENNE", description: "Sauce tomate, mozzarella, jambon, ananas, maïs", price: 10, image: "/pizzas/base-tomate/hawaienne.jpg", categories: ["pizzas-base-tomate"], active: true, displayOrder: 15, inStock: true },
+    { name: "SAUMON", description: "Base crème, mozzarella, saumon, pomme de terre, oignon", price: 11.5, image: "/pizzas/base-creme/saumon.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 0, inStock: true },
+    { name: "CHÈVRE MIEL", description: "Base crème, mozzarella, chèvre, miel", price: 10, image: "/pizzas/base-creme/chevre-miel.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 1, inStock: true },
+    { name: "RACLETTE", description: "Base crème, mozzarella, jambon, pomme de terre, raclette", price: 10, image: "/pizzas/base-creme/raclette.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 2, inStock: true },
+    { name: "FLAMME", description: "Base crème, mozzarella, lardons, oignon", price: 10, image: "/pizzas/base-creme/flamme.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 3, inStock: true },
+    { name: "CHICKEN", description: "Base crème, mozzarella, poulet, oignon, champignons, poivron", price: 10, image: "/pizzas/base-creme/chicken.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 4, inStock: true },
+    { name: "4 FROMAGES", description: "Base crème, mozzarella, brie, chèvre, gorgonzola", price: 10, image: "/pizzas/base-creme/4fromages.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 5, inStock: true },
+    { name: "FC METZ", description: "Base crème, viande hachée, pommes de terre, boursin", price: 10, image: "/pizzas/base-creme/fcmetz.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 6, inStock: true },
+    { name: "MONDO", description: "Base crème, mozzarella, jambon, pomme de terre, champignons, reblochon, oignons", price: 10, image: "/pizzas/base-creme/mondo.jpg", categories: ["pizzas-base-creme"], active: true, displayOrder: 7, inStock: true },
+    { name: "ALGÉRIENNE", description: "Sauce algérienne, mozzarella, viande hachée, pomme de terre, poivron, olives noires", price: 10, image: "/pizzas/pizzaicon.jpg", categories: ["pizzas-speciales"], active: true, displayOrder: 0, inStock: true },
+    { name: "INDIENNE", description: "Sauce curry, mozzarella, poulet, oignon, poivron", price: 10, image: "/pizzas/pizzaicon.jpg", categories: ["pizzas-speciales"], active: true, displayOrder: 1, inStock: true },
+    { name: "ANDALOUSE", description: "Sauce andalouse, mozzarella, poulet, oignon, poivron, chèvre", price: 10, image: "/pizzas/pizzaicon.jpg", categories: ["pizzas-speciales"], active: true, displayOrder: 2, inStock: true },
+    { name: "PANINI MERGUEZ", description: "Sauce tomate ou crème fraîche + boisson", price: 7.5, image: "", categories: ["paninis"], active: true, displayOrder: 0, inStock: false },
+    { name: "POULET", description: "Sauce tomate ou crème fraiche + boisson", price: 7.5, image: "", categories: ["paninis"], active: true, displayOrder: 1, inStock: false },
+    { name: "VIANDE HACHÉE", description: "Sauce tomate ou crème fraiche + boisson", price: 7.5, image: "", categories: ["paninis"], active: true, displayOrder: 2, inStock: false },
+    { name: "SAUMON", description: "Sauce tomate ou crème fraiche + boisson", price: 7.5, image: "", categories: ["paninis"], active: true, displayOrder: 3, inStock: false },
+    { name: "4 FROMAGES", description: "Sauce tomate ou crème fraiche + boisson", price: 7.5, image: "", categories: ["paninis"], active: true, displayOrder: 4, inStock: false },
+    { name: "THON", description: "Sauce tomate ou crème fraiche + boisson", price: 7.5, image: "", categories: ["paninis"], active: true, displayOrder: 5, inStock: false },
+    { name: "CHEESEBURGER", description: "Steak, Cheddar, Crudités + Boisson 33cl", price: 6.5, image: "", categories: ["burgers"], active: true, displayOrder: 0, inStock: false },
+    { name: "DOBLE CHEESE", description: "2 Steaks, 2 Cheddars, Crudités + Boisson 33cl", price: 8.5, image: "", categories: ["burgers"], active: true, displayOrder: 1, inStock: false },
+    { name: "LE CHICKEN", description: "Galette de poulet, galette de pomme de terre et 2 cheddars, Crudités + Boisson 33cl", price: 7.5, image: "", categories: ["burgers"], active: true, displayOrder: 2, inStock: false },
+    { name: "TACOS 1 VIANDE", description: "1 Viande au choix, servi with a drink 33cl", price: 7, image: "", categories: ["tacos"], active: true, displayOrder: 0, inStock: true },
+    { name: "TACOS 2 VIANDES", description: "2 Viandes au choix, servi with a drink 33cl", price: 9, image: "/tacos2.jpeg", categories: ["tacos"], active: true, displayOrder: 1, inStock: true },
+    { name: "FRITES", description: "", price: 3.5, image: "/tex-mex/frites.jpg", categories: ["tex-mex"], active: true, displayOrder: 0, inStock: true },
+    { name: "POTATOES", description: "", price: 3.5, image: "/tex-mex/potatoes.jpg", categories: ["tex-mex"], active: true, displayOrder: 1, inStock: true },
+    { name: "NUGGETS X8", description: "Servi avec frites ou potatoes", price: 10, image: "/tex-mex/nuggets.jpg", categories: ["tex-mex"], active: true, displayOrder: 2, inStock: true },
+    { name: "NUGGETS X12", description: "Servi avec frites ou potatoes", price: 13, image: "/tex-mex/nuggets.jpg", categories: ["tex-mex"], active: true, displayOrder: 3, inStock: true },
+    { name: "CHICKEN WINGS X10", description: "Servi avec frites ou potatoes", price: 10, image: "/tex-mex/wings.jpg", categories: ["tex-mex"], active: true, displayOrder: 4, inStock: true },
+    { name: "CHICKEN WINGS X12", description: "Servi avec frites ou potatoes", price: 13, image: "/tex-mex/wings.jpg", categories: ["tex-mex"], active: true, displayOrder: 5, inStock: true },
+    { name: "SAUMON", description: "Tomates cerises, saumon, avocat, oignon, pomme de terre", price: 7.5, image: "", categories: ["salades"], active: true, displayOrder: 0, inStock: false },
+    { name: "THON", description: "Tomates cerises, thon, mais, olives noires, oeuf dur", price: 7.5, image: "", categories: ["salades"], active: true, displayOrder: 1, inStock: false },
+    { name: "CHÈVRE CHAUD", description: "Tomates cerises, lardon, chèvre chaud", price: 7.5, image: "", categories: ["salades"], active: true, displayOrder: 2, inStock: false },
+    { name: "FERMIÈRE", description: "Tomates cerises, poulet, pomme de terre, olives noires", price: 7.5, image: "/salade-poulet-min.jpg", categories: ["salades"], active: true, displayOrder: 3, inStock: false },
+    { name: "TARTE AU DAIM", description: "", price: 4, image: "", categories: ["desserts"], active: true, displayOrder: 0 },
+    { name: "TIRAMISU", description: "", price: 4, image: "/tiramisu.jpeg", categories: ["desserts"], active: true, displayOrder: 1 },
+    { name: "BROWNIES", description: "", price: 4, image: "", categories: ["desserts"], active: true, displayOrder: 2 },
+    { name: "TARTE AU CITRON", description: "", price: 4, image: "", categories: ["desserts"], active: true, displayOrder: 3 },
+    { name: "BEN & JERRY'S 100 ml", description: "", price: 3, image: "", categories: ["desserts"], active: true, displayOrder: 4 },
+    { name: "BEN & JERRY'S 500 ml", description: "", price: 6, image: "", categories: ["desserts"], active: true, displayOrder: 5 },
+    { name: "Fanta Orange 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 100, inStock: true },
+    { name: "Coca-Cola Cherry 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 101, inStock: true, popular: true },
+    { name: "Orangina 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 102, inStock: true },
+    { name: "Perrier 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 103, inStock: true },
+    { name: "7 Up 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 104, inStock: true },
+    { name: "Schweppes Agrumes 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 105, inStock: true },
+    { name: "Sprite 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 106, inStock: true },
+    { name: "Red Bull 25cl", price: 2.5, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 107, inStock: true },
+    { name: "Coca Cola 1.5L", price: 3.5, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 108, inStock: true, popular: true },
+    { name: "Fanta Orange 1.5L", price: 3.5, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 109, inStock: true },
+    { name: "Monster Energy 50cl", price: 2.5, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 110, inStock: true },
+    { name: "Coca-Cola 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 111, inStock: true, popular: true },
+    { name: "Coca-Cola Zéro 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 112, inStock: true, popular: true },
+    { name: "Ice Tea 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 113, inStock: true },
+    { name: "Oasis 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 114, inStock: true },
+    { name: "Eau Minérale 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 115, inStock: true },
+    { name: "Dada 33cl", price: 1.8, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 116, inStock: true },
+    { name: "Ice Tea 1.5L", price: 3.5, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 117, inStock: true },
+    { name: "Oasis 2L", price: 3.5, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 118, inStock: true },
+    { name: "Coca Cola Zéro 1.5L", price: 3.5, description: "", image: "", categories: ["boissons"], active: true, displayOrder: 0, inStock: true },
+  ];
+
+  for (const item of items) {
+    await ctx.db.insert("menuItems", item);
+  }
+}
+
+async function runSeedToppingAssignments(ctx: MutationCtx) {
+  const items = await ctx.db.query("menuItems").collect();
+  
+  for (const item of items) {
+    const cats = item.categories || [];
     
-    // 1. Get current boissons to delete them
-    const existingBoissons = await ctx.db
-      .query("menuItems")
-      .collect();
-
-    // Filter items that actually contain 'boissons' in their categories array
-    const toDelete = existingBoissons.filter(item => item.categories && item.categories.includes(categorySlug));
-
-    for (const item of toDelete) {
-      await ctx.db.delete(item._id);
+    if (cats.some(c => c.startsWith("pizzas-"))) {
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "taille", displayOrder: 0 });
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "supplements", displayOrder: 1 });
+    } else if (cats.includes("tacos")) {
+      if (item.name.includes("2 VIANDES")) {
+        await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "2-viandes", displayOrder: 0 });
+      } else {
+        await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "viandes", displayOrder: 0 });
+      }
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "sauces", displayOrder: 1 });
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "supplements", displayOrder: 2 });
+    } else if (cats.includes("burgers") || cats.includes("paninis")) {
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "sauces", displayOrder: 0 });
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "supplements", displayOrder: 1 });
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "crudites", displayOrder: 2 });
+    } else if (cats.includes("salades")) {
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "crudites", displayOrder: 0 });
+      await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "supplements", displayOrder: 1 });
+    } else if (cats.includes("tex-mex")) {
+       await ctx.db.insert("menuItemToppings", { menuItemId: item._id, toppingCategoryId: "sauces", displayOrder: 0 });
     }
+  }
+}
 
-    const newBoissons = [
-      { name: "Fanta Orange", price: 2.30, description: "33cl", popular: false },
-      { name: "Coca-Cola Cherry", price: 2.30, description: "33cl", popular: true },
-      { name: "Orangina", price: 2.30, description: "33cl", popular: false },
-      { name: "Perrier", price: 2.30, description: "33cl", popular: false },
-      { name: "7 Up", price: 2.30, description: "33cl", popular: false },
-      { name: "Schweppes Agrumes", price: 2.30, description: "33cl", popular: false },
-      { name: "Sprite", price: 2.30, description: "33cl", popular: false },
-      { name: "Red Bull", price: 3.50, description: "33cl", popular: false },
-      { name: "Coca Cola 1.5L", price: 4.50, description: "1.5L", popular: true },
-      { name: "Fanta Orange 1.5L", price: 4.50, description: "1.5L", popular: false },
-      { name: "Monster Energy 50cl", price: 3.50, description: "50cl", popular: false },
-      { name: "Coca-Cola", price: 2.30, description: "33cl", popular: true },
-      { name: "Coca-Cola Zéro", price: 2.30, description: "33cl", popular: true },
-      { name: "Ice Tea", price: 2.30, description: "33cl", popular: false },
-      { name: "Oasis", price: 2.30, description: "33cl", popular: false },
-      { name: "Eau Minérale", price: 2.30, description: "33cl", popular: false },
-      { name: "Dada", price: 2.30, description: "33cl", popular: false },
-      { name: "Ice Tea 1.5L", price: 4.50, description: "1.5L", popular: false },
-      { name: "Oasis 2L", price: 5.00, description: "2L", popular: false },
-    ];
+async function runSeedRestaurantInfo(ctx: MutationCtx) {
+  await ctx.db.insert("restaurantInfo", {
+    key: "main",
+    address: "20 Rue Saint-Pierre 57000 Metz",
+    phone: "03 87 38 09 45",
+    email: "contact@mondopizza57.fr",
+    minimumAdvanceNotice: 30,
+    pickupEnabled: true,
+    deliveryEnabled: true,
+    reviewsEnabled: true,
+    defaultDeliveryFee: 0,
+    freeDeliveryThreshold: 0,
+    galleryEnabled: false,
+    hours: [
+      { day: "Lundi", time: "11h00 - 14h00 et 17h30 - 23h00" },
+      { day: "Mardi", time: "11h00 - 14h00 et 17h30 - 23h00" },
+      { day: "Mercredi", time: "11h00 - 14h00 et 17h30 - 23h00" },
+      { day: "Jeudi", time: "11h00 - 14h00 et 17h30 - 23h00" },
+      { day: "Vendredi", time: "11h00 - 14h00 et 17h30 - 23h00" },
+      { day: "Samedi", time: "17h30 - 23h00" },
+      { day: "Dimanche", time: "17h30 - 23h00" },
+    ],
+    socialLinks: { facebook: "", instagram: "", twitter: "" },
+  });
+}
 
-    let inserted = 0;
-    for (let i = 0; i < newBoissons.length; i++) {
-      const b = newBoissons[i];
-      await ctx.db.insert("menuItems", {
-        name: b.name,
-        price: b.price,
-        description: b.description,
-        popular: b.popular,
-        categories: [categorySlug],
-        active: true,
-        displayOrder: 100 + i, // High order to keep them together
-        image: "",
-        categoryOrders: []
-      });
-      inserted++;
-    }
+async function runSeedReviews(ctx: MutationCtx) {
+  const reviews = [
+    { name: "Alonzo", rating: 5, comment: "Excellente expérience le patron (ou employer ) très gentil et poli et service super rapide et très très bonne pizza !!!", date: "12 mars 2026", active: true },
+    { name: "Laura", rating: 5, comment: "Enfin une bonne pizzeria sur Metz avec des produits frais (ce qui est plus que rare de nos jours) et de la pâte faite maison !\nL'accueil est super, les gars sont très sympas et ça se voit qu'il aiment ce qu'ils font.\nEnviron 15min d'attente pour notre commande, au top 👌\nAllez-y, vous ne serez pas déçu !", date: "04 avril 2026", active: true },
+    { name: "Naim", rating: 5, comment: "Meilleures pizza de metz accueil merveilleux, produits de qualités, goût et saveurs italienne. Merci de ramener cette spécialité italienne sur Metz sablon et de le partager avec nous un vrai régal avec des offres familiales à petit prix! Il y a des crêpes salées, sucrées, banane, fraises et framboise avec tout les goûts. Les dada enfin je sais où vous trouver !!!! Rien à dire vous êtes les meilleurs merci les italiens tounsi un grand cœur pour vous .", date: "30 avril 2025", active: true },
+    { name: "Anita", rating: 5, comment: "La meilleure pizza de Metz\nDe super prix pour de super pizza\nEt surtout des Livreurs au Top\nMerciii Mondo Pizza", date: "30 mars 2025", active: true },
+  ];
+  for (const r of reviews) {
+    await ctx.db.insert("reviews", r);
+  }
+}
 
-    return { success: true, deleted: toDelete.length, inserted };
-  },
-});
-
-
-export const seedRestaurantInfo = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // Skip if restaurant info already exists
-    const existing = await ctx.db
-      .query("restaurantInfo")
-      .withIndex("by_key", (q) => q.eq("key", "main"))
-      .first();
-    if (existing) return { success: true, skipped: true };
-
-
-    await ctx.db.insert("restaurantInfo", {
-      key: "main",
-      address: "",
-      phone: "",
-      email: "",
-
-      hours: [
-        { day: 'Lundi', time: '11h00 - 14h00 et 17h30 - 23h00' },
-        { day: 'Mardi', time: '11h00 - 14h00 et 17h30 - 23h00' },
-        { day: 'Mercredi', time: '11h00 - 14h00 et 17h30 - 23h00' },
-        { day: 'Jeudi', time: '11h00 - 14h00 et 17h30 - 23h00' },
-        { day: 'Vendredi', time: '11h00 - 14h00 et 17h30 - 23h00' },
-        { day: 'Samedi', time: '17h30 - 23h00' },
-        { day: 'Dimanche', time: '17h30 - 23h00' },
-      ],
-
-      socialLinks: {
-
-        facebook: "",
-        instagram: "",
-        twitter: "",
-      },
-    });
-    return { success: true, skipped: false };
-  },
-});
-
-
-
-
-export const seedReviews = mutation({
-
-
-  args: {},
-  handler: async (ctx) => {
-    const reviews: any[] = [];
-
-    let inserted = 0;
-    let skipped = 0;
-    for (const review of reviews) {
-      // Skip if a review by this person on this date already exists
-      const existing = await ctx.db
-        .query("reviews")
-        .filter((q) => q.and(
-          q.eq(q.field("name"), review.name),
-          q.eq(q.field("date"), review.date)
-        ))
-        .first();
-      if (existing) { skipped++; continue; }
-      await ctx.db.insert("reviews", review);
-      inserted++;
-    }
-
-    return { success: true, inserted, skipped };
-  },
-});
-
-
-export const seedGallery = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const images: any[] = [];
-
-    let inserted = 0;
-    let skipped = 0;
-    for (const image of images) {
-      // Skip if a gallery item with this title already exists
-      const existing = await ctx.db
-        .query("gallery")
-        .filter((q) => q.eq(q.field("title"), image.title))
-        .first();
-      if (existing) { skipped++; continue; }
-      await ctx.db.insert("gallery", image);
-      inserted++;
-    }
-    return { success: true, inserted, skipped };
-
-  },
-});
-
-// Admin user creation - password must be provided via Convex Dashboard or CLI
-// Example: npx convex run seed:createAdminUser '{"username":"admin","password":"your-secure-password"}'
-export const createAdminUser = mutation({
-  args: {
-    username: v.string(),
-    password: v.string(),
-  },
-  handler: async (ctx, args) => {
-    // Check if user already exists
-    const existingUser = await ctx.db
-      .query("adminUsers")
-      .withIndex("by_username", (q) => q.eq("username", args.username))
-      .first();
-
-    if (existingUser) {
-      throw new Error(`Admin user '${args.username}' already exists`);
-    }
-
-    const encoder = new TextEncoder();
-    const data = encoder.encode(args.password);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const passwordHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-
-    await ctx.db.insert("adminUsers", {
-      username: args.username,
-      passwordHash,
-      createdAt: Date.now(),
-    });
-
-    return { success: true, username: args.username };
-  },
-});
-
+// Exported Mutations
 export const clearAllData = mutation({
   args: {},
   handler: async (ctx) => {
-    const menuItems = await ctx.db.query("menuItems").collect();
-    for (const item of menuItems) {
-      await ctx.db.delete(item._id);
+    const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery", "orders", "promoCodes", "users", "userSessions", "adminUsers", "adminSessions"] as const;
+    for (const table of tables) {
+      const items = await ctx.db.query(table).collect();
+      for (const item of items) {
+        await ctx.db.delete(item._id);
+      }
     }
-
-    const toppings = await ctx.db.query("toppings").collect();
-    for (const topping of toppings) {
-      await ctx.db.delete(topping._id);
-    }
-
-    const categories = await ctx.db.query("toppingCategories").collect();
-    for (const category of categories) {
-      await ctx.db.delete(category._id);
-    }
-
-    const assignments = await ctx.db.query("menuItemToppings").collect();
-    for (const assignment of assignments) {
-      await ctx.db.delete(assignment._id);
-    }
-
-    const menuCategories = await ctx.db.query("menuCategories").collect();
-    for (const category of menuCategories) {
-      await ctx.db.delete(category._id);
-    }
-
-    const restaurantInfo = await ctx.db.query("restaurantInfo").collect();
-    for (const info of restaurantInfo) {
-      await ctx.db.delete(info._id);
-    }
-
     return { success: true };
   },
 });
 
-export const cleanupOrphanedToppings = mutation({
+export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
-    const toppings = await ctx.db.query("toppings").collect();
-    const categories = await ctx.db.query("toppingCategories").collect();
-    const categoryIds = new Set(categories.map((c) => c.categoryId));
-
-    let deletedCount = 0;
-    for (const topping of toppings) {
-      if (!categoryIds.has(topping.categoryId)) {
-        await ctx.db.delete(topping._id);
-        deletedCount++;
-      }
-    }
-
-    const assignments = await ctx.db.query("menuItemToppings").collect();
-    let deletedAssignments = 0;
-    for (const assignment of assignments) {
-      if (!categoryIds.has(assignment.toppingCategoryId)) {
-        await ctx.db.delete(assignment._id);
-        deletedAssignments++;
-      }
-    }
-
-    return { success: true, deletedCount, deletedAssignments };
-  },
-});
-
-export const seedFromSnapshot = mutation({
-  args: {
-    data: v.any(),
-    clearFirst: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
-    if (args.clearFirst) {
-      const tables = [
-        "menuItems", "toppings", "toppingCategories",
-        "menuItemToppings", "menuCategories", "restaurantInfo",
-        "reviews", "gallery"
-      ] as const;
-
-      for (const table of tables) {
-        const items = await ctx.db.query(table).collect();
-        for (const item of items) {
-          await ctx.db.delete(item._id);
-        }
-      }
-    }
-
-    const { data } = args;
-
-    const insertItems = async (table: any, items: any[]) => {
-      if (!items) return;
+    // 1. Clear everything
+    const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery"] as const;
+    for (const table of tables) {
+      const items = await ctx.db.query(table).collect();
       for (const item of items) {
-        const { _id, _creationTime, ...rest } = item;
-        // Check if item already exists by name/slug to avoid duplicates if not clearing
-        if (table === "menuItems") {
-          const existing = await ctx.db.query("menuItems").filter(q => q.eq(q.field("name"), rest.name)).first();
-          if (existing) continue;
-        } else if (table === "menuCategories") {
-          const existing = await ctx.db.query("menuCategories").withIndex("by_slug", q => q.eq("slug", rest.slug)).first();
-          if (existing) continue;
-        }
-
-        await ctx.db.insert(table, rest);
+        await ctx.db.delete(item._id);
       }
-    };
+    }
 
-    await insertItems("menuCategories", data.menuCategories);
-    await insertItems("toppingCategories", data.toppingCategories);
-    await insertItems("toppings", data.toppings);
-    await insertItems("menuItems", data.menuItems);
-    await insertItems("menuItemToppings", data.menuItemToppings);
-    await insertItems("restaurantInfo", data.restaurantInfo);
-    await insertItems("reviews", data.reviews);
-    await insertItems("gallery", data.gallery);
-
+    // 2. Run all seeds
+    await runSeedCategories(ctx);
+    await runSeedToppingCategories(ctx);
+    await runSeedToppings(ctx);
+    await runSeedMenuItems(ctx);
+    await runSeedToppingAssignments(ctx);
+    await runSeedRestaurantInfo(ctx);
+    await runSeedReviews(ctx);
+    
     return { success: true };
   },
 });
 
-/**
- * Exports all relevant menu data from the database.
- */
 export const exportData = mutation({
   args: {},
   handler: async (ctx) => {
@@ -1044,22 +303,14 @@ export const exportData = mutation({
   },
 });
 
-/**
- * Imports data into the database, optionally clearing existing data.
- */
 export const importData = mutation({
   args: {
-    data: v.any(), // The result from exportData
+    data: v.any(),
     clearFirst: v.boolean(),
   },
   handler: async (ctx, args) => {
     if (args.clearFirst) {
-      const tables = [
-        "menuItems", "toppings", "toppingCategories",
-        "menuItemToppings", "menuCategories", "restaurantInfo",
-        "reviews", "gallery"
-      ] as const;
-
+      const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery"] as const;
       for (const table of tables) {
         const items = await ctx.db.query(table).collect();
         for (const item of items) {
@@ -1069,7 +320,6 @@ export const importData = mutation({
     }
 
     const { data } = args;
-
     const insertItems = async (table: any, items: any[]) => {
       if (!items) return;
       for (const item of items) {
@@ -1090,7 +340,3 @@ export const importData = mutation({
     return { success: true };
   },
 });
-
-
-
-

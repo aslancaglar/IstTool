@@ -9,7 +9,7 @@ const http = httpRouter();
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Vapi-Secret",
+  "Access-Control-Allow-Headers": "Content-Type, X-Api-Key",
 };
 
 function json(data: unknown, status = 200) {
@@ -23,17 +23,10 @@ function options() {
   return new Response(null, { status: 204, headers: CORS });
 }
 
-// Simple shared secret check for write endpoints
-function checkSecret(req: Request): Response | null {
-  const secret = req.headers.get("X-Vapi-Secret");
-  if (!process.env.VAPI_SECRET || secret !== process.env.VAPI_SECRET) {
-    return json({ error: "Non autorisé" }, 401);
-  }
-  return null;
-}
+const normalize = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
 
 // ── GET /api/vapi/menu ─────────────────────────────────────────────────────
-// VAPI calls this at the start of each call to read the live menu.
 
 http.route({
   path: "/api/vapi/menu",
@@ -63,18 +56,52 @@ http.route({
   }),
 });
 
+// ── GET /api/vapi/menu/full ────────────────────────────────────────────────
+
+http.route({
+  path: "/api/vapi/menu/full",
+  method: "OPTIONS",
+  handler: httpAction(async () => options()),
+});
+
+http.route({
+  path: "/api/vapi/menu/full",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    try {
+      const items = await ctx.runQuery(api.menuItems.list, {});
+      const result = await Promise.all(
+        items
+          .filter((item: any) => item.active !== false && item.inStock !== false)
+          .map(async (item: any) => {
+            const toppingCategories = await ctx.runQuery(api.queries.getToppingsForMenuItem, { menuItemId: item._id });
+            return {
+              id: item._id,
+              name: item.name,
+              description: item.description ?? "",
+              price: item.price,
+              categories: item.categories ?? [],
+              toppingCategories,
+            };
+          })
+      );
+      return json({ items: result });
+    } catch (e: any) {
+      return json({ error: e.message }, 500);
+    }
+  }),
+});
+
 // ── POST /api/vapi/order ───────────────────────────────────────────────────
-// VAPI calls this when the customer confirms their order.
+// Utilisé par Retell AI (body.args) et VAPI (body direct).
 //
-// Expected body:
+// Structure attendue pour chaque item :
 // {
-//   "customer": { "firstName": "Jean", "lastName": "Dupont", "phone": "+33612345678" },
-//   "type": "pickup" | "delivery",
-//   "address": { "street": "...", "city": "...", "zipCode": "..." },  // delivery only
-//   "items": [
-//     { "menuItemId": "<id>", "name": "Margherita", "price": 10.50 }
-//   ],
-//   "note": "Sans oignons"   // optional, appended to last item instructions
+//   "menuItemId": "...",   ← optionnel si name est fourni
+//   "name": "Margherita",
+//   "price": 8.50,         ← prix de base
+//   "finalPrice": 13.00,   ← prix final (après taille + suppléments)
+//   "supplements": "33cm, Extra Mozzarella"  ← texte libre, affiché dans l'admin
 // }
 
 http.route({
@@ -87,9 +114,6 @@ http.route({
   path: "/api/vapi/order",
   method: "POST",
   handler: httpAction(async (ctx, req) => {
-    const denied = checkSecret(req);
-    if (denied) return denied;
-
     let body: any;
     try {
       body = await req.json();
@@ -97,46 +121,131 @@ http.route({
       return json({ error: "Corps de requête invalide" }, 400);
     }
 
-    const { customer, type, address, items, note } = body;
+    // Retell AI wrappe les args dans body.args (parfois sérialisé en string JSON)
+    const rawArgs = body.args ?? body;
+    const data = typeof rawArgs === 'string' ? (() => { try { return JSON.parse(rawArgs); } catch { return {}; } })() : rawArgs;
 
-    if (!customer?.firstName || !customer?.phone) {
-      return json({ error: "Nom et téléphone du client requis" }, 400);
+    const firstName = data.firstName ?? data.customer?.firstName;
+    const lastName  = data.lastName  ?? data.customer?.lastName ?? "";
+    const phone     = data.phone     ?? data.customer?.phone;
+    const orderType = data.orderType ?? data.type;
+    const street    = data.street    ?? data.address?.street;
+    const city      = data.city      ?? data.address?.city;
+    const zipCode   = data.zipCode   ?? data.address?.zipCode;
+    const items     = data.items;
+    const note      = data.note ?? "";
+
+    if (!firstName || !phone) {
+      return json({ error: "Prénom et téléphone requis" }, 400);
     }
-    if (!type || !["pickup", "delivery"].includes(type)) {
-      return json({ error: "Type de commande invalide (pickup ou delivery)" }, 400);
+    if (!orderType || !["pickup", "delivery"].includes(orderType)) {
+      return json({ error: "Type invalide: pickup ou delivery" }, 400);
     }
     if (!Array.isArray(items) || items.length === 0) {
       return json({ error: "Aucun article dans la commande" }, 400);
     }
-    if (type === "delivery" && (!address?.street || !address?.city || !address?.zipCode)) {
+    if (orderType === "delivery" && (!street || !city || !zipCode)) {
       return json({ error: "Adresse de livraison incomplète" }, 400);
     }
 
-    // Build order items — one entry per item (quantity handled by repetition)
-    const orderItems = items.map((item: any) => ({
-      menuItemId: item.menuItemId,
-      name: item.name,
-      price: item.price,
-      finalPrice: item.price,
-    }));
+    const type = orderType as "pickup" | "delivery";
 
-    // Total computed from items (server will re-validate against DB)
-    const totalPrice = orderItems.reduce((sum: number, i: any) => sum + i.price, 0);
+    // Résolution des articles : menuItemId prioritaire, sinon fuzzy match par nom
+    const allMenuItems = await ctx.runQuery(api.menuItems.list, {});
+
+    const orderItems: any[] = [];
+    for (const item of items) {
+      // Résolution de l'article par ID ou fuzzy match par nom
+      let resolved = item.menuItemId
+        ? allMenuItems.find((m: any) => m._id === item.menuItemId)
+        : null;
+
+      if (!resolved && item.name) {
+        const needle = normalize(item.name);
+        resolved = allMenuItems.find((m: any) => normalize(m.name) === needle)
+          ?? allMenuItems.find((m: any) =>
+            normalize(m.name).includes(needle) || needle.includes(normalize(m.name))
+          );
+      }
+
+      if (!resolved) {
+        return json({ error: `Article introuvable: ${item.name}` }, 400);
+      }
+
+      // Résolution des toppings (taille + suppléments)
+      const toppingIds: string[] = Array.isArray(item.toppingIds) ? item.toppingIds : [];
+      let selectedToppings: { categoryId: string; toppingIds: string[] }[] = [];
+      let toppingPriceTotal = 0;
+      const toppingNames: string[] = [];
+
+      if (toppingIds.length > 0) {
+        const toppings = await ctx.runQuery(api.queries.getToppingsByIds, { toppingIds });
+
+        // Grouper par categoryId pour le format attendu par createOrder
+        const categoryMap = new Map<string, string[]>();
+        for (const t of toppings) {
+          if (!t) continue;
+          const catId = t.categoryId as string;
+          if (!categoryMap.has(catId)) categoryMap.set(catId, []);
+          categoryMap.get(catId)!.push(t.toppingId as string);
+
+          // Calcul du prix du topping
+          if ((t as any).menuItemId) {
+            const linkedItems = await ctx.runQuery(api.menuItems.list, {});
+            const linked = linkedItems.find((m: any) => m._id === (t as any).menuItemId);
+            if (linked) {
+              toppingPriceTotal += (t as any).specialPrice !== undefined
+                ? (t as any).specialPrice
+                : linked.price;
+              toppingNames.push(linked.name);
+            }
+          } else {
+            toppingPriceTotal += (t as any).specialPrice !== undefined
+              ? (t as any).specialPrice
+              : ((t as any).price ?? 0);
+            if ((t as any).name) toppingNames.push((t as any).name);
+          }
+        }
+
+        selectedToppings = Array.from(categoryMap.entries()).map(([categoryId, ids]) => ({
+          categoryId,
+          toppingIds: ids,
+        }));
+      }
+
+      const finalPrice = resolved.price + toppingPriceTotal;
+
+      // Nom affiché dans l'admin : utilise supplements si fourni, sinon construit depuis les toppings
+      const supplementLabel = item.supplements || toppingNames.join(", ");
+      const displayName = supplementLabel
+        ? `${resolved.name} (${supplementLabel})`
+        : resolved.name;
+
+      orderItems.push({
+        menuItemId: resolved._id,
+        name: displayName,
+        price: resolved.price,
+        finalPrice,
+        selectedToppings: selectedToppings.length > 0 ? selectedToppings : undefined,
+      });
+    }
+
+    const totalPrice = orderItems.reduce((sum: number, i: any) => sum + i.finalPrice, 0);
 
     try {
       const orderId = await ctx.runMutation(api.mutations.createOrder, {
         customer: {
-          firstName: customer.firstName,
-          lastName: customer.lastName ?? "",
-          email: `tel.${customer.phone.replace(/\D/g, "")}@commande-vapi.fr`,
-          phone: customer.phone,
+          firstName,
+          lastName: lastName ?? "",
+          email: `tel.${phone.replace(/\D/g, "")}@commande-vocale.fr`,
+          phone,
         },
         type,
         address: type === "delivery" ? {
-          street: address.street,
-          city: address.city,
-          zipCode: address.zipCode,
-          instructions: note ?? undefined,
+          street,
+          city,
+          zipCode,
+          instructions: note || undefined,
         } : undefined,
         scheduledTime: "asap",
         paymentMethod: "cash",

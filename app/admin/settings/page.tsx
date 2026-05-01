@@ -63,6 +63,8 @@ export default function SettingsPage() {
     freeDeliveryThreshold: 0,
     galleryEnabled: true,
     reviewsEnabled: true,
+    cashEnabled: true,
+    stripeEnabled: true,
   });
 
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
@@ -110,6 +112,8 @@ export default function SettingsPage() {
         freeDeliveryThreshold: restaurantInfo.freeDeliveryThreshold ?? 0,
         galleryEnabled: restaurantInfo.galleryEnabled ?? true,
         reviewsEnabled: restaurantInfo.reviewsEnabled ?? true,
+        cashEnabled: restaurantInfo.cashEnabled ?? true,
+        stripeEnabled: restaurantInfo.stripeEnabled ?? true,
       });
 
       setHolidays(restaurantInfo.holidays || []);
@@ -172,6 +176,8 @@ export default function SettingsPage() {
         freeDeliveryThreshold: formData.freeDeliveryThreshold,
         galleryEnabled: formData.galleryEnabled,
         reviewsEnabled: formData.reviewsEnabled,
+        cashEnabled: formData.cashEnabled,
+        stripeEnabled: formData.stripeEnabled,
       });
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
@@ -354,6 +360,52 @@ export default function SettingsPage() {
                       </p>
                     </div>
                   )}
+
+                  <div className="pt-2 border-t border-slate-200">
+                    <h3 className="text-sm font-semibold text-slate-700 mb-3">Modes de paiement acceptés</h3>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                        <div>
+                          <h3 className="font-medium text-slate-900">Espèces / Carte à la récupération</h3>
+                          <p className="text-sm text-slate-500">Paiement en espèces ou par carte au comptoir</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.cashEnabled}
+                            onChange={(e) => setFormData({ ...formData, cashEnabled: e.target.checked })}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                        <div>
+                          <h3 className="font-medium text-slate-900">Carte bancaire en ligne (Stripe)</h3>
+                          <p className="text-sm text-slate-500">Paiement sécurisé par carte via Stripe</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.stripeEnabled}
+                            onChange={(e) => setFormData({ ...formData, stripeEnabled: e.target.checked })}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      {!formData.cashEnabled && !formData.stripeEnabled && (
+                        <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                          <p className="text-sm text-amber-800">
+                            <strong>⚠️ Attention:</strong> Aucun mode de paiement activé. Les clients ne pourront pas finaliser leurs commandes.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 mt-4">
                     <div className="flex items-center justify-between">

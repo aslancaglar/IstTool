@@ -424,6 +424,8 @@ export default function CheckoutPage() {
                                     isSubmitting={isSubmitting}
                                     totalPrice={finalTotal}
                                     hideSubmitButton
+                                    cashEnabled={restaurantInfo?.cashEnabled ?? true}
+                                    stripeEnabled={restaurantInfo?.stripeEnabled ?? true}
                                 />
                             </div>
 

@@ -47,6 +47,8 @@ export const upsert = mutation({
     freeDeliveryThreshold: v.optional(v.number()),
     galleryEnabled: v.optional(v.boolean()),
     reviewsEnabled: v.optional(v.boolean()),
+    cashEnabled: v.optional(v.boolean()),
+    stripeEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -72,6 +74,8 @@ export const upsert = mutation({
         freeDeliveryThreshold: args.freeDeliveryThreshold,
         galleryEnabled: args.galleryEnabled,
         reviewsEnabled: args.reviewsEnabled,
+        cashEnabled: args.cashEnabled,
+        stripeEnabled: args.stripeEnabled,
       });
       return existing._id;
     } else {
@@ -91,6 +95,8 @@ export const upsert = mutation({
         freeDeliveryThreshold: args.freeDeliveryThreshold ?? 0,
         galleryEnabled: args.galleryEnabled ?? true,
         reviewsEnabled: args.reviewsEnabled ?? true,
+        cashEnabled: args.cashEnabled ?? true,
+        stripeEnabled: args.stripeEnabled ?? true,
       });
       return id;
     }

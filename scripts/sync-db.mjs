@@ -15,6 +15,7 @@ try {
     const resultString = execSync('npx convex run seed:exportData', {
         encoding: 'utf-8',
         cwd: PROJECT_ROOT,
+        maxBuffer: 1024 * 1024 * 10, // 10MB
     });
 
     // Function to strip ANSI escape codes
@@ -25,10 +26,11 @@ try {
     // Convex CLI output might contain some logs or checkmarks before/after the actual JSON
     let data;
     try {
-        const firstBrace = cleanResult.indexOf('{');
-        const lastBrace = cleanResult.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1) {
-            const jsonStr = cleanResult.substring(firstBrace, lastBrace + 1);
+        const jsonStart = cleanResult.indexOf('{');
+        const jsonEnd = cleanResult.lastIndexOf('}');
+
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+            const jsonStr = cleanResult.substring(jsonStart, jsonEnd + 1);
             data = JSON.parse(jsonStr);
         } else {
             data = JSON.parse(cleanResult);

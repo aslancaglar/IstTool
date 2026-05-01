@@ -106,6 +106,8 @@ export default defineSchema({
     freeDeliveryThreshold: v.optional(v.number()), // Order amount for free delivery (0 = disabled)
     galleryEnabled: v.optional(v.boolean()),
     reviewsEnabled: v.optional(v.boolean()),
+    cashEnabled: v.optional(v.boolean()),
+    stripeEnabled: v.optional(v.boolean()),
   }).index("by_key", ["key"]),
 
   users: defineTable({
