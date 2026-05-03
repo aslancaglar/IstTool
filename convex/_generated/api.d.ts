@@ -25,6 +25,7 @@ import type * as restaurantInfo from "../restaurantInfo.js";
 import type * as reviews from "../reviews.js";
 import type * as seed from "../seed.js";
 import type * as stripe from "../stripe.js";
+import type * as temp_update from "../temp_update.js";
 import type * as toppingsAdmin from "../toppingsAdmin.js";
 
 import type {
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   reviews: typeof reviews;
   seed: typeof seed;
   stripe: typeof stripe;
+  temp_update: typeof temp_update;
   toppingsAdmin: typeof toppingsAdmin;
 }>;
 

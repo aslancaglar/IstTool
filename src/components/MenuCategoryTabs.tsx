@@ -51,7 +51,7 @@ function MenuCategoryTabs({
     };
 
     return (
-        <FadeIn delay={200} direction="up" className="relative mb-8 -mx-4 px-4 sm:mx-0 sm:px-4">
+        <FadeIn delay={200} direction="up" className="relative mb-12 -mx-4 px-4 sm:mx-0 sm:px-4">
             <div
                 ref={scrollContainerRef}
                 onScroll={onScroll}
