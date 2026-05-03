@@ -70,7 +70,7 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
         }
         return {
           ...prev,
-          [categoryId]: [...categoryToppings, { toppingId, name, price }],
+          [categoryId]: [...categoryToppings, { toppingId, name, price, categoryName: category?.name, freeForBogo: category?.freeForBogo ?? false }],
         };
       }
     });

@@ -27,7 +27,7 @@ interface CategoryFormData {
 }
 interface ToppingCategoryFormData {
   categoryId: string; name: string; minSelection: number;
-  maxSelection: number | undefined; displayOrder: number; active: boolean;
+  maxSelection: number | undefined; displayOrder: number; active: boolean; freeForBogo: boolean;
 }
 interface ToppingFormData {
   toppingId: string; name: string; price: number;
@@ -209,7 +209,7 @@ export default function MenuItemsPage() {
   const [toppingCategoryFilter, setToppingCategoryFilter] = useState<string>('all');
   const [isToppingCatModalOpen, setIsToppingCatModalOpen] = useState(false);
   const [editingToppingCatId, setEditingToppingCatId] = useState<Id<'toppingCategories'> | null>(null);
-  const [toppingCatFormData, setToppingCatFormData] = useState<ToppingCategoryFormData>({ categoryId: '', name: '', minSelection: 0, maxSelection: undefined, displayOrder: 0, active: true });
+  const [toppingCatFormData, setToppingCatFormData] = useState<ToppingCategoryFormData>({ categoryId: '', name: '', minSelection: 0, maxSelection: undefined, displayOrder: 0, active: true, freeForBogo: false });
   const [toppingCatConfirmModal, setToppingCatConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppingCategories'> | null }>({ isOpen: false, id: null });
 
   // ── Topping UI state ─────────────────────────────────────────────────────────
@@ -436,12 +436,12 @@ export default function MenuItemsPage() {
   // ── Topping category handlers ─────────────────────────────────────────────────
   const handleCreateToppingCategory = () => {
     setEditingToppingCatId(null);
-    setToppingCatFormData({ categoryId: `cat-${Date.now()}`, name: '', minSelection: 0, maxSelection: undefined, displayOrder: toppingCategories?.length || 0, active: true });
+    setToppingCatFormData({ categoryId: `cat-${Date.now()}`, name: '', minSelection: 0, maxSelection: undefined, displayOrder: toppingCategories?.length || 0, active: true, freeForBogo: false });
     setIsToppingCatModalOpen(true);
   };
   const handleEditToppingCategory = (cat: any) => {
     setEditingToppingCatId(cat._id);
-    setToppingCatFormData({ categoryId: cat.categoryId, name: cat.name, minSelection: cat.minSelection, maxSelection: cat.maxSelection, displayOrder: cat.displayOrder || 0, active: cat.active !== false });
+    setToppingCatFormData({ categoryId: cat.categoryId, name: cat.name, minSelection: cat.minSelection, maxSelection: cat.maxSelection, displayOrder: cat.displayOrder || 0, active: cat.active !== false, freeForBogo: cat.freeForBogo === true });
     setIsToppingCatModalOpen(true);
   };
   const handleToppingCatSubmit = async (e: React.FormEvent) => {
@@ -591,16 +591,16 @@ export default function MenuItemsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Menu</h1>
-            <p className="text-slate-600 mt-0.5 text-sm sm:text-base">Gérez vos catégories, articles et garnitures</p>
+            <h1 className="text-2xl font-bold text-slate-900">Menu</h1>
+            <p className="text-slate-500 mt-1 text-sm">Gérez vos catégories, articles et garnitures</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={handleCreateArticle}
-              className="flex items-center gap-2 bg-slate-900 text-white px-3 py-2 sm:px-4 text-sm rounded-lg hover:bg-slate-800 transition">
+              className="flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 text-sm rounded-xl hover:bg-red-700 transition font-semibold">
               <Pizza className="w-4 h-4" /><span>Ajouter un Article</span>
             </button>
             <button onClick={handleCreateTopping}
-              className="flex items-center gap-2 bg-slate-700 text-white px-3 py-2 sm:px-4 text-sm rounded-lg hover:bg-slate-600 transition">
+              className="flex items-center gap-2 bg-slate-700 text-white px-4 py-2.5 text-sm rounded-xl hover:bg-slate-600 transition font-semibold">
               <UtensilsCrossed className="w-4 h-4" /><span>Ajouter une Garniture</span>
             </button>
           </div>
@@ -789,32 +789,33 @@ export default function MenuItemsPage() {
 
       {/* ── Menu category modal ── */}
       {isCategoryModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsCategoryModalOpen(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <h2 className="text-xl font-bold text-slate-900">{editingCategoryId ? 'Modifier la Catégorie' : 'Ajouter une Catégorie'}</h2>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="w-6 h-6" /></button>
+              <button onClick={() => setIsCategoryModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleCategorySubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nom</label>
-                <input type="text" value={categoryFormData.name} onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" required />
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
+                <input type="text" value={categoryFormData.name} onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Slug</label>
-                <input type="text" value={categoryFormData.slug} onChange={(e) => setCategoryFormData({ ...categoryFormData, slug: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" required />
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Slug</label>
+                <input type="text" value={categoryFormData.slug} onChange={(e) => setCategoryFormData({ ...categoryFormData, slug: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Ordre d'affichage</label>
-                <input type="number" value={categoryFormData.displayOrder} onChange={(e) => setCategoryFormData({ ...categoryFormData, displayOrder: parseInt(e.target.value) })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" required />
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Ordre d'affichage</label>
+                <input type="number" value={categoryFormData.displayOrder} onChange={(e) => setCategoryFormData({ ...categoryFormData, displayOrder: parseInt(e.target.value) })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="cat-active" checked={categoryFormData.active} onChange={(e) => setCategoryFormData({ ...categoryFormData, active: e.target.checked })} className="w-4 h-4" />
+                <input type="checkbox" id="cat-active" checked={categoryFormData.active} onChange={(e) => setCategoryFormData({ ...categoryFormData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
                 <label htmlFor="cat-active" className="text-sm font-medium text-slate-700">Actif</label>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition">Annuler</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition">{editingCategoryId ? 'Mettre à jour' : 'Créer'}</button>
+                <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm">Annuler</button>
+                <button type="submit" className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm">{editingCategoryId ? 'Mettre à jour' : 'Créer'}</button>
               </div>
             </form>
           </div>
@@ -823,41 +824,49 @@ export default function MenuItemsPage() {
 
       {/* ── Topping category modal ── */}
       {isToppingCatModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsToppingCatModalOpen(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <h2 className="text-xl font-bold text-slate-900">{editingToppingCatId ? 'Modifier la Catégorie' : 'Ajouter une Catégorie de Garniture'}</h2>
-              <button onClick={() => setIsToppingCatModalOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="w-6 h-6" /></button>
+              <button onClick={() => setIsToppingCatModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleToppingCatSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nom</label>
-                <input type="text" value={toppingCatFormData.name} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, name: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" placeholder="ex: Sauces, Crudités" required />
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
+                <input type="text" value={toppingCatFormData.name} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, name: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="ex: Sauces, Crudités" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">ID de la Catégorie</label>
-                <input type="text" value={toppingCatFormData.categoryId} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, categoryId: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent font-mono" placeholder="ex: sauces" required />
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">ID de la Catégorie</label>
+                <input type="text" value={toppingCatFormData.categoryId} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, categoryId: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-mono" placeholder="ex: sauces" required />
                 <p className="text-xs text-slate-500 mt-1">Identifiant unique</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Sélection min</label>
-                  <input type="number" min="0" value={toppingCatFormData.minSelection} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, minSelection: parseInt(e.target.value) })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" required />
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Sélection min</label>
+                  <input type="number" min="0" value={toppingCatFormData.minSelection} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, minSelection: parseInt(e.target.value) })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
                   <p className="text-xs text-slate-500 mt-1">0 = facultatif</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Sélection max</label>
-                  <input type="number" min="0" value={toppingCatFormData.maxSelection ?? ''} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, maxSelection: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" placeholder="∞" />
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Sélection max</label>
+                  <input type="number" min="0" value={toppingCatFormData.maxSelection ?? ''} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, maxSelection: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="∞" />
                   <p className="text-xs text-slate-500 mt-1">Vide = illimité</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="tcat-active" checked={toppingCatFormData.active} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, active: e.target.checked })} className="w-4 h-4" />
+                <input type="checkbox" id="tcat-active" checked={toppingCatFormData.active} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
                 <label htmlFor="tcat-active" className="text-sm font-medium text-slate-700">Actif</label>
               </div>
+              <div className="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <input type="checkbox" id="tcat-freeForBogo" checked={toppingCatFormData.freeForBogo} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, freeForBogo: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600" />
+                <div>
+                  <label htmlFor="tcat-freeForBogo" className="text-sm font-medium text-emerald-800 cursor-pointer">Gratuit pour « 1 acheté = 1 offert »</label>
+                  <p className="text-xs text-emerald-600 mt-0.5">Les options de cette catégorie sont offertes sur le produit gratuit (ex : Taille Pizza).</p>
+                </div>
+              </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsToppingCatModalOpen(false)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition">Annuler</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition">{editingToppingCatId ? 'Mettre à jour' : 'Créer'}</button>
+                <button type="button" onClick={() => setIsToppingCatModalOpen(false)} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm">Annuler</button>
+                <button type="submit" className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm">{editingToppingCatId ? 'Mettre à jour' : 'Créer'}</button>
               </div>
             </form>
           </div>
@@ -866,49 +875,49 @@ export default function MenuItemsPage() {
 
       {/* ── Topping modal ── */}
       {isToppingModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsToppingModalOpen(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <h2 className="text-xl font-bold text-slate-900">{editingToppingId ? 'Modifier la Garniture' : 'Ajouter une Garniture'}</h2>
-              <button onClick={() => setIsToppingModalOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="w-6 h-6" /></button>
+              <button onClick={() => setIsToppingModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleToppingSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nom</label>
-                <input type="text" value={toppingFormData.name} onChange={(e) => setToppingFormData({ ...toppingFormData, name: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" required />
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
+                <input type="text" value={toppingFormData.name} onChange={(e) => setToppingFormData({ ...toppingFormData, name: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Prix (€)</label>
-                <input type="number" step="0.01" min="0" value={toppingFormData.price} onChange={(e) => setToppingFormData({ ...toppingFormData, price: parseFloat(e.target.value) || 0 })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" />
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prix (€)</label>
+                <input type="number" step="0.01" min="0" value={toppingFormData.price} onChange={(e) => setToppingFormData({ ...toppingFormData, price: parseFloat(e.target.value) || 0 })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
                 <p className="text-xs text-slate-500 mt-1">0 = gratuit. Utilisé si aucun article n'est lié.</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Prix Spécial (Override) (€)</label>
-                <input 
-                  type="number" step="0.01" min="0" 
-                  value={toppingFormData.specialPrice ?? ""} 
-                  onChange={(e) => setToppingFormData({ ...toppingFormData, specialPrice: e.target.value ? parseFloat(e.target.value) : undefined })} 
-                  className="w-full px-4 py-2 border border-blue-200 bg-blue-50/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prix Spécial (Override) (€)</label>
+                <input
+                  type="number" step="0.01" min="0"
+                  value={toppingFormData.specialPrice ?? ""}
+                  onChange={(e) => setToppingFormData({ ...toppingFormData, specialPrice: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  className="w-full border border-blue-200 bg-blue-50/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Laisser vide pour prix par défaut"
                 />
                 <p className="text-xs text-blue-600 mt-1">Si rempli, ce prix remplace le prix de l'article lié.</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Lier à un article du menu (Optionnel)</label>
-                <select 
-                  value={toppingFormData.menuItemId || ""} 
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Lier à un article du menu (Optionnel)</label>
+                <select
+                  value={toppingFormData.menuItemId || ""}
                   onChange={(e) => {
                     const selectedId = e.target.value as Id<'menuItems'> | "";
                     const item = menuItems?.find(i => i._id === selectedId);
-                    setToppingFormData({ 
-                      ...toppingFormData, 
+                    setToppingFormData({
+                      ...toppingFormData,
                       menuItemId: selectedId || undefined,
-                      // Automatically fill name and price if they are empty
                       name: toppingFormData.name || (item?.name || ""),
                       price: toppingFormData.price || (item?.price || 0)
                     });
-                  }} 
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-sm"
+                  }}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                   <option value="">Aucun article lié</option>
                   {menuItems?.map(item => (
@@ -918,19 +927,19 @@ export default function MenuItemsPage() {
                 <p className="text-xs text-slate-500 mt-1">L'article sélectionné sera traité comme une garniture.</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Catégorie</label>
-                <select value={toppingFormData.categoryId} onChange={(e) => setToppingFormData({ ...toppingFormData, categoryId: e.target.value })} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent" required>
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Catégorie</label>
+                <select value={toppingFormData.categoryId} onChange={(e) => setToppingFormData({ ...toppingFormData, categoryId: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
                   <option value="">Choisir une catégorie</option>
                   {toppingCategories?.map(cat => <option key={cat._id} value={cat.categoryId}>{cat.name}</option>)}
                 </select>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="topping-active" checked={toppingFormData.active} onChange={(e) => setToppingFormData({ ...toppingFormData, active: e.target.checked })} className="w-4 h-4" />
+                <input type="checkbox" id="topping-active" checked={toppingFormData.active} onChange={(e) => setToppingFormData({ ...toppingFormData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
                 <label htmlFor="topping-active" className="text-sm font-medium text-slate-700">Actif</label>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsToppingModalOpen(false)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition">Annuler</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition">{editingToppingId ? 'Mettre à jour' : 'Créer'}</button>
+                <button type="button" onClick={() => setIsToppingModalOpen(false)} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm">Annuler</button>
+                <button type="submit" className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm">{editingToppingId ? 'Mettre à jour' : 'Créer'}</button>
               </div>
             </form>
           </div>

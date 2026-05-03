@@ -5,7 +5,7 @@ import {
     X, Clock, Package, CheckCircle, XCircle,
     User, Phone, Mail, MapPin, Trash2,
     Truck, ShoppingBag, CreditCard, Banknote,
-    ChevronDown, ChevronUp, Copy, ExternalLink
+    ChevronDown, ChevronUp, Copy, ExternalLink, Gift
 } from 'lucide-react';
 import { Id } from '../../../../convex/_generated/dataModel';
 
@@ -18,6 +18,8 @@ interface OrderDetailsModalProps {
     onDeleteOrder: (orderId: Id<'orders'>) => Promise<void>;
     toppings: any[] | undefined;
     toppingCategories: any[] | undefined;
+    promoCodes?: any[] | undefined;
+    campaigns?: any[] | undefined;
 }
 
 const STATUS_FLOW_PICKUP = ['pending', 'preparing', 'completed'] as const;
@@ -39,15 +41,19 @@ export default function OrderDetailsModal({
     onPaymentStatusChange,
     onDeleteOrder,
     toppings,
-    toppingCategories
+    toppingCategories,
+    promoCodes,
+    campaigns
 }: OrderDetailsModalProps) {
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setIsConfirmingDelete(false);
             setCopied(false);
+            setIsCustomerDetailsOpen(false);
         }
     }, [isOpen]);
 
@@ -190,71 +196,8 @@ export default function OrderDetailsModal({
                 {/* ── BODY ────────────────────────── */}
                 <div className="flex-1 overflow-y-auto">
 
-                    {/* Customer & Delivery — compact card */}
-                    <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="space-y-1.5 min-w-0">
-                                <p className="font-bold text-slate-900 text-base truncate">
-                                    {order.customer.firstName} {order.customer.lastName}
-                                </p>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <a
-                                        href={`tel:${order.customer.phone}`}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
-                                    >
-                                        <Phone className="w-3.5 h-3.5" />
-                                        {order.customer.phone}
-                                    </a>
-                                    <button
-                                        onClick={copyPhone}
-                                        className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-white rounded-lg transition-colors"
-                                        title="Copier le numéro"
-                                    >
-                                        {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                                    </button>
-                                </div>
-                                <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                                    <Mail className="w-3 h-3" />
-                                    {order.customer.email}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Delivery address */}
-                        {isDelivery && order.address && (
-                            <div className="mt-3 p-3 bg-white rounded-xl border border-slate-200">
-                                <div className="flex items-start justify-between gap-2">
-                                    <div className="flex items-start gap-2 min-w-0">
-                                        <MapPin className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-bold text-slate-900">{order.address.street}</p>
-                                            <p className="text-xs text-slate-500">{order.address.zipCode} {order.address.city}</p>
-                                            {order.address.instructions && (
-                                                <div className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-100">
-                                                    <p className="text-xs text-amber-700">
-                                                        <span className="font-bold">📝 Note:</span> {order.address.instructions}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <a
-                                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${order.address.street}, ${order.address.zipCode} ${order.address.city}`)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="shrink-0 flex flex-col items-center justify-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg border border-slate-200 transition-colors"
-                                        title="Ouvrir dans Google Maps"
-                                    >
-                                        <ExternalLink className="w-4 h-4" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">Itinéraire</span>
-                                    </a>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
                     {/* ── ARTICLES ────────────────────────── */}
-                    <div className="px-5 py-4">
+                    <div className="px-5 py-4 border-b border-slate-100">
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                             <Package className="w-3.5 h-3.5" />
                             Articles ({order.items.length})
@@ -262,9 +205,11 @@ export default function OrderDetailsModal({
 
                         <div className="space-y-2">
                             {order.items.map((item: any, index: number) => {
-                                // Build toppings by category
+                                const isFree = item.isFree === true;
+
+                                // Build toppings by category (only for paid items)
                                 const toppingsByCategory: Record<string, { name: string; price: number }[]> = {};
-                                if (item.selectedToppings) {
+                                if (!isFree && item.selectedToppings) {
                                     item.selectedToppings.forEach((toppingGroup: any) => {
                                         toppingGroup.toppingIds.forEach((tId: string, tIdx: number) => {
                                             const topping = toppings?.find(t => t.toppingId === tId);
@@ -275,11 +220,83 @@ export default function OrderDetailsModal({
                                                 }
                                                 toppingsByCategory[categoryName].push({
                                                     name: topping.name,
-                                                    price: topping.price ?? 0,
+                                                    price: topping.specialPrice !== undefined ? topping.specialPrice : (topping.price ?? 0),
                                                 });
                                             }
                                         });
                                     });
+                                }
+
+                                if (isFree) {
+                                    // All toppings: freeForBogo ones shown at €0, others charged
+                                    const freeToppings: { name: string; price: number; isFreeForBogo: boolean }[] = [];
+
+                                    // Collect toppingIds stored on this free item
+                                    const storedIds = new Set<string>();
+                                    if (item.selectedToppings) {
+                                        item.selectedToppings.forEach((toppingGroup: any) => {
+                                            toppingGroup.toppingIds.forEach((tId: string) => storedIds.add(tId));
+                                        });
+                                    }
+
+                                    // For old orders: also pull freeForBogo toppings from the matching paid item
+                                    const paidCounterpart = order.items.find(
+                                        (other: any) => !other.isFree && other.menuItemId === item.menuItemId
+                                    );
+                                    if (paidCounterpart?.selectedToppings) {
+                                        paidCounterpart.selectedToppings.forEach((toppingGroup: any) => {
+                                            toppingGroup.toppingIds.forEach((tId: string) => {
+                                                if (storedIds.has(tId)) return; // already included
+                                                const topping = toppings?.find((t: any) => t.toppingId === tId);
+                                                if (!topping) return;
+                                                const cat = toppingCategories?.find((c: any) => c.categoryId === topping.categoryId);
+                                                if (cat?.freeForBogo === true) storedIds.add(tId); // add freeForBogo ones
+                                            });
+                                        });
+                                    }
+
+                                    storedIds.forEach((tId) => {
+                                        const topping = toppings?.find((t: any) => t.toppingId === tId);
+                                        if (!topping) return;
+                                        const cat = toppingCategories?.find((c: any) => c.categoryId === topping.categoryId);
+                                        const isFreeForBogo = cat?.freeForBogo === true;
+                                        const price = isFreeForBogo ? 0 : (topping.specialPrice !== undefined ? topping.specialPrice : (topping.price ?? 0));
+                                        freeToppings.push({ name: topping.name, price, isFreeForBogo });
+                                    });
+                                    return (
+                                        <div key={index} className="bg-emerald-50 rounded-xl p-3 border border-dashed border-emerald-200">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <Gift className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-200 px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0">Offert</span>
+                                                    <p className="font-bold text-emerald-800 text-sm truncate">{item.name.replace(/ \(offert\)$/i, '')}</p>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                    {paidCounterpart && (
+                                                        <span className="text-sm text-emerald-400 line-through tabular-nums">
+                                                            {paidCounterpart.finalPrice.toFixed(2)}€
+                                                        </span>
+                                                    )}
+                                                    <span className="text-sm font-black text-emerald-600 tabular-nums">
+                                                        {item.finalPrice > 0 ? `+${item.finalPrice.toFixed(2)}€` : 'Gratuit'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {freeToppings.length > 0 && (
+                                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                                    {freeToppings.map((t, tidx) => (
+                                                        <span key={tidx} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-white border border-emerald-200 text-emerald-700 font-medium">
+                                                            {t.name}
+                                                            {t.isFreeForBogo
+                                                                ? <span className="text-emerald-400 font-bold">offert</span>
+                                                                : t.price > 0 && <span className="text-emerald-600 font-bold">+{t.price.toFixed(2)}€</span>
+                                                            }
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
                                 }
 
                                 return (
@@ -306,7 +323,7 @@ export default function OrderDetailsModal({
                                                         >
                                                             {tp.name}
                                                             {tp.price > 0 && (
-                                                                <span className="text-red-500 font-bold">+{tp.price.toFixed(0)}€</span>
+                                                                <span className="text-red-500 font-bold">+{tp.price.toFixed(2)}€</span>
                                                             )}
                                                         </span>
                                                     ))
@@ -317,6 +334,127 @@ export default function OrderDetailsModal({
                                 );
                             })}
                         </div>
+                    </div>
+
+                    {/* ── CUSTOMER & PROMOTIONS DETAILS DROPDOWN ────────────────────────── */}
+                    <div className="px-5 py-4">
+                        <button
+                            onClick={() => setIsCustomerDetailsOpen(!isCustomerDetailsOpen)}
+                            className="w-full flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors p-3 rounded-xl border border-slate-200"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white rounded-lg shadow-sm">
+                                    <User className="w-4 h-4 text-slate-500" />
+                                </div>
+                                <div className="text-left">
+                                    <p className="text-sm font-bold text-slate-900">
+                                        {order.customer.firstName} {order.customer.lastName}
+                                    </p>
+                                    <p className="text-xs text-slate-500">Informations client</p>
+                                </div>
+                            </div>
+                            {isCustomerDetailsOpen ? (
+                                <ChevronUp className="w-5 h-5 text-slate-400" />
+                            ) : (
+                                <ChevronDown className="w-5 h-5 text-slate-400" />
+                            )}
+                        </button>
+
+                        {isCustomerDetailsOpen && (
+                            <div className="mt-3 space-y-4 animate-in slide-in-from-top-2 duration-200 fade-in">
+                                {/* Customer Info */}
+                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <a
+                                            href={`tel:${order.customer.phone}`}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                                        >
+                                            <Phone className="w-3.5 h-3.5" />
+                                            {order.customer.phone}
+                                        </a>
+                                        <button
+                                            onClick={copyPhone}
+                                            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
+                                            title="Copier le numéro"
+                                        >
+                                            {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-slate-600 flex items-center gap-2">
+                                        <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                        {order.customer.email}
+                                    </p>
+
+                                    {/* Delivery address */}
+                                    {isDelivery && order.address && (
+                                        <div className="pt-3 mt-3 border-t border-slate-100">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-start gap-2 min-w-0">
+                                                    <MapPin className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" />
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-bold text-slate-900">{order.address.street}</p>
+                                                        <p className="text-xs text-slate-500">{order.address.zipCode} {order.address.city}</p>
+                                                        {order.address.instructions && (
+                                                            <div className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-100">
+                                                                <p className="text-xs text-amber-700">
+                                                                    <span className="font-bold">📝 Note:</span> {order.address.instructions}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <a
+                                                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${order.address.street}, ${order.address.zipCode} ${order.address.city}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="shrink-0 flex flex-col items-center justify-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg border border-slate-200 transition-colors"
+                                                    title="Ouvrir dans Google Maps"
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider">Itinéraire</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Promotions Inline Badges (Always visible) */}
+                        {(order.promoCode || (order.appliedCampaignIds && order.appliedCampaignIds.length > 0)) && (
+                            <div className="mt-4 bg-red-50/50 p-4 rounded-xl border border-red-100 space-y-2">
+                                <h4 className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-2">
+                                    <Gift className="w-3.5 h-3.5" /> Promotions Appliquées
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {/* Promo Code */}
+                                    {order.promoCode && (
+                                        <span className="inline-flex items-center gap-1.5 bg-white border border-red-200 text-red-700 text-xs font-medium px-2.5 py-1 rounded-lg shadow-sm">
+                                            <span className="font-black">{order.promoCode}</span>
+                                            {promoCodes && (
+                                                <span className="text-slate-500 text-[10px] border-l border-red-100 pl-1.5 ml-0.5">
+                                                    {promoCodes.find(p => p.code === order.promoCode)?.description || 'Code promo'}
+                                                </span>
+                                            )}
+                                        </span>
+                                    )}
+
+                                    {/* Automatic Campaigns */}
+                                    {order.appliedCampaignIds && order.appliedCampaignIds.length > 0 && campaigns && (
+                                        order.appliedCampaignIds.map((campaignId: string) => {
+                                            const campaign = campaigns.find(c => c._id === campaignId);
+                                            if (!campaign) return null;
+                                            return (
+                                                <span key={campaignId} className="inline-flex items-center gap-1.5 bg-white border border-amber-200 text-amber-700 text-xs font-medium px-2.5 py-1 rounded-lg shadow-sm">
+                                                    <span className="font-black uppercase text-[10px] bg-amber-100 px-1 py-0.5 rounded">Auto</span>
+                                                    {campaign.description || 'Campagne'}
+                                                </span>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

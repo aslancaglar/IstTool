@@ -30,6 +30,7 @@ export const createToppingCategory = mutation({
     maxSelection: v.optional(v.number()),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    freeForBogo: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -40,6 +41,7 @@ export const createToppingCategory = mutation({
       maxSelection: args.maxSelection,
       displayOrder: args.displayOrder ?? 0,
       active: args.active ?? true,
+      freeForBogo: args.freeForBogo ?? false,
     });
     return id;
   },
@@ -55,6 +57,7 @@ export const updateToppingCategory = mutation({
     maxSelection: v.optional(v.number()),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    freeForBogo: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -65,6 +68,7 @@ export const updateToppingCategory = mutation({
       maxSelection: args.maxSelection,
       displayOrder: args.displayOrder,
       active: args.active,
+      freeForBogo: args.freeForBogo,
     });
     return args.id;
   },

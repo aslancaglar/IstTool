@@ -59,7 +59,7 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
       } else if (c.discountType === 'bogo_same') {
         const ids: string[] = (c as any).applicableMenuItemIds ?? [];
         if (ids.length === 0 || ids.includes(item._id as string)) {
-          promoBadge = '2 POUR 1';
+          promoBadge = '1 ACHETÉ = 1 OFFERT';
         }
       } else if (c.discountType === 'bogo_gift') {
         const triggerItemId: string = (c as any).bogoTriggerItemId ?? '';
@@ -197,23 +197,26 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item, index) => (
-              <div
-                key={`${item._id}-${activeCategory}`}
-                className="opacity-0 animate-fade-in-up"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <MenuItem
-                  item={{
-                    ...item,
-                    description: item.description || ''
-                  }}
-                  discountPercent={getItemPromo(item).discountPercent}
-                  promoBadge={getItemPromo(item).promoBadge}
-                  onOpenModal={handleOpenModal}
-                />
-              </div>
-            ))}
+            {filteredItems.map((item, index) => {
+              const promo = getItemPromo(item);
+              return (
+                <div
+                  key={`${item._id}-${activeCategory}`}
+                  className="opacity-0 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <MenuItem
+                    item={{
+                      ...item,
+                      description: item.description || ''
+                    }}
+                    discountPercent={promo.discountPercent}
+                    promoBadge={promo.promoBadge}
+                    onOpenModal={handleOpenModal}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
 

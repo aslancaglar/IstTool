@@ -253,12 +253,12 @@ export default function SettingsPage() {
     <>
       <div className="space-y-6 max-w-4xl pb-20">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Paramètres du Restaurant</h1>
-          <p className="text-slate-600 mt-2">Gérez les informations de votre restaurant</p>
+          <h1 className="text-2xl font-bold text-slate-900">Paramètres du Restaurant</h1>
+          <p className="text-slate-500 mt-1">Gérez les informations de votre restaurant</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('contact')}
@@ -271,35 +271,35 @@ export default function SettingsPage() {
             {expandedSections.contact && (
               <div className="p-6 pt-0 border-t border-slate-100 mt-0 space-y-4">
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Adresse</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Adresse</label>
                   <input
                     type="text"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="123 Rue de la Paix, 75001 Paris"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Téléphone</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Téléphone</label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="+33 1 23 45 67 89"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Email</label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="contact@restaurant.com"
                     />
                   </div>
@@ -308,7 +308,7 @@ export default function SettingsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('ordering')}
@@ -333,7 +333,7 @@ export default function SettingsPage() {
                         onChange={(e) => setFormData({ ...formData, pickupEnabled: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                     </label>
                   </div>
 
@@ -349,7 +349,7 @@ export default function SettingsPage() {
                         onChange={(e) => setFormData({ ...formData, deliveryEnabled: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                     </label>
                   </div>
 
@@ -377,7 +377,7 @@ export default function SettingsPage() {
                             onChange={(e) => setFormData({ ...formData, cashEnabled: e.target.checked })}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                         </label>
                       </div>
 
@@ -393,7 +393,7 @@ export default function SettingsPage() {
                             onChange={(e) => setFormData({ ...formData, stripeEnabled: e.target.checked })}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                         </label>
                       </div>
 
@@ -421,7 +421,7 @@ export default function SettingsPage() {
                           step="5"
                           value={formData.minimumAdvanceNotice}
                           onChange={(e) => setFormData({ ...formData, minimumAdvanceNotice: parseInt(e.target.value) || 30 })}
-                          className="w-20 px-3 py-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                          className="w-20 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
                         />
                         <span className="text-sm text-slate-600">min</span>
                       </div>
@@ -441,7 +441,7 @@ export default function SettingsPage() {
                           step="1"
                           value={formData.freeDeliveryThreshold}
                           onChange={(e) => setFormData({ ...formData, freeDeliveryThreshold: parseFloat(e.target.value) || 0 })}
-                          className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                          className="w-24 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
                         />
                         <span className="text-sm text-slate-600">€</span>
                       </div>
@@ -453,7 +453,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Sections du Site */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('sections')}
@@ -480,7 +480,7 @@ export default function SettingsPage() {
                         onChange={(e) => setFormData({ ...formData, reviewsEnabled: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                     </label>
                   </div>
 
@@ -496,7 +496,7 @@ export default function SettingsPage() {
                         onChange={(e) => setFormData({ ...formData, galleryEnabled: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                     </label>
                   </div>
                 </div>
@@ -505,7 +505,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Delivery Zones Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('delivery')}
@@ -532,7 +532,7 @@ export default function SettingsPage() {
                           step="0.5"
                           value={formData.defaultDeliveryFee}
                           onChange={(e) => setFormData({ ...formData, defaultDeliveryFee: parseFloat(e.target.value) || 0 })}
-                          className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                          className="w-24 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
                         />
                         <span className="text-sm text-slate-600">€</span>
                       </div>
@@ -546,7 +546,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={addDeliveryZone}
-                        className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                        className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
                       >
                         <Plus className="w-4 h-4" />
                         Ajouter une zone
@@ -574,7 +574,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={zone.name || ''}
                                 onChange={(e) => updateDeliveryZone(index, 'name', e.target.value)}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 placeholder="Ex: Centre-ville"
                               />
                             </div>
@@ -586,7 +586,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={zone.postalCode}
                                 onChange={(e) => updateDeliveryZone(index, 'postalCode', e.target.value)}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 placeholder="Ex: 57190 ou 57* ou 57190-57199"
                               />
                               <p className="text-xs text-slate-400 mt-1">
@@ -603,7 +603,7 @@ export default function SettingsPage() {
                                 step="0.5"
                                 value={zone.price}
                                 onChange={(e) => updateDeliveryZone(index, 'price', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 placeholder="0.00"
                               />
                             </div>
@@ -617,7 +617,7 @@ export default function SettingsPage() {
                                 step="1"
                                 value={zone.freeDeliveryThreshold ?? ''}
                                 onChange={(e) => updateDeliveryZone(index, 'freeDeliveryThreshold', e.target.value === '' ? 0 : parseFloat(e.target.value))}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 placeholder="Laisser vide pour désactiver"
                               />
                             </div>
@@ -637,7 +637,7 @@ export default function SettingsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('hours')}
@@ -653,7 +653,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={addDay}
-                    className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                    className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
                   >
                     <Plus className="w-4 h-4" />
                     Ajouter un Jour
@@ -678,7 +678,7 @@ export default function SettingsPage() {
                           type="text"
                           value={day.day}
                           onChange={(e) => updateDayName(dayIndex, e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                           placeholder="e.g. Lundi - Vendredi"
                         />
                       </div>
@@ -694,7 +694,7 @@ export default function SettingsPage() {
                                   type="time"
                                   value={slot.start}
                                   onChange={(e) => updateSlot(dayIndex, slotIndex, 'start', e.target.value)}
-                                  className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-1 focus:ring-primary-500"
+                                  className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 />
                               </div>
                               <span className="text-slate-400 text-center">-</span>
@@ -704,7 +704,7 @@ export default function SettingsPage() {
                                   type="time"
                                   value={slot.end}
                                   onChange={(e) => updateSlot(dayIndex, slotIndex, 'end', e.target.value)}
-                                  className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-1 focus:ring-primary-500"
+                                  className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 />
                               </div>
                             </div>
@@ -722,7 +722,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => addSlot(dayIndex)}
-                          className="text-xs flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium mt-2"
+                          className="text-xs flex items-center gap-1 text-red-600 hover:text-red-700 font-medium mt-2"
                         >
                           <Plus className="w-3 h-3" />
                           Ajouter un créneau
@@ -741,7 +741,7 @@ export default function SettingsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('holidays')}
@@ -757,7 +757,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={addHoliday}
-                    className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                    className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
                   >
                     <Plus className="w-4 h-4" />
                     Ajouter une période
@@ -783,7 +783,7 @@ export default function SettingsPage() {
                             type="text"
                             value={holiday.name || ''}
                             onChange={(e) => updateHoliday(index, 'name', e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                             placeholder="e.g. Vacances d'été"
                           />
                         </div>
@@ -793,7 +793,7 @@ export default function SettingsPage() {
                             type="date"
                             value={holiday.startDate}
                             onChange={(e) => updateHoliday(index, 'startDate', e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                             required
                           />
                         </div>
@@ -803,7 +803,7 @@ export default function SettingsPage() {
                             type="date"
                             value={holiday.endDate}
                             onChange={(e) => updateHoliday(index, 'endDate', e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                             required
                           />
                         </div>
@@ -813,7 +813,7 @@ export default function SettingsPage() {
                             id={`active-${index}`}
                             checked={holiday.active}
                             onChange={(e) => updateHoliday(index, 'active', e.target.checked)}
-                            className="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
+                            className="w-4 h-4 text-red-600 border-slate-300 rounded focus:ring-red-500"
                           />
                           <label htmlFor={`active-${index}`} className="text-sm text-slate-700">Actif</label>
                         </div>
@@ -831,7 +831,7 @@ export default function SettingsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('social')}
@@ -844,7 +844,7 @@ export default function SettingsPage() {
             {expandedSections.social && (
               <div className="p-6 pt-0 border-t border-slate-100 mt-0 space-y-4">
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">URL Facebook</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">URL Facebook</label>
                   <input
                     type="url"
                     value={formData.socialLinks.facebook}
@@ -854,13 +854,13 @@ export default function SettingsPage() {
                         socialLinks: { ...formData.socialLinks, facebook: e.target.value },
                       })
                     }
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="https://facebook.com/yourpage"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">URL Instagram</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">URL Instagram</label>
                   <input
                     type="url"
                     value={formData.socialLinks.instagram}
@@ -870,13 +870,13 @@ export default function SettingsPage() {
                         socialLinks: { ...formData.socialLinks, instagram: e.target.value },
                       })
                     }
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="https://instagram.com/yourpage"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">URL Twitter</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">URL Twitter</label>
                   <input
                     type="url"
                     value={formData.socialLinks.twitter}
@@ -886,7 +886,7 @@ export default function SettingsPage() {
                         socialLinks: { ...formData.socialLinks, twitter: e.target.value },
                       })
                     }
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="https://twitter.com/yourpage"
                   />
                 </div>
@@ -898,7 +898,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={saveStatus === 'saving'}
-              className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-2 bg-red-600 text-white px-6 py-2.5 rounded-xl hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
             >
               <Save className="w-5 h-5" />
               {saveStatus === 'saving' ? 'Enregistrement...' : 'Enregistrer les modifications'}

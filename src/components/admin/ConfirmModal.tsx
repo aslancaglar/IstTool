@@ -13,8 +13,9 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-slate-900">{title}</h3>
                     <button
@@ -32,7 +33,7 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
                 <div className="flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
+                        className="px-4 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition font-semibold text-sm"
                     >
                         Annuler
                     </button>
@@ -41,7 +42,7 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
                             onConfirm();
                             onClose();
                         }}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium shadow-sm hover:shadow"
+                        className="px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm"
                     >
                         Supprimer
                     </button>

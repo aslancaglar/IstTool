@@ -4,7 +4,6 @@ import '../src/index.css';
 import ConvexClientProvider from './ConvexClientProvider';
 import { AdminAuthProvider } from '../src/context/AdminAuthContext';
 import { AuthProvider } from '../src/context/AuthContext';
-import { VideoProvider } from '../src/context/VideoContext';
 import { OrderProvider } from '../src/context/OrderContext';
 
 import StoreLayout from './StoreLayout';
@@ -154,13 +153,11 @@ export default function RootLayout({
                 <ConvexClientProvider>
                     <AdminAuthProvider>
                         <AuthProvider>
-                            <VideoProvider>
-                                <OrderProvider>
-                                    <StoreLayout>
-                                        {children}
-                                    </StoreLayout>
-                                </OrderProvider>
-                            </VideoProvider>
+                            <OrderProvider>
+                                <StoreLayout>
+                                    {children}
+                                </StoreLayout>
+                            </OrderProvider>
                         </AuthProvider>
                     </AdminAuthProvider>
                 </ConvexClientProvider>

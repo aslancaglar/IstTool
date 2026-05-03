@@ -29,7 +29,7 @@ async function runSeedToppingCategories(ctx: MutationCtx) {
     { categoryId: "supplements", name: "Suppléments", minSelection: 0, maxSelection: 10, displayOrder: 5, active: true },
     { categoryId: "viandes", name: "1 Viandes", minSelection: 1, maxSelection: 1, displayOrder: 1, active: true },
     { categoryId: "2-viandes", name: "2 Vaindes", minSelection: 1, maxSelection: 2, displayOrder: 2, active: true },
-    { categoryId: "taille", name: "Taille Pizza", minSelection: 0, maxSelection: 1, displayOrder: 0, active: true },
+    { categoryId: "taille", name: "Taille Pizza", minSelection: 0, maxSelection: 1, displayOrder: 0, active: true, freeForBogo: true },
   ];
 
   for (const cat of categories) {

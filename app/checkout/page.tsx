@@ -72,15 +72,15 @@ export default function CheckoutPage() {
     const subtotal = getTotalPrice();
 
     // Campaign auto-apply computation (mirrors server logic)
-    const { campaignDiscount, campaignFreeDelivery, appliedCampaignIds, appliedCampaignList } = useMemo(() => {
-        if (!activeCampaigns || activeCampaigns.length === 0) {
-            return { campaignDiscount: 0, campaignFreeDelivery: false, appliedCampaignIds: [] as string[], appliedCampaignList: [] as { id: string; description?: string; discountType: string; discountValue: number; computedDiscount: number; isFreeDelivery: boolean }[] };
-        }
+    const { campaignDiscount, campaignFreeDelivery, appliedCampaignIds, appliedCampaignList, bogoFreeItems } = useMemo(() => {
+        const emptyReturn = { campaignDiscount: 0, campaignFreeDelivery: false, appliedCampaignIds: [] as string[], appliedCampaignList: [] as { id: string; description?: string; discountType: string; discountValue: number; computedDiscount: number; isFreeDelivery: boolean; bogoFreeCount?: number }[], bogoFreeItems: [] as { menuItemId: string; name: string; image?: string; selectedToppings: { toppingId: string; name: string; price?: number }[]; finalPrice: number }[] };
+        if (!activeCampaigns || activeCampaigns.length === 0) return emptyReturn;
         const catMap = new Map(orderItems.map(item => [item.menuItemId, (item as any).categories ?? []]));
         let discount = 0;
         let freeDelivery = false;
         const ids: string[] = [];
-        const list: { id: string; description?: string; discountType: string; discountValue: number; computedDiscount: number; isFreeDelivery: boolean }[] = [];
+        const list: { id: string; description?: string; discountType: string; discountValue: number; computedDiscount: number; isFreeDelivery: boolean; bogoFreeCount?: number }[] = [];
+        const freeItems: { menuItemId: string; name: string; image?: string; selectedToppings: { toppingId: string; name: string; price?: number }[]; finalPrice: number }[] = [];
 
         for (const campaign of activeCampaigns) {
             if (campaign.minOrderAmount != null && subtotal < campaign.minOrderAmount) continue;
@@ -91,6 +91,7 @@ export default function CheckoutPage() {
             }
             let computedDiscount = 0;
             let isFreeDelivery = false;
+            let bogoFreeCount: number | undefined = undefined;
             if (campaign.discountType === 'free_delivery') {
                 if (orderType !== 'delivery') continue;
                 freeDelivery = true;
@@ -102,23 +103,34 @@ export default function CheckoutPage() {
                     .reduce((sum, item) => sum + item.totalPrice, 0);
                 computedDiscount = Math.round(Math.min(eligible * campaign.discountValue / 100, eligible) * 100) / 100;
             } else if (campaign.discountType === 'percent_off_specific_items') {
-                const ids = (campaign as any).applicableMenuItemIds ?? [];
+                const eligibleIds = (campaign as any).applicableMenuItemIds ?? [];
                 const eligible = orderItems
-                    .filter(item => ids.includes(item.menuItemId))
+                    .filter(item => eligibleIds.includes(item.menuItemId))
                     .reduce((sum, item) => sum + item.totalPrice, 0);
                 computedDiscount = Math.round(Math.min(eligible * campaign.discountValue / 100, eligible) * 100) / 100;
             } else if (campaign.discountType === 'bogo_same') {
-                const ids: string[] = (campaign as any).applicableMenuItemIds ?? [];
-                const counts = new Map<string, number>();
-                const prices = new Map<string, number>();
+                const eligibleIds: string[] = (campaign as any).applicableMenuItemIds ?? [];
+                bogoFreeCount = 0;
                 for (const item of orderItems) {
-                    if (ids.length > 0 && !ids.includes(item.menuItemId)) continue;
-                    counts.set(item.menuItemId, (counts.get(item.menuItemId) ?? 0) + 1);
-                    prices.set(item.menuItemId, item.totalPrice);
+                    if (eligibleIds.length > 0 && !eligibleIds.includes(item.menuItemId)) continue;
+                    // Taille toppings are free on the offert item (price→0), others are charged
+                    const allToppingsForFree = item.selectedToppings.map((t: any) =>
+                        t.freeForBogo === true ? { ...t, price: 0 } : t
+                    );
+                    const toppingFinalPrice = allToppingsForFree.reduce(
+                        (sum: number, t: any) => sum + (t.price ?? 0), 0
+                    );
+                    freeItems.push({
+                        menuItemId: item.menuItemId,
+                        name: item.name,
+                        image: (item as any).image,
+                        selectedToppings: allToppingsForFree,
+                        finalPrice: toppingFinalPrice,
+                    });
+                    bogoFreeCount++;
                 }
-                counts.forEach((count, id) => {
-                    computedDiscount += Math.floor(count / 2) * (prices.get(id) ?? 0);
-                });
+                if (bogoFreeCount === 0) continue;
+                // No monetary discount — free items are added to the order at €0
             } else if (campaign.discountType === 'bogo_gift') {
                 const triggerItemId: string = (campaign as any).bogoTriggerItemId ?? '';
                 const giftItemId: string = (campaign as any).bogoGiftItemId ?? '';
@@ -134,9 +146,9 @@ export default function CheckoutPage() {
             }
             discount += computedDiscount;
             ids.push(campaign._id);
-            list.push({ id: campaign._id, description: campaign.description, discountType: campaign.discountType, discountValue: campaign.discountValue, computedDiscount, isFreeDelivery });
+            list.push({ id: campaign._id, description: campaign.description, discountType: campaign.discountType, discountValue: campaign.discountValue, computedDiscount, isFreeDelivery, bogoFreeCount });
         }
-        return { campaignDiscount: Math.round(discount * 100) / 100, campaignFreeDelivery: freeDelivery, appliedCampaignIds: ids, appliedCampaignList: list };
+        return { campaignDiscount: Math.round(discount * 100) / 100, campaignFreeDelivery: freeDelivery, appliedCampaignIds: ids, appliedCampaignList: list, bogoFreeItems: freeItems };
     }, [activeCampaigns, subtotal, orderType, orderItems]);
 
     // Effective delivery fee (zeroed when free delivery promo or campaign applied)
@@ -155,7 +167,8 @@ export default function CheckoutPage() {
     }, [user, restaurantInfo]);
 
     // Computed totals
-    const totalBeforeDiscount = subtotal + effectiveDeliveryFee;
+    const bogoFreeTotal = bogoFreeItems.reduce((sum, item) => sum + item.finalPrice, 0);
+    const totalBeforeDiscount = subtotal + effectiveDeliveryFee + bogoFreeTotal;
     const finalTotal = Math.max(0, totalBeforeDiscount - discountAmount - campaignDiscount);
 
     // Effects
@@ -262,20 +275,30 @@ export default function CheckoutPage() {
                 paymentMethod: pMethod,
                 paymentStatus: pStatus,
                 stripePaymentIntentId: pIntentId,
-                totalPrice: subtotal + effectiveDeliveryFee,
+                totalPrice: subtotal + effectiveDeliveryFee + bogoFreeItems.reduce((sum, item) => sum + item.finalPrice, 0),
                 promoCode: appliedPromoCode,
                 deliveryFee: effectiveDeliveryFee,
                 itemCategoryIds: orderItems.map(item => ({
                     menuItemId: item.menuItemId,
                     categoryIds: (item as any).categories ?? [],
                 })),
-                items: orderItems.map(item => ({
-                    menuItemId: item.menuItemId,
-                    name: item.name,
-                    price: item.basePrice,
-                    selectedToppings: item.selectedToppings.map(t => ({ categoryId: '', toppingIds: [t.toppingId] })),
-                    finalPrice: item.totalPrice,
-                })),
+                items: [
+                    ...orderItems.map(item => ({
+                        menuItemId: item.menuItemId,
+                        name: item.name,
+                        price: item.basePrice,
+                        selectedToppings: item.selectedToppings.map(t => ({ categoryId: '', toppingIds: [t.toppingId] })),
+                        finalPrice: item.totalPrice,
+                    })),
+                    ...bogoFreeItems.map(item => ({
+                        menuItemId: item.menuItemId,
+                        name: `${item.name} (offert)`,
+                        price: 0,
+                        selectedToppings: item.selectedToppings.map((t: any) => ({ categoryId: '', toppingIds: [t.toppingId] })),
+                        finalPrice: item.finalPrice,
+                        isFree: true,
+                    })),
+                ],
                 appliedCampaignIds,
             });
             setIsRedirecting(true);
@@ -326,6 +349,7 @@ export default function CheckoutPage() {
         freeDeliveryFromPromo,
         appliedCampaigns: appliedCampaignList,
         campaignDiscount,
+        bogoFreeItems,
     };
 
     const continueDisabled = !orderType || !customer.firstName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported));

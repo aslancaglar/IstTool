@@ -86,23 +86,23 @@ export default function PlatformPricesPage() {
             <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Prix Plateformes</h1>
-                        <p className="text-slate-600 mt-1">Gérez les prix du menu pour les plateformes de commande en ligne (UberEats, Deliveroo, etc.)</p>
+                        <h1 className="text-2xl font-bold text-slate-900">Prix Plateformes</h1>
+                        <p className="text-sm text-slate-500 mt-1">Gérez les prix du menu pour les plateformes de commande en ligne (UberEats, Deliveroo, etc.)</p>
                     </div>
                     <button
                         onClick={handleSave}
                         disabled={isSaving || Object.keys(localPrices).length === 0}
-                        className="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+                        className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-xl hover:bg-red-700 transition font-semibold text-sm disabled:opacity-50"
                     >
                         <Save className="w-5 h-5" />
                         {isSaving ? 'Enregistrement...' : 'Appliquer & Enregistrer tout'}
                     </button>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-4">
-                            <label className="block text-sm font-semibold text-slate-700">Augmentation de prix en masse (%)</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Augmentation de prix en masse (%)</label>
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -112,7 +112,7 @@ export default function PlatformPricesPage() {
                                         type="number"
                                         value={markupPercent}
                                         onChange={(e) => setMarkupPercent(e.target.value)}
-                                        className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                                        className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
                                         placeholder="ex. 35"
                                     />
                                 </div>
@@ -128,7 +128,7 @@ export default function PlatformPricesPage() {
                         </div>
 
                         <div className="space-y-4">
-                            <label className="block text-sm font-semibold text-slate-700">Rechercher des articles</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Rechercher des articles</label>
                             <div className="relative">
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                                 <input
@@ -136,19 +136,19 @@ export default function PlatformPricesPage() {
                                     placeholder="Filtrer par nom..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                                    className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-4">
-                            <label className="block text-sm font-semibold text-slate-700">Filtrer par catégorie</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Filtrer par catégorie</label>
                             <div className="relative">
                                 <Filter className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent appearance-none bg-white"
+                                    className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 appearance-none bg-white"
                                 >
                                     <option value="all">Toutes les catégories</option>
                                     {categories.map((cat: any) => (
@@ -167,16 +167,16 @@ export default function PlatformPricesPage() {
                     </div>
                 )}
 
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200">
-                                    <th className="px-6 py-4 text-sm font-semibold text-slate-900">Nom de l'article</th>
-                                    <th className="px-6 py-4 text-sm font-semibold text-slate-900">Catégorie</th>
-                                    <th className="px-6 py-4 text-sm font-semibold text-slate-900 text-right">Prix Standard</th>
-                                    <th className="px-6 py-4 text-sm font-semibold text-slate-900 text-right">Prix Plateforme</th>
-                                    <th className="px-6 py-4 text-sm font-semibold text-slate-900 text-right">Marge</th>
+                                <tr className="bg-slate-50 border-b border-slate-100">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Nom de l'article</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Catégorie</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Prix Standard</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Prix Plateforme</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Marge</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -186,29 +186,29 @@ export default function PlatformPricesPage() {
 
                                     return (
                                         <tr key={item._id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <span className="font-medium text-slate-900">{item.name}</span>
+                                            <td className="px-4 py-3">
+                                                <span className="text-sm font-medium text-slate-900">{item.name}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-600">
+                                            <td className="px-4 py-3 text-sm text-slate-600">
                                                 {item.categories?.join(', ') || '-'}
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-900 text-right font-medium">
+                                            <td className="px-4 py-3 text-sm text-slate-900 text-right font-medium">
                                                 {item.price.toFixed(2)}€
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-4 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <input
                                                         type="number"
                                                         step="0.01"
                                                         value={currentPlatformPrice}
                                                         onChange={(e) => handlePriceChange(item._id, e.target.value)}
-                                                        className={`w-24 text-right px-2 py-1 border rounded-md text-sm focus:ring-1 focus:ring-slate-500 ${localPrices[item._id] !== undefined ? 'border-primary-300 bg-primary-50' : 'border-slate-200'
+                                                        className={`w-24 text-right px-2 py-1.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 ${localPrices[item._id] !== undefined ? 'border-red-300 bg-red-50' : 'border-slate-200'
                                                             }`}
                                                     />
                                                     <span className="text-sm text-slate-500">€</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-4 py-3 text-right">
                                                 <span className={`text-xs font-bold px-2 py-1 rounded-full ${markup > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
                                                     }`}>
                                                     +{markup.toFixed(0)}%

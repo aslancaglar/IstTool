@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { ShoppingBag, X, ChevronUp, Trash2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { ShoppingBag, X, ChevronUp, Trash2, Gift } from 'lucide-react';
 import { useOrder } from '../context/OrderContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -13,15 +13,40 @@ import { useAuth } from '../context/AuthContext';
 import { calculateDeliveryFee } from '../utils/deliveryFeeCalculator';
 
 export default function MobileStickyCart() {
-  const { getItemCount, getTotalPrice, orderItems, removeFromOrder, clearOrder, isInitialized } = useOrder();
+  const { getItemCount, getTotalPrice, totalPrice, itemCount, orderItems, removeFromOrder, clearOrder, isInitialized } = useOrder();
   const { user } = useAuth();
   const restaurantInfo = useQuery(api.restaurantInfo.get);
+  const activeCampaigns = useQuery(api.promoCodes.listActiveCampaigns);
+
+  const bogoFreeItems = useMemo(() => {
+    if (!activeCampaigns) return [];
+    const subtotal = totalPrice;
+    const result: { menuItemId: string; name: string; image?: string; selectedToppings: { toppingId: string; name: string; price?: number }[]; finalPrice: number }[] = [];
+    for (const campaign of activeCampaigns) {
+      if (campaign.discountType !== 'bogo_same') continue;
+      if (campaign.minOrderAmount != null && subtotal < campaign.minOrderAmount) continue;
+      const eligibleIds: string[] = (campaign as any).applicableMenuItemIds ?? [];
+      for (const item of orderItems) {
+        if (eligibleIds.length > 0 && !eligibleIds.includes(item.menuItemId)) continue;
+        const allToppingsForFree = item.selectedToppings.map(
+          (t: any) => t.freeForBogo === true ? { ...t, price: 0 } : t
+        );
+        const toppingFinalPrice = allToppingsForFree.reduce((sum: number, t: any) => sum + (t.price ?? 0), 0);
+        result.push({
+          menuItemId: item.menuItemId,
+          name: item.name,
+          image: (item as any).image,
+          selectedToppings: allToppingsForFree,
+          finalPrice: toppingFinalPrice,
+        });
+      }
+    }
+    return result;
+  }, [activeCampaigns, orderItems, totalPrice]);
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [isSideCartOpen, setIsSideCartOpen] = useState(false);
   const [canOpenCart, setCanOpenCart] = useState(true);
-  const itemCount = getItemCount();
-  const totalPrice = getTotalPrice();
 
   useEffect(() => {
     // Show cart when items are added
@@ -112,7 +137,6 @@ export default function MobileStickyCart() {
                   <p className="font-semibold text-sm text-gray-900 truncate">{item.name}</p>
                   <span className="text-xs font-bold text-gray-400 shrink-0">{formatPrice(item.basePrice)}</span>
                 </div>
-                
                 {item.selectedToppings && item.selectedToppings.length > 0 && (
                   <div className="mt-1 space-y-0.5">
                     {item.selectedToppings.map((t: any, idx: number) => (
@@ -135,6 +159,43 @@ export default function MobileStickyCart() {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+          ))}
+
+          {bogoFreeItems.map((item, idx) => (
+            <div key={`bogo-${item.menuItemId}-${idx}`} className="flex items-start gap-3 bg-emerald-50 border-2 border-dashed border-emerald-200 rounded-xl p-3">
+              <div className="relative w-12 h-12 bg-emerald-100 rounded-lg overflow-hidden flex-shrink-0">
+                {item.image ? (
+                  <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover opacity-80" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Gift className="w-6 h-6 text-emerald-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wide shrink-0">Offert</span>
+                  <p className="font-semibold text-sm text-emerald-800 truncate">{item.name}</p>
+                </div>
+                {item.selectedToppings && item.selectedToppings.length > 0 ? (
+                  <div className="mt-0.5 space-y-0.5">
+                    {item.selectedToppings.map((t, tidx) => (
+                      <div key={`${t.toppingId}-${tidx}`} className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] text-emerald-500 truncate">+ {t.name}</span>
+                        {typeof t.price === 'number' && t.price > 0 && (
+                          <span className="text-[10px] text-emerald-600 font-bold shrink-0">+{t.price.toFixed(2)}€</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-emerald-600 mt-1 font-medium">1 acheté = 1 offert</p>
+                )}
+              </div>
+              <span className="font-bold text-sm text-emerald-600 shrink-0 pt-0.5">
+                {item.finalPrice > 0 ? `${item.finalPrice.toFixed(2)}€` : '0.00€'}
+              </span>
             </div>
           ))}
         </div>

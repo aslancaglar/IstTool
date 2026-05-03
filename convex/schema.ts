@@ -51,6 +51,7 @@ export default defineSchema({
     maxSelection: v.optional(v.number()),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    freeForBogo: v.optional(v.boolean()),
   }).index("by_display_order", ["displayOrder"]),
 
   toppings: defineTable({
@@ -158,10 +159,12 @@ export default defineSchema({
         toppingIds: v.array(v.string()),
       }))),
       finalPrice: v.number(),
+      isFree: v.optional(v.boolean()),
     })),
     totalPrice: v.number(),
     promoCode: v.optional(v.string()),
     discountAmount: v.optional(v.number()),
+    appliedCampaignIds: v.optional(v.array(v.string())),
     status: v.union(
       v.literal("pending"),
       v.literal("preparing"),

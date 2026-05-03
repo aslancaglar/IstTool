@@ -57,7 +57,7 @@ export default function MenuItem({ item, onOpenModal, discountPercent = 0, promo
           )}
           <div className="absolute top-4 left-4 flex flex-col gap-1">
             {promoBadge && (
-              <span className="bg-purple-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow max-w-[130px] truncate">
+              <span className="bg-purple-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg">
                 {promoBadge}
               </span>
             )}

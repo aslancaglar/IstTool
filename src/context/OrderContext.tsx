@@ -7,10 +7,14 @@ const STORAGE_KEY = 'mondo_pizza_order_items';
 interface OrderContextType {
   orderItems: OrderItem[];
   isInitialized: boolean;
+  totalPrice: number;
+  itemCount: number;
   addToOrder: (item: OrderItem) => void;
   removeFromOrder: (itemId: string) => void;
   clearOrder: () => void;
+  /** @deprecated Use totalPrice directly */
   getTotalPrice: () => number;
+  /** @deprecated Use itemCount directly */
   getItemCount: () => number;
 }
 
@@ -68,24 +72,29 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     setOrderItems([]);
   }, []);
 
-  const getTotalPrice = useCallback(() => {
-    return orderItems.reduce((total, item) => total + item.totalPrice, 0);
-  }, [orderItems]);
+  // Derived values — computed once here, not re-computed by every consumer
+  const totalPrice = useMemo(
+    () => orderItems.reduce((sum, item) => sum + item.totalPrice, 0),
+    [orderItems]
+  );
+  const itemCount = orderItems.length;
 
-  const getItemCount = useCallback(() => {
-    return orderItems.length;
-  }, [orderItems]);
+  // Keep legacy function API for backwards compatibility during migration
+  const getTotalPrice = useCallback(() => totalPrice, [totalPrice]);
+  const getItemCount = useCallback(() => itemCount, [itemCount]);
 
   // MEMOIZATION: Prevent all components consuming useOrder() from re-rendering just because the parent re-rendered
   const contextValue = useMemo(() => ({
     orderItems,
     isInitialized,
+    totalPrice,
+    itemCount,
     addToOrder,
     removeFromOrder,
     clearOrder,
     getTotalPrice,
     getItemCount,
-  }), [orderItems, isInitialized, addToOrder, removeFromOrder, clearOrder, getTotalPrice, getItemCount]);
+  }), [orderItems, isInitialized, totalPrice, itemCount, addToOrder, removeFromOrder, clearOrder, getTotalPrice, getItemCount]);
 
   return (
     <OrderContext.Provider value={contextValue}>

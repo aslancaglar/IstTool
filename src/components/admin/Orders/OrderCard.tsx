@@ -77,10 +77,15 @@ export default function OrderCard({ order, onClick, onStatusChange }: OrderCardP
                             {order.paymentStatus === 'paid' ? 'Payé' : 'À payer'}
                         </span>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-right shrink-0 flex flex-col items-end">
                         <p className="text-2xl font-black text-slate-900 tabular-nums leading-none">
                             {order.totalPrice.toFixed(2)}€
                         </p>
+                        {order.discountAmount > 0 && (
+                            <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
+                                -{order.discountAmount.toFixed(2)}€
+                            </span>
+                        )}
                     </div>
                 </div>
 

@@ -16,6 +16,8 @@ export interface SelectedTopping {
   toppingId: string;
   name: string;
   price?: number;
+  categoryName?: string;
+  freeForBogo?: boolean;
 }
 
 

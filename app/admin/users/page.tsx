@@ -115,69 +115,69 @@ export default function UsersPage() {
         <>
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 font-display">Gestion des Utilisateurs</h1>
-                    <p className="text-slate-600 mt-2">Visualisez et gérez les clients enregistrés</p>
+                    <h1 className="text-2xl font-bold text-slate-900">Gestion des Utilisateurs</h1>
+                    <p className="text-slate-500 mt-1">Visualisez et gérez les clients enregistrés</p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200">
-                                    <th className="px-6 py-4 text-sm font-bold text-slate-900">Client</th>
-                                    <th className="px-6 py-4 text-sm font-bold text-slate-900">Contact</th>
-                                    <th className="px-6 py-4 text-sm font-bold text-slate-900">Adresse</th>
-                                    <th className="px-6 py-4 text-sm font-bold text-slate-900 text-center">Commandes</th>
-                                    <th className="px-6 py-4 text-sm font-bold text-slate-900">Inscrit le</th>
-                                    <th className="px-6 py-4 text-sm font-bold text-slate-900 text-right">Actions</th>
+                                <tr className="bg-slate-50 border-b border-slate-100">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Client</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Contact</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Adresse</th>
+                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">Commandes</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Inscrit le</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200">
+                            <tbody className="divide-y divide-slate-50">
                                 {users === undefined ? (
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            <td className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-24"></div></td>
-                                            <td className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-32"></div></td>
-                                            <td className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-48"></div></td>
-                                            <td className="px-6 py-4 text-center"><div className="h-4 bg-slate-100 rounded w-8 mx-auto"></div></td>
-                                            <td className="px-6 py-4"><div className="h-4 bg-slate-100 rounded w-20"></div></td>
-                                            <td className="px-6 py-4"></td>
+                                            <td className="px-4 py-3"><div className="h-4 bg-slate-100 rounded w-24"></div></td>
+                                            <td className="px-4 py-3"><div className="h-4 bg-slate-100 rounded w-32"></div></td>
+                                            <td className="px-4 py-3"><div className="h-4 bg-slate-100 rounded w-48"></div></td>
+                                            <td className="px-4 py-3 text-center"><div className="h-4 bg-slate-100 rounded w-8 mx-auto"></div></td>
+                                            <td className="px-4 py-3"><div className="h-4 bg-slate-100 rounded w-20"></div></td>
+                                            <td className="px-4 py-3"></td>
                                         </tr>
                                     ))
                                 ) : users.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                                        <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
                                             Aucun utilisateur trouvé.
                                         </td>
                                     </tr>
                                 ) : (
                                     users.map((user) => (
-                                        <tr key={user._id} className="hover:bg-slate-50 transition-colors">
-                                            <td className="px-6 py-4">
+                                        <tr key={user._id} className="hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-4 py-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500">
-                                                        <User className="w-5 h-5" />
+                                                    <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                                                        <User className="w-4 h-4" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-slate-900">{user.firstName} {user.lastName}</p>
+                                                        <p className="text-sm font-medium text-slate-900">{user.firstName} {user.lastName}</p>
                                                         <p className="text-xs text-slate-500 font-mono">ID: {user._id.substring(0, 8)}...</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 space-y-1">
+                                            <td className="px-4 py-3 space-y-1">
                                                 <div className="flex items-center gap-2 text-sm text-slate-600">
-                                                    <Mail className="w-4 h-4" />
+                                                    <Mail className="w-3.5 h-3.5" />
                                                     <span className="truncate max-w-[150px]">{user.email}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm text-slate-600">
-                                                    <Phone className="w-4 h-4" />
+                                                    <Phone className="w-3.5 h-3.5" />
                                                     {user.phone}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-4 py-3">
                                                 {user.street ? (
                                                     <div className="flex items-start gap-2 text-sm text-slate-600">
-                                                        <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                                        <MapPin className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                                         <div>
                                                             <p>{user.street}</p>
                                                             <p>{user.zipCode} {user.city}</p>
@@ -187,10 +187,10 @@ export default function UsersPage() {
                                                     <span className="text-slate-400 text-sm">Aucune adresse</span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="px-4 py-3 text-center">
                                                 <button
                                                     onClick={() => handleOrdersClick(user)}
-                                                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors ${(user.orderCount || 0) > 0
+                                                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-colors ${(user.orderCount || 0) > 0
                                                         ? 'bg-red-50 text-red-600 hover:bg-red-100'
                                                         : 'bg-slate-50 text-slate-400'
                                                         }`}
@@ -199,27 +199,27 @@ export default function UsersPage() {
                                                     {user.orderCount || 0}
                                                 </button>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-4 py-3">
                                                 <div className="flex items-center gap-2 text-sm text-slate-600">
-                                                    <Calendar className="w-4 h-4" />
+                                                    <Calendar className="w-3.5 h-3.5" />
                                                     {formatDate(user.createdAt)}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="flex items-center justify-end gap-1">
                                                     <button
                                                         onClick={() => handleEditClick(user)}
-                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                        className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
                                                         title="Modifier"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteClick(user._id)}
-                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                                         title="Supprimer"
                                                     >
-                                                        < Trash2 className="w-4 h-4" />
+                                                        <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -235,9 +235,9 @@ export default function UsersPage() {
             {/* Edit User Modal */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95">
                         <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                            <h2 className="text-xl font-bold text-slate-900 font-display">Modifier l'utilisateur</h2>
+                            <h2 className="text-xl font-bold text-slate-900">Modifier l'utilisateur</h2>
                             <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                                 <X className="w-5 h-5 text-slate-500" />
                             </button>
@@ -245,8 +245,8 @@ export default function UsersPage() {
 
                         <form onSubmit={handleUpdate} className="p-6 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700">Prénom</label>
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prénom</label>
                                     <input
                                         type="text"
                                         required
@@ -255,8 +255,8 @@ export default function UsersPage() {
                                         className="w-full bg-slate-50 border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 text-sm"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700">Nom</label>
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
                                     <input
                                         type="text"
                                         required
@@ -267,8 +267,8 @@ export default function UsersPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700">Email</label>
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Email</label>
                                 <input
                                     type="email"
                                     required
@@ -278,8 +278,8 @@ export default function UsersPage() {
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700">Téléphone</label>
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Téléphone</label>
                                 <input
                                     type="tel"
                                     required
@@ -316,17 +316,17 @@ export default function UsersPage() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 pt-6">
+                            <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setIsEditModalOpen(false)}
-                                    className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition"
+                                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition shadow-lg shadow-red-200"
+                                    className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm"
                                 >
                                     Enregistrer
                                 </button>
@@ -339,7 +339,7 @@ export default function UsersPage() {
             {/* Orders Modal */}
             {isOrdersModalOpen && selectedUserForOrders && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-                    <div className="bg-slate-50 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 flex flex-col max-h-[90vh]">
+                    <div className="bg-slate-50 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between p-6 bg-white border-b border-slate-100 flex-shrink-0">
                             <div className="flex items-center gap-4">
                                 {selectedOrderForDetails && (
@@ -351,7 +351,7 @@ export default function UsersPage() {
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 font-display">
+                                    <h2 className="text-xl font-bold text-slate-900">
                                         {selectedOrderForDetails ? `Détails de la commande #${selectedOrderForDetails._id.substring(0, 8).toUpperCase()}` : 'Historique des commandes'}
                                     </h2>
                                     <p className="text-sm text-slate-500">{selectedUserForOrders.firstName} {selectedUserForOrders.lastName}</p>

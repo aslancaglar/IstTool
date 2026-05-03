@@ -33,8 +33,6 @@ const CODE_TEMPLATES: PromoTemplate[] = [
   { id: "happy_hour", discountType: "percentage", icon: Clock, label: "Happy hour", example: "Ex: 20% de 14h à 17h", color: "amber", isHappyHour: true },
   { id: "percent_off_items", discountType: "percent_off_items", icon: ShoppingBag, label: "% sur une catégorie", example: "Ex: 20% sur les Pizzas", color: "rose" },
   { id: "percent_off_specific_items", discountType: "percent_off_specific_items", icon: Package, label: "% sur articles spécifiques", example: "Ex: 20% sur le Big Burger", color: "orange" },
-  { id: "bogo_same", discountType: "bogo_same", icon: ShoppingBag, label: "1 acheté = 1 offert (même article)", example: "Ex: 2 Pizzas achetées → 1 offerte", color: "violet" },
-  { id: "bogo_gift", discountType: "bogo_gift", icon: Package, label: "1 acheté = 1 autre offert", example: "Ex: Big Burger acheté → Boisson offerte", color: "pink" },
 ];
 
 // Templates for CAMPAIGNS (automatic, no code)
@@ -111,14 +109,10 @@ const fmtHour = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 function templateForPromo(promo: any, isCampaign: boolean): PromoTemplate {
   const templates = isCampaign ? CAMPAIGN_TEMPLATES : CODE_TEMPLATES;
-  if (promo.discountType === "bogo_gift") return templates[7];
-  if (promo.discountType === "bogo_same") return templates[6];
-  if (promo.discountType === "percent_off_specific_items") return templates[5];
-  if (promo.discountType === "free_delivery") return templates[2];
-  if (promo.discountType === "percent_off_items") return templates[4];
-  if (promo.timeWindow) return templates[3];
-  if (promo.discountType === "percentage") return templates[0];
-  return templates[1];
+  if (promo.discountType === "bogo_gift") return CAMPAIGN_TEMPLATES.find(t => t.discountType === "bogo_gift")!;
+  if (promo.discountType === "bogo_same") return CAMPAIGN_TEMPLATES.find(t => t.discountType === "bogo_same")!;
+  if (promo.timeWindow) return templates.find(t => t.isHappyHour) ?? templates[0];
+  return templates.find(t => t.discountType === promo.discountType && !t.isHappyHour) ?? templates[1];
 }
 
 // ─── Shared: type picker + form ───────────────────────────────────────────────
@@ -698,7 +692,7 @@ export default function PromotionsPage() {
   // ─── List view ────────────────────────────────────────────────────
   return (
     <>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Promotions</h1>
           <p className="text-sm text-slate-500 mt-1">Gérez vos campagnes automatiques et codes de réduction</p>

@@ -21,18 +21,26 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOrderListOpen, setIsOrderListOpen] = useState(false);
-  const { getItemCount, isInitialized } = useOrder();
+  const { itemCount, isInitialized } = useOrder();
   const { user, logout } = useAuth();
   const { openLoginModal } = useAuthModal();
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
+    let rafId: number;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const shouldBeScrolled = window.scrollY > 50;
+        setIsScrolled(prev => prev !== shouldBeScrolled ? shouldBeScrolled : prev);
+      });
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const handleHashNavigation = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
@@ -115,9 +123,9 @@ export default function Header() {
                 aria-label="Voir la commande"
               >
                 <ShoppingBag className="w-5 h-5" />
-                {isInitialized && getItemCount() > 0 && (
+                {isInitialized && itemCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center border-2 border-primary-600">
-                    {getItemCount()}
+                    {itemCount}
                   </span>
                 )}
               </button>

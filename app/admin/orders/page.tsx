@@ -14,6 +14,8 @@ export default function OrdersPage() {
   const orders = useQuery(api.queries.getAllOrders, adminToken ? { adminToken } : "skip");
   const toppingCategories = useQuery(api.toppingsAdmin.listToppingCategories);
   const toppings = useQuery(api.toppingsAdmin.listToppings);
+  const promoCodes = useQuery(api.promoCodes.list, adminToken ? { adminToken } : "skip");
+  const campaigns = useQuery(api.promoCodes.listCampaigns, adminToken ? { adminToken } : "skip");
   const updateOrderStatus = useMutation(api.mutations.updateOrderStatus);
   const updatePaymentStatus = useMutation(api.mutations.updatePaymentStatus);
   const deleteOrderMutation = useMutation(api.mutations.deleteOrder);
@@ -194,7 +196,7 @@ export default function OrdersPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Commandes</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Commandes</h1>
             <p className="text-slate-500 text-sm mt-1">{orders?.length ?? 0} commande{(orders?.length ?? 0) > 1 ? 's' : ''} au total</p>
           </div>
           <button
@@ -259,7 +261,7 @@ export default function OrdersPage() {
               />
             ))
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-16 text-center">
               <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <h3 className="text-base font-bold text-slate-900 mb-1">Aucune commande</h3>
               <p className="text-sm text-slate-500">Rien à afficher pour ce filtre.</p>
@@ -277,6 +279,8 @@ export default function OrdersPage() {
         onDeleteOrder={handleDeleteOrder}
         toppings={toppings}
         toppingCategories={toppingCategories}
+        promoCodes={promoCodes}
+        campaigns={campaigns}
       />
     </>
   );

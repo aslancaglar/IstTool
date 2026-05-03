@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Bell, BellOff, Clock3, GripVertical, MapPin, Package, Phone, Truck } from "lucide-react";
+import { Bell, BellOff, Clock3, Gift, GripVertical, MapPin, Package, Phone, Truck } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { useAdminAuth } from "../../../src/context/AdminAuthContext";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -333,7 +333,32 @@ export default function AdminKdsPage() {
 
                           {isExpanded && (
                             <div className="mb-3 space-y-2 rounded-lg border border-slate-100 bg-slate-50 p-2.5">
-                              {order.items.map((item: any, index: number) => (
+                              {order.items.map((item: any, index: number) => {
+                                const isFree = item.isFree === true;
+                                const bogoCounterpart = isFree
+                                  ? order.items.find((other: any) => !other.isFree && other.menuItemId === item.menuItemId)
+                                  : null;
+                                return isFree ? (
+                                  <div key={`${order._id}-item-${index}`} className="rounded-md border border-dashed border-emerald-200 bg-emerald-50 p-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <div className="flex items-center gap-1.5 min-w-0">
+                                        <Gift className="h-3 w-3 text-emerald-500 shrink-0" />
+                                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-200 px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0">Offert</span>
+                                        <p className="text-xs font-semibold text-emerald-800 truncate">{item.name.replace(/ \(offert\)$/i, '')}</p>
+                                      </div>
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        {bogoCounterpart && (
+                                          <span className="text-xs text-emerald-400 line-through tabular-nums">
+                                            {bogoCounterpart.finalPrice.toFixed(2)}€
+                                          </span>
+                                        )}
+                                        <span className="text-xs font-bold text-emerald-600">
+                                          {item.finalPrice > 0 ? `+${item.finalPrice.toFixed(2)}€` : 'Gratuit'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : (
                                 <div key={`${order._id}-item-${index}`} className="rounded-md border border-slate-200 bg-white p-2">
                                   <div className="flex items-center justify-between gap-2">
                                     <p className="text-xs font-semibold text-slate-900">{item.name}</p>
@@ -350,7 +375,8 @@ export default function AdminKdsPage() {
                                     </p>
                                   )}
                                 </div>
-                              ))}
+                                );
+                              })}
 
                               {order.type === "delivery" && order.address && (
                                 <div className="rounded-md border border-purple-100 bg-purple-50 p-2 text-[11px] text-purple-900">

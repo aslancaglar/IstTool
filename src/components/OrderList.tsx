@@ -1,5 +1,6 @@
 "use client";
-import { X, ShoppingBag, Trash2, Sandwich } from 'lucide-react';
+import { useMemo } from 'react';
+import { X, ShoppingBag, Trash2, Sandwich, Gift } from 'lucide-react';
 import Image from 'next/image';
 import { useOrder } from '../context/OrderContext';
 import FreeDeliveryBar from './FreeDeliveryBar';
@@ -17,21 +18,35 @@ export default function OrderList({ isOpen, onClose }: OrderListProps) {
   const { orderItems, removeFromOrder, clearOrder, getTotalPrice } = useOrder();
   const { user } = useAuth();
   const restaurantInfo = useQuery(api.restaurantInfo.get);
+  const activeCampaigns = useQuery(api.promoCodes.listActiveCampaigns);
+
+  const bogoFreeItems = useMemo(() => {
+    if (!activeCampaigns) return [];
+    const subtotal = getTotalPrice();
+    const result: { menuItemId: string; name: string; image?: string; selectedToppings: { toppingId: string; name: string; price?: number }[]; finalPrice: number }[] = [];
+    for (const campaign of activeCampaigns) {
+      if (campaign.discountType !== 'bogo_same') continue;
+      if (campaign.minOrderAmount != null && subtotal < campaign.minOrderAmount) continue;
+      const eligibleIds: string[] = (campaign as any).applicableMenuItemIds ?? [];
+      for (const item of orderItems) {
+        if (eligibleIds.length > 0 && !eligibleIds.includes(item.menuItemId)) continue;
+        const allToppingsForFree = item.selectedToppings.map(
+          (t: any) => t.freeForBogo === true ? { ...t, price: 0 } : t
+        );
+        const toppingFinalPrice = allToppingsForFree.reduce((sum: number, t: any) => sum + (t.price ?? 0), 0);
+        result.push({
+          menuItemId: item.menuItemId,
+          name: item.name,
+          image: (item as any).image,
+          selectedToppings: allToppingsForFree,
+          finalPrice: toppingFinalPrice,
+        });
+      }
+    }
+    return result;
+  }, [activeCampaigns, orderItems, getTotalPrice]);
 
   if (!isOpen) return null;
-
-  const formatPriceOption = (option: string) => {
-    switch (option) {
-      case 'seul':
-        return 'Seul';
-      case 'frites':
-        return 'avec Frites';
-      case 'menu':
-        return 'Menu';
-      default:
-        return option;
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50">
@@ -132,6 +147,57 @@ export default function OrderList({ isOpen, onClose }: OrderListProps) {
                     <span className="font-bold text-gray-900 font-display">
                       {item.totalPrice.toFixed(2)}€
                     </span>
+                  </div>
+                </div>
+              ))}
+
+              {bogoFreeItems.map((item, idx) => (
+                <div
+                  key={`bogo-${item.menuItemId}-${idx}`}
+                  className="rounded-lg p-4 border-2 border-dashed border-emerald-200 bg-emerald-50/60"
+                >
+                  <div className="flex gap-3">
+                    {item.image ? (
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-emerald-100">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          sizes="64px"
+                          className="object-cover opacity-80"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <Gift className="w-8 h-8 text-emerald-400" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wide shrink-0">
+                          Offert
+                        </span>
+                        <h3 className="text-sm font-bold text-emerald-800 truncate">{item.name}</h3>
+                      </div>
+                      {item.selectedToppings && item.selectedToppings.length > 0 ? (
+                        <div className="space-y-0.5">
+                          {item.selectedToppings.map((t, tidx) => (
+                            <div key={`${t.toppingId}-${tidx}`} className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] text-emerald-500 truncate">+ {t.name}</span>
+                              {typeof t.price === 'number' && t.price > 0 && (
+                                <span className="text-[10px] text-emerald-600 font-bold shrink-0">+{t.price.toFixed(2)}€</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-emerald-700 mt-1 font-medium">1 article offert — 1 acheté = 1 offert</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-emerald-200 flex items-center justify-between">
+                    <span className="text-xs text-emerald-600">Produit offert</span>
+                    <span className="font-bold text-emerald-700">{item.finalPrice > 0 ? `${item.finalPrice.toFixed(2)}€` : '0.00€'}</span>
                   </div>
                 </div>
               ))}

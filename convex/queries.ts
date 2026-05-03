@@ -77,6 +77,7 @@ export const getToppingsForMenuItem = query({
           name: category.name,
           minSelection: category.minSelection,
           maxSelection: category.maxSelection,
+          freeForBogo: category.freeForBogo ?? false,
           toppings: activeToppings,
         };
       })

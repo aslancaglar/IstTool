@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ShoppingBag, Tag, Truck, Percent, CheckCircle2, X, Loader2, Sparkles } from 'lucide-react';
+import { ShoppingBag, Tag, Truck, Percent, CheckCircle2, X, Loader2, Sparkles, Gift } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import FreeDeliveryBar from '../FreeDeliveryBar';
 
@@ -22,6 +22,15 @@ interface AppliedCampaign {
     discountValue: number;
     computedDiscount: number;
     isFreeDelivery: boolean;
+    bogoFreeCount?: number;
+}
+
+interface BogoFreeItem {
+    menuItemId: string;
+    name: string;
+    image?: string;
+    selectedToppings?: { toppingId: string; name: string; price?: number }[];
+    finalPrice: number;
 }
 
 interface OrderSummaryProps {
@@ -41,6 +50,7 @@ interface OrderSummaryProps {
     validatePromo?: (code: string) => Promise<PromoResult>;
     appliedCampaigns?: AppliedCampaign[];
     campaignDiscount?: number;
+    bogoFreeItems?: BogoFreeItem[];
 }
 
 export default function OrderSummary({
@@ -59,6 +69,7 @@ export default function OrderSummary({
     validatePromo,
     appliedCampaigns = [],
     campaignDiscount = 0,
+    bogoFreeItems = [],
 }: OrderSummaryProps) {
     const [promoInput, setPromoInput] = useState('');
     const [promoError, setPromoError] = useState('');
@@ -90,9 +101,10 @@ export default function OrderSummary({
 
     const shownDeliveryFee = effectiveDeliveryFee ?? deliveryFee;
     const totalDiscount = discountAmount + campaignDiscount;
+    const bogoFreeTotal = bogoFreeItems.reduce((sum, item) => sum + (item.finalPrice ?? 0), 0);
     const displayTotal = orderType === 'delivery'
-        ? Math.max(0, subtotal + shownDeliveryFee - totalDiscount)
-        : Math.max(0, subtotal - totalDiscount);
+        ? Math.max(0, subtotal + shownDeliveryFee + bogoFreeTotal - totalDiscount)
+        : Math.max(0, subtotal + bogoFreeTotal - totalDiscount);
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
@@ -142,6 +154,42 @@ export default function OrderSummary({
                         </div>
                     </div>
                 ))}
+                {bogoFreeItems.map((item, idx) => (
+                    <div key={`bogo-free-${item.menuItemId}-${idx}`} className="flex gap-3 p-2 rounded-xl bg-emerald-50/60 border border-dashed border-emerald-200 animate-in fade-in duration-300">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-50 flex-shrink-0 overflow-hidden border border-emerald-100 shadow-sm">
+                            {item.image ? (
+                                <img src={item.image} className="w-full h-full object-cover opacity-80" alt={item.name} />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <Gift className="w-5 h-5 text-emerald-300" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full shrink-0 uppercase tracking-wide">Offert</span>
+                                    <p className="text-sm font-bold text-emerald-700 truncate">{item.name}</p>
+                                </div>
+                                <p className="text-sm font-black text-emerald-600 shrink-0">
+                                    {item.finalPrice > 0 ? formatPrice(item.finalPrice) : '€0.00'}
+                                </p>
+                            </div>
+                            {item.selectedToppings && item.selectedToppings.length > 0 && (
+                                <div className="mt-0.5 space-y-0.5">
+                                    {item.selectedToppings.map((topping, tidx) => (
+                                        <div key={`${topping.toppingId}-${tidx}`} className="flex items-center justify-between gap-2">
+                                            <span className="text-[10px] text-emerald-500 truncate">+ {topping.name}</span>
+                                            {typeof topping.price === 'number' && topping.price > 0 && (
+                                                <span className="text-[10px] text-emerald-600 font-bold shrink-0">+{topping.price.toFixed(2)}€</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {/* Active Campaigns */}
@@ -154,7 +202,9 @@ export default function OrderSummary({
                                 {c.description ?? (c.discountType === 'percentage' ? `-${c.discountValue}%` : c.discountType === 'fixed' ? `-${c.discountValue.toFixed(2)}€` : 'Livraison offerte')}
                             </span>
                             <span className="text-xs font-bold text-emerald-700 shrink-0">
-                                {c.isFreeDelivery ? 'Offerte' : `-${formatPrice(c.computedDiscount)}`}
+                                {c.bogoFreeCount != null
+                                    ? `${c.bogoFreeCount} offert${c.bogoFreeCount > 1 ? 's' : ''}`
+                                    : c.isFreeDelivery ? 'Offerte' : `-${formatPrice(c.computedDiscount)}`}
                             </span>
                         </div>
                     ))}
@@ -223,7 +273,7 @@ export default function OrderSummary({
                         <Tag className="w-3.5 h-3.5" />
                         Sous-total
                     </span>
-                    <span className="font-bold text-gray-800">{formatPrice(subtotal)}</span>
+                    <span className="font-bold text-gray-800">{formatPrice(subtotal + bogoFreeTotal)}</span>
                 </div>
 
                 {campaignDiscount > 0 && (

@@ -3,12 +3,15 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import Header from '../src/components/Header';
 import Footer from '../src/components/Footer';
-import MobileStickyCart from '../src/components/MobileStickyCart';
 import HolidayNotification from '../src/components/HolidayNotification';
-import AuthModal from '../src/components/AuthModal';
 import { AuthModalProvider, useAuthModal } from '../src/context/AuthModalContext';
+
+// Lazy-load heavy components that are not needed on initial paint
+const MobileStickyCart = dynamic(() => import('../src/components/MobileStickyCart'), { ssr: false });
+const AuthModal = dynamic(() => import('../src/components/AuthModal'), { ssr: false });
 
 function AuthModalUrlSync() {
     const pathname = usePathname();

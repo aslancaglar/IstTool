@@ -26,6 +26,10 @@ function options() {
 const normalize = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
 
+// Strip size suffixes like "33 CM", "29cm", "33cm" that the LLM sometimes appends to the name
+const stripSize = (s: string) =>
+  s.replace(/\s*(29\s*cm|33\s*cm)\s*/gi, "").trim();
+
 // ── GET /api/vapi/menu ─────────────────────────────────────────────────────
 
 http.route({
@@ -162,9 +166,15 @@ http.route({
 
       if (!resolved && item.name) {
         const needle = normalize(item.name);
-        resolved = allMenuItems.find((m: any) => normalize(m.name) === needle)
-          ?? allMenuItems.find((m: any) =>
+        const needleClean = normalize(stripSize(item.name));
+        resolved =
+          allMenuItems.find((m: any) => normalize(m.name) === needle) ??
+          allMenuItems.find((m: any) => normalize(m.name) === needleClean) ??
+          allMenuItems.find((m: any) =>
             normalize(m.name).includes(needle) || needle.includes(normalize(m.name))
+          ) ??
+          allMenuItems.find((m: any) =>
+            normalize(m.name).includes(needleClean) || needleClean.includes(normalize(m.name))
           );
       }
 

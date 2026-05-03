@@ -36,6 +36,7 @@ export const createOrder = mutation({
         toppingIds: v.array(v.string()),
       }))),
       finalPrice: v.number(),
+      isFree: v.optional(v.boolean()),
     })),
     totalPrice: v.number(),
     promoCode: v.optional(v.string()),
@@ -57,10 +58,18 @@ export const createOrder = mutation({
 
     for (const item of args.items) {
       // Look up the actual menu item from the database
-      const menuItem = await ctx.db
+      let menuItem = await ctx.db
         .query("menuItems")
         .filter((q) => q.eq(q.field("_id"), item.menuItemId))
         .first();
+
+      if (!menuItem) {
+        // Fallback to lookup by name if _id is not found (common after seedAll)
+        menuItem = await ctx.db
+          .query("menuItems")
+          .filter((q) => q.eq(q.field("name"), item.name))
+          .first();
+      }
 
       if (!menuItem) {
         throw new Error(`Article introuvable: ${item.name}`);
@@ -68,6 +77,56 @@ export const createOrder = mutation({
 
       if (menuItem.active === false) {
         throw new Error(`Article indisponible: ${menuItem.name}`);
+      }
+
+      // Bogo free items: base price is €0, but non-Taille toppings are charged
+      if (item.isFree === true) {
+        let freeVerifiedPrice = 0;
+        const freeVerifiedToppings: { categoryId: string; toppingIds: string[] }[] = [];
+
+        if (item.selectedToppings && item.selectedToppings.length > 0) {
+          for (const toppingGroup of item.selectedToppings) {
+            const allToppingIds: string[] = [];  // all (for display in admin)
+            for (const toppingId of toppingGroup.toppingIds) {
+              const topping = await ctx.db
+                .query("toppings")
+                .filter((q) => q.eq(q.field("toppingId"), toppingId))
+                .first();
+
+              if (!topping || topping.active === false) continue;
+
+              allToppingIds.push(toppingId);
+
+              // Check if this topping's category is marked as free for bogo — skip price if so
+              const toppingCat = await ctx.db
+                .query("toppingCategories")
+                .filter((q) => q.eq(q.field("categoryId"), topping.categoryId))
+                .first();
+              if (toppingCat?.freeForBogo === true) continue;
+
+              if (topping.menuItemId) {
+                const linkedItem = await ctx.db.get(topping.menuItemId);
+                freeVerifiedPrice += topping.specialPrice !== undefined ? topping.specialPrice : (linkedItem?.price ?? 0);
+              } else {
+                freeVerifiedPrice += topping.specialPrice !== undefined ? topping.specialPrice : (topping.price ?? 0);
+              }
+            }
+            if (allToppingIds.length > 0) {
+              freeVerifiedToppings.push({ categoryId: toppingGroup.categoryId, toppingIds: allToppingIds });
+            }
+          }
+        }
+
+        computedTotal += freeVerifiedPrice;
+        verifiedItems.push({
+          menuItemId: item.menuItemId,
+          name: item.name,
+          price: 0,
+          selectedToppings: freeVerifiedToppings.length > 0 ? freeVerifiedToppings : undefined,
+          finalPrice: freeVerifiedPrice,
+          isFree: true,
+        });
+        continue;
       }
 
       // Calculate the verified price from the DB
@@ -156,15 +215,8 @@ export const createOrder = mutation({
             eligibleSubtotal,
           );
         } else if (campaign.discountType === "bogo_same") {
-          const ids = campaign.applicableMenuItemIds ?? [];
-          const eligible = verifiedItems.filter(i => ids.length === 0 || ids.includes(i.menuItemId));
-          const counts = new Map<string, { price: number; count: number }>();
-          for (const item of eligible) {
-            const e = counts.get(item.menuItemId);
-            if (e) e.count++;
-            else counts.set(item.menuItemId, { price: item.finalPrice, count: 1 });
-          }
-          counts.forEach((g) => { campaignDiscount += Math.floor(g.count / 2) * g.price; });
+          // bogo_same is handled by adding free items at €0 — no monetary discount needed
+          // (isFree items are excluded to avoid double-discounting)
         } else if (campaign.discountType === "bogo_gift") {
           const hasTrigger = verifiedItems.some(i => i.menuItemId === campaign.bogoTriggerItemId);
           const giftItems = verifiedItems.filter(i => i.menuItemId === campaign.bogoGiftItemId);
@@ -232,15 +284,7 @@ export const createOrder = mutation({
           eligibleSubtotal,
         );
       } else if (promo.discountType === "bogo_same") {
-        const ids = promo.applicableMenuItemIds ?? [];
-        const eligible = verifiedItems.filter(i => ids.length === 0 || ids.includes(i.menuItemId));
-        const counts = new Map<string, { price: number; count: number }>();
-        for (const item of eligible) {
-          const e = counts.get(item.menuItemId);
-          if (e) e.count++;
-          else counts.set(item.menuItemId, { price: item.finalPrice, count: 1 });
-        }
-        counts.forEach((g) => { discountAmount += Math.floor(g.count / 2) * g.price; });
+        // bogo_same handled by adding free items at €0 — no monetary discount
       } else if (promo.discountType === "bogo_gift") {
         const hasTrigger = verifiedItems.some(i => i.menuItemId === promo.bogoTriggerItemId);
         const giftItems = verifiedItems.filter(i => i.menuItemId === promo.bogoGiftItemId);
@@ -286,6 +330,7 @@ export const createOrder = mutation({
       totalPrice: finalTotal,
       promoCode: appliedPromoCode,
       discountAmount: totalDiscountAmount > 0 ? totalDiscountAmount : undefined,
+      appliedCampaignIds: args.appliedCampaignIds && args.appliedCampaignIds.length > 0 ? args.appliedCampaignIds : undefined,
       status: "pending",
       createdAt: Date.now(),
       updatedAt: Date.now(),

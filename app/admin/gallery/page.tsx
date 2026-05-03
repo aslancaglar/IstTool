@@ -80,8 +80,8 @@ export default function GalleryPage() {
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Galerie</h1>
-                        <p className="text-slate-600 mt-2">Gérez la galerie de photos</p>
+                        <h1 className="text-2xl font-bold text-slate-900">Galerie</h1>
+                        <p className="text-sm text-slate-500 mt-1">Gérez la galerie de photos</p>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -95,7 +95,7 @@ export default function GalleryPage() {
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isUploading}
-                            className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition disabled:opacity-50"
+                            className="flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-xl hover:bg-red-700 transition font-semibold text-sm disabled:opacity-50"
                         >
                             {isUploading ? (
                                 <span className="animate-pulse">Téléchargement...</span>
@@ -145,7 +145,7 @@ export default function GalleryPage() {
                         <p className="text-slate-500">Aucune image dans la galerie pour le moment.</p>
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="mt-4 text-primary-600 font-medium hover:text-primary-700 hover:underline"
+                            className="mt-4 text-red-600 font-medium hover:text-red-700 hover:underline"
                         >
                             Télécharger votre première photo
                         </button>
