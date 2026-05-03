@@ -16,6 +16,7 @@ interface MenuItemFormData {
     categoryOrders: { category: string; order: number }[];
     active: boolean;
     inStock: boolean;
+    isUpsell: boolean;
 }
 
 interface MenuItemModalProps {
@@ -50,6 +51,7 @@ export default function MenuItemModal({
         categoryOrders: [],
         active: true,
         inStock: true,
+        isUpsell: false,
     });
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -76,6 +78,7 @@ export default function MenuItemModal({
                 categoryOrders: editingItem.categoryOrders || [],
                 active: editingItem.active !== false,
                 inStock: editingItem.inStock !== false,
+                isUpsell: editingItem.isUpsell || false,
             });
             setPreviewUrl(editingItem.image);
             const toppingIds = (editingItem.toppingCategoryIds as string[] | undefined) || [];
@@ -92,6 +95,7 @@ export default function MenuItemModal({
                 categoryOrders: [],
                 active: true,
                 inStock: true,
+                isUpsell: false,
             });
             setPreviewUrl(null);
             setSelectedToppingCategories([]);
@@ -132,62 +136,63 @@ export default function MenuItemModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full my-8 mt-16">
-                <div className="flex items-center justify-between p-6 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between p-6 border-b border-slate-100">
                     <h2 className="text-xl font-bold text-slate-900">
                         {editingItem ? 'Modifier l\'Article' : 'Ajouter un Article'}
                     </h2>
-                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-                        <X className="w-6 h-6" />
+                    <button type="button" onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition">
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Nom</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
                             <input
                                 type="text"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 required
                             />
                         </div>
 
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Description</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 rows={3}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 placeholder="Description (facultative)"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Prix</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prix (€)</label>
                             <input
                                 type="number"
                                 step="0.01"
                                 value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 required
                             />
                         </div>
 
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Ordre d'affichage (par catégorie)</label>
-                            <div className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Ordre d'affichage (par catégorie)</label>
+                            <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
                                 {formData.categories.map((categorySlug) => {
                                     const categoryName = categories?.find(c => c.slug === categorySlug)?.name || categorySlug;
                                     const currentOrder = formData.categoryOrders?.find(o => o.category === categorySlug)?.order ?? 0;
                                     return (
                                         <div key={categorySlug} className="flex items-center gap-3">
-                                            <label className="text-sm text-slate-600 w-32 truncate">{categoryName}:</label>
+                                            <label className="text-sm font-medium text-slate-600 w-32 truncate">{categoryName}:</label>
                                             <input
                                                 type="number"
                                                 value={currentOrder}
@@ -202,7 +207,7 @@ export default function MenuItemModal({
                                                     }
                                                     setFormData({ ...formData, categoryOrders: newCategoryOrders });
                                                 }}
-                                                className="w-20 px-2 py-1 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                                                className="w-20 border border-slate-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                             />
                                         </div>
                                     );
@@ -211,10 +216,10 @@ export default function MenuItemModal({
                         </div>
 
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Image</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Image</label>
                             <div className="space-y-3">
                                 {previewUrl && (
-                                    <div className="relative w-full aspect-video bg-slate-100 rounded-lg overflow-hidden">
+                                    <div className="relative w-full aspect-video bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
                                         <img src={previewUrl} alt="Aperçu" className="w-full h-full object-cover" />
                                         {editingItem && (
                                             <button
@@ -231,9 +236,9 @@ export default function MenuItemModal({
                                                         setIsDeletingImage(false);
                                                     }
                                                 }}
-                                                className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                                                className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs font-bold rounded-lg hover:bg-red-50 shadow-sm transition disabled:opacity-50"
                                             >
-                                                <Trash2 className="w-3 h-3" />
+                                                <Trash2 className="w-3.5 h-3.5" />
                                                 {isDeletingImage ? 'Suppression...' : 'Supprimer l\'Image'}
                                             </button>
                                         )}
@@ -244,10 +249,10 @@ export default function MenuItemModal({
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-slate-300 rounded-lg hover:border-slate-400 hover:bg-slate-50 transition"
+                                        className="flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-slate-300 rounded-xl hover:border-red-400 hover:bg-red-50 hover:text-red-600 text-slate-600 transition font-medium text-sm w-full"
                                     >
-                                        <Upload className="w-5 h-5 text-slate-500" />
-                                        <span className="text-slate-600">{selectedFile ? selectedFile.name : 'Télécharger une Image'}</span>
+                                        <Upload className="w-4 h-4" />
+                                        <span>{selectedFile ? selectedFile.name : 'Télécharger une Image'}</span>
                                     </button>
                                 </div>
                                 <input
@@ -258,14 +263,14 @@ export default function MenuItemModal({
                                         if (!selectedFile) setPreviewUrl(e.target.value);
                                     }}
                                     placeholder="https://example.com/image.jpg"
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 />
                             </div>
                         </div>
 
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Catégories</label>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Catégories</label>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
                                 {categories?.map((cat) => (
                                     <label key={cat._id} className="flex items-center gap-2 cursor-pointer group">
                                         <input
@@ -277,51 +282,64 @@ export default function MenuItemModal({
                                                     : formData.categories.filter((c) => c !== cat.slug);
                                                 setFormData({ ...formData, categories: newCategories });
                                             }}
-                                            className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500"
+                                            className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
                                         />
-                                        <span className="text-sm text-slate-600">{cat.name}</span>
+                                        <span className="text-sm font-medium text-slate-700">{cat.name}</span>
                                     </label>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="popular"
-                                checked={formData.popular}
-                                onChange={(e) => setFormData({ ...formData, popular: e.target.checked })}
-                                className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500"
-                            />
-                            <label htmlFor="popular" className="text-sm font-medium text-slate-700">Populaire</label>
-                        </div>
+                        <div className="flex flex-col gap-3 col-span-2 sm:flex-row sm:gap-6 pt-2">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="popular"
+                                    checked={formData.popular}
+                                    onChange={(e) => setFormData({ ...formData, popular: e.target.checked })}
+                                    className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                                />
+                                <label htmlFor="popular" className="text-sm font-medium text-slate-700 cursor-pointer">Populaire</label>
+                            </div>
 
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="active"
-                                checked={formData.active}
-                                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                                className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500"
-                            />
-                            <label htmlFor="active" className="text-sm font-medium text-slate-700">Actif</label>
-                        </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="active"
+                                    checked={formData.active}
+                                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                                    className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                                />
+                                <label htmlFor="active" className="text-sm font-medium text-slate-700 cursor-pointer">Actif</label>
+                            </div>
 
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="inStock"
-                                checked={formData.inStock}
-                                onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
-                                className="w-4 h-4 text-green-600 border-slate-300 rounded focus:ring-green-500"
-                            />
-                            <label htmlFor="inStock" className="text-sm font-medium text-slate-700">En stock</label>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="inStock"
+                                    checked={formData.inStock}
+                                    onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+                                    className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500 cursor-pointer"
+                                />
+                                <label htmlFor="inStock" className="text-sm font-medium text-slate-700 cursor-pointer">En stock</label>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="isUpsell"
+                                    checked={formData.isUpsell}
+                                    onChange={(e) => setFormData({ ...formData, isUpsell: e.target.checked })}
+                                    className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-400 cursor-pointer"
+                                />
+                                <label htmlFor="isUpsell" className="text-sm font-medium text-slate-700 cursor-pointer">Upsell <span className="text-[10px] text-slate-400 font-normal uppercase tracking-wider">(Panier)</span></label>
+                            </div>
                         </div>
 
                         {toppingCategories && toppingCategories.length > 0 && (
-                            <div className="col-span-2 border-t border-slate-200 pt-4 mt-2">
-                                <label className="block text-sm font-medium text-slate-700 mb-3">Catégories de Garnitures</label>
-                                <div className="grid grid-cols-2 gap-2">
+                            <div className="col-span-2 border-t border-slate-100 pt-4 mt-2">
+                                <label className="block text-xs font-semibold text-slate-600 mb-3">Catégories de Garnitures</label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     {toppingCategories.map((cat) => (
                                         <button
                                             key={cat._id}
@@ -333,15 +351,15 @@ export default function MenuItemModal({
                                                     setSelectedToppingCategories([...selectedToppingCategories, cat.categoryId]);
                                                 }
                                             }}
-                                            className={`flex items-center gap-2 p-2 border rounded-lg transition text-left ${selectedToppingCategories.includes(cat.categoryId)
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : 'border-slate-200 hover:bg-slate-50'
+                                            className={`flex items-center gap-2 px-3 py-2 border rounded-xl transition text-left text-sm font-semibold ${selectedToppingCategories.includes(cat.categoryId)
+                                                ? 'border-red-200 bg-red-50 text-red-700'
+                                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                                                 }`}
                                         >
-                                            <span className={selectedToppingCategories.includes(cat.categoryId) ? 'text-blue-500' : 'text-slate-400'}>
-                                                {selectedToppingCategories.includes(cat.categoryId) ? '✓' : '+'}
+                                            <span className={`w-4 h-4 flex items-center justify-center border rounded-full text-[10px] flex-shrink-0 transition-colors ${selectedToppingCategories.includes(cat.categoryId) ? 'bg-red-500 border-red-500 text-white' : 'border-slate-300 text-transparent'}`}>
+                                                ✓
                                             </span>
-                                            <span className="text-sm text-slate-700">{cat.name}</span>
+                                            <span className="truncate">{cat.name}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -350,48 +368,52 @@ export default function MenuItemModal({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-slate-100">
                         {/* Delete — edit mode only */}
                         {editingItem && onDelete && (
-                            <div className="flex items-center gap-2">
+                            <div className="w-full sm:w-auto mb-2 sm:mb-0">
                                 {!showDeleteConfirm ? (
                                     <button
                                         type="button"
                                         onClick={() => setShowDeleteConfirm(true)}
-                                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm text-red-600 border border-red-200 hover:bg-red-50 rounded-xl transition font-semibold w-full sm:w-auto"
                                     >
                                         <Trash2 className="w-4 h-4" />
-                                        <span className="hidden sm:inline">Supprimer</span>
+                                        <span>Supprimer</span>
                                     </button>
                                 ) : (
-                                    <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
-                                        <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                                        <span className="text-xs text-red-700 font-medium hidden sm:inline">Supprimer définitivement ?</span>
-                                        <button
-                                            type="button"
-                                            disabled={isDeleting}
-                                            onClick={handleDelete}
-                                            className="px-2.5 py-1 bg-red-600 text-white text-xs font-semibold rounded hover:bg-red-700 transition disabled:opacity-50"
-                                        >
-                                            {isDeleting ? '...' : 'Oui'}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowDeleteConfirm(false)}
-                                            className="px-2.5 py-1 bg-white border border-slate-300 text-slate-600 text-xs rounded hover:bg-slate-50 transition"
-                                        >
-                                            Non
-                                        </button>
+                                    <div className="flex items-center justify-between sm:justify-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-1.5 w-full sm:w-auto">
+                                        <div className="flex items-center gap-1.5">
+                                            <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                                            <span className="text-xs text-red-700 font-bold whitespace-nowrap">Sûr ?</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <button
+                                                type="button"
+                                                disabled={isDeleting}
+                                                onClick={handleDelete}
+                                                className="px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                                            >
+                                                {isDeleting ? '...' : 'Oui'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowDeleteConfirm(false)}
+                                                className="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 transition"
+                                            >
+                                                Non
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        <div className="flex gap-3 flex-1 justify-end">
-                            <button type="button" onClick={onClose} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition text-sm">
+                        <div className="flex gap-3 w-full sm:flex-1 sm:justify-end">
+                            <button type="button" onClick={onClose} className="flex-1 sm:flex-none px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm">
                                 Annuler
                             </button>
-                            <button type="submit" disabled={isUploading} className="px-6 py-2 bg-slate-900 text-white rounded-lg disabled:opacity-50 hover:bg-slate-800 transition text-sm font-medium">
+                            <button type="submit" disabled={isUploading} className="flex-1 sm:flex-none px-6 py-2.5 bg-red-600 text-white rounded-xl disabled:opacity-50 hover:bg-red-700 transition text-sm font-semibold">
                                 {isUploading ? 'Téléchargement...' : editingItem ? 'Mettre à jour' : 'Créer'}
                             </button>
                         </div>
