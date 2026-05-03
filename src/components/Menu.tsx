@@ -137,7 +137,7 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
 
 
   return (
-    <section id="menu" className={`pb-20 bg-white ${reducedTopPadding ? 'pt-4 md:pt-[42px]' : 'pt-20'}`}>
+    <section id="menu" className={`pb-20 bg-white ${reducedTopPadding ? 'pt-2 md:pt-4' : 'pt-20'}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {showHeader && (
           <FadeIn direction="up">

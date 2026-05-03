@@ -19,7 +19,7 @@ export default function MenuPage() {
         <AppLoaderWrapper>
             <div className="min-h-screen">
                 {/* Hero Section */}
-                <section className="relative h-[35vh] min-h-[280px] flex items-center justify-center overflow-hidden">
+                <section className="relative h-[28vh] min-h-[200px] flex items-center justify-center overflow-hidden">
                     <div className="absolute inset-0">
 
 
@@ -36,7 +36,7 @@ export default function MenuPage() {
                         <div className="absolute inset-0 bg-gradient-to-r from-dark-950/65 via-dark-900/65 to-dark-900/65" />
                     </div>
 
-                    <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-24 md:pt-26">
+                    <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto pt-16 md:pt-20">
                         <h1 className="font-display font-extrabold text-5xl md:text-7xl text-white mb-3 tracking-wide uppercase">
                             Notre Carte
                         </h1>
