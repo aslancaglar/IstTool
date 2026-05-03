@@ -31,6 +31,7 @@ const nextConfig = {
         ...(convexSiteUrl ? { NEXT_PUBLIC_CONVEX_SITE_URL: convexSiteUrl } : {}),
     },
     images: {
+        unoptimized: true,
         remotePatterns: imageHostnames.map((hostname) => ({
             protocol: 'https',
             hostname,
