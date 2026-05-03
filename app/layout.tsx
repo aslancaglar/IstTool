@@ -14,16 +14,16 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
     metadataBase: new URL('https://mondopizza.fr'),
     title: {
-        default: 'Mondo Pizza Metz | Pizzas Artisanales, Burgers & Livraison à Metz',
+        default: 'Mondo Pizza Metz | Pizzas Authentiques, Burgers & Livraison à Metz',
         template: '%s | Mondo Pizza Metz',
     },
-    description: 'Mondo Pizza à Metz : pizzas artisanales faites maison, burgers, tacos et livraison rapide. Pâte fraîche, ingrédients de qualité. Commandez en ligne ! ☎ 03 87 38 09 45',
+    description: 'Mondo Pizza à Metz : pizzas savoureuses faites maison, burgers, tacos et livraison rapide. Pâte fraîche, ingrédients de qualité. Commandez en ligne ! ☎ 03 87 38 09 45',
     keywords: [
         'pizza metz',
         'pizzeria metz',
         'pizza livraison metz',
         'commander pizza metz',
-        'pizza artisanale metz',
+        'pizza authentique metz',
         'meilleure pizza metz',
         'pizza maison metz',
         'restaurant pizza metz',
@@ -46,23 +46,23 @@ export const metadata: Metadata = {
         apple: '/LogoMondo.png',
     },
     openGraph: {
-        title: 'Mondo Pizza Metz | Pizzas Artisanales & Livraison',
-        description: 'Pizzas artisanales faites maison à Metz. Pâte fraîche, ingrédients de qualité, livraison rapide. Commandez en ligne dès maintenant !',
+        title: 'Mondo Pizza Metz | Pizzas Authentiques & Livraison',
+        description: 'Pizzas savoureuses faites maison à Metz. Pâte fraîche, ingrédients de qualité, livraison rapide. Commandez en ligne dès maintenant !',
         url: 'https://mondopizza.fr/',
         siteName: 'Mondo Pizza Metz',
         images: [{
             url: '/MondoHeroImage-min.jpg',
             width: 1200,
             height: 630,
-            alt: 'Mondo Pizza Metz - Pizzas artisanales',
+            alt: 'Mondo Pizza Metz - Pizzas authentiques',
         }],
         locale: 'fr_FR',
         type: 'website',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Mondo Pizza Metz | Pizzas Artisanales & Livraison',
-        description: 'Pizzas artisanales faites maison à Metz. Commandez en ligne !',
+        title: 'Mondo Pizza Metz | Pizzas Authentiques & Livraison',
+        description: 'Pizzas savoureuses faites maison à Metz. Commandez en ligne !',
         images: ['/MondoHeroImage-min.jpg'],
     },
     robots: {

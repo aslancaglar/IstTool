@@ -8,8 +8,8 @@ import Contact from '../src/components/Contact';
 import AppLoaderWrapper from '../src/components/AppLoaderWrapper';
 
 export const metadata: Metadata = {
-    title: 'Mondo Pizza Metz | Pizzas Artisanales, Burgers & Livraison à Metz',
-    description: 'Mondo Pizza, la meilleure pizzeria de Metz ! Pizzas artisanales à pâte fraîche, burgers, tacos, livraison rapide et click & collect. Commandez en ligne maintenant.',
+    title: 'Mondo Pizza Metz | Pizzas Authentiques, Burgers & Livraison à Metz',
+    description: 'Mondo Pizza, la meilleure pizzeria de Metz ! Pizzas savoureuses à pâte fraîche, burgers, tacos, livraison rapide et click & collect. Commandez en ligne maintenant.',
     alternates: {
         canonical: 'https://mondopizza.fr',
     },

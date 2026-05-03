@@ -48,7 +48,7 @@ export default function Loader({ onFinished }: { onFinished: () => void }) {
 
                 {/* Tagline */}
                 <p className={`loader-tagline ${progress > 30 ? 'loader-tagline-visible' : ''}`}>
-                    Le vrai goût de la pizza artisanale
+                    Le vrai goût de la pizza authentique
                 </p>
 
                 {/* Progress Bar */}

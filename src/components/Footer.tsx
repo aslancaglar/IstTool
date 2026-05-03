@@ -32,7 +32,7 @@ export default function Footer() {
               <span style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-3xl tracking-wider text-white">MONDO PIZZA</span>
             </a>
             <p className="text-gray-400 mb-6 leading-relaxed">
-              Le vrai goût de la pizza artisanale. Des saveurs authentiques préparées avec passion depuis plus de 25 ans.
+              Le vrai goût de la pizza authentique. Des saveurs exceptionnelles préparées avec passion depuis plus de 25 ans.
             </p>
             <div className="flex gap-3">
               {socialLinks.facebook && (
