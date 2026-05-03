@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from 'react';
-import { X, Upload, Trash2, AlertTriangle } from 'lucide-react';
+import { X, Upload, Trash2, AlertTriangle, Star, CheckCircle, Package, ShoppingCart } from 'lucide-react';
 import { Id } from '../../../../convex/_generated/dataModel';
 
 interface MenuItemFormData {
@@ -184,36 +184,7 @@ export default function MenuItemModal({
                             />
                         </div>
 
-                        <div className="col-span-2">
-                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Ordre d'affichage (par catégorie)</label>
-                            <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                {formData.categories.map((categorySlug) => {
-                                    const categoryName = categories?.find(c => c.slug === categorySlug)?.name || categorySlug;
-                                    const currentOrder = formData.categoryOrders?.find(o => o.category === categorySlug)?.order ?? 0;
-                                    return (
-                                        <div key={categorySlug} className="flex items-center gap-3">
-                                            <label className="text-sm font-medium text-slate-600 w-32 truncate">{categoryName}:</label>
-                                            <input
-                                                type="number"
-                                                value={currentOrder}
-                                                onChange={(e) => {
-                                                    const newOrder = parseInt(e.target.value) || 0;
-                                                    const newCategoryOrders = [...(formData.categoryOrders || [])];
-                                                    const existingIndex = newCategoryOrders.findIndex(o => o.category === categorySlug);
-                                                    if (existingIndex >= 0) {
-                                                        newCategoryOrders[existingIndex] = { category: categorySlug, order: newOrder };
-                                                    } else {
-                                                        newCategoryOrders.push({ category: categorySlug, order: newOrder });
-                                                    }
-                                                    setFormData({ ...formData, categoryOrders: newCategoryOrders });
-                                                }}
-                                                className="w-20 border border-slate-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
+
 
                         <div className="col-span-2">
                             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Image</label>
@@ -268,71 +239,30 @@ export default function MenuItemModal({
                             </div>
                         </div>
 
-                        <div className="col-span-2">
-                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Catégories</label>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className="col-span-2 border-t border-slate-100 pt-4 mt-2">
+                            <label className="block text-xs font-semibold text-slate-600 mb-3">Catégories</label>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                                 {categories?.map((cat) => (
-                                    <label key={cat._id} className="flex items-center gap-2 cursor-pointer group">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.categories.includes(cat.slug)}
-                                            onChange={(e) => {
-                                                const newCategories = e.target.checked
-                                                    ? [...formData.categories, cat.slug]
-                                                    : formData.categories.filter((c) => c !== cat.slug);
-                                                setFormData({ ...formData, categories: newCategories });
-                                            }}
-                                            className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
-                                        />
-                                        <span className="text-sm font-medium text-slate-700">{cat.name}</span>
-                                    </label>
+                                    <button
+                                        key={cat._id}
+                                        type="button"
+                                        onClick={() => {
+                                            const newCategories = formData.categories.includes(cat.slug)
+                                                ? formData.categories.filter((c) => c !== cat.slug)
+                                                : [...formData.categories, cat.slug];
+                                            setFormData({ ...formData, categories: newCategories });
+                                        }}
+                                        className={`flex items-center gap-2 px-3 py-2 border rounded-xl transition text-left text-sm font-semibold ${formData.categories.includes(cat.slug)
+                                            ? 'border-red-200 bg-red-50 text-red-700'
+                                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        <span className={`w-4 h-4 flex items-center justify-center border rounded-full text-[10px] flex-shrink-0 transition-colors ${formData.categories.includes(cat.slug) ? 'bg-red-500 border-red-500 text-white' : 'border-slate-300 text-transparent'}`}>
+                                            ✓
+                                        </span>
+                                        <span className="truncate">{cat.name}</span>
+                                    </button>
                                 ))}
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-3 col-span-2 sm:flex-row sm:gap-6 pt-2">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="popular"
-                                    checked={formData.popular}
-                                    onChange={(e) => setFormData({ ...formData, popular: e.target.checked })}
-                                    className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
-                                />
-                                <label htmlFor="popular" className="text-sm font-medium text-slate-700 cursor-pointer">Populaire</label>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="active"
-                                    checked={formData.active}
-                                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                                    className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
-                                />
-                                <label htmlFor="active" className="text-sm font-medium text-slate-700 cursor-pointer">Actif</label>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="inStock"
-                                    checked={formData.inStock}
-                                    onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
-                                    className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500 cursor-pointer"
-                                />
-                                <label htmlFor="inStock" className="text-sm font-medium text-slate-700 cursor-pointer">En stock</label>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="isUpsell"
-                                    checked={formData.isUpsell}
-                                    onChange={(e) => setFormData({ ...formData, isUpsell: e.target.checked })}
-                                    className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-400 cursor-pointer"
-                                />
-                                <label htmlFor="isUpsell" className="text-sm font-medium text-slate-700 cursor-pointer">Upsell <span className="text-[10px] text-slate-400 font-normal uppercase tracking-wider">(Panier)</span></label>
                             </div>
                         </div>
 
@@ -365,6 +295,59 @@ export default function MenuItemModal({
                                 </div>
                             </div>
                         )}
+
+                        <div className="col-span-2 border-t border-slate-100 pt-4 mt-2">
+                            <label className="block text-xs font-semibold text-slate-600 mb-3">Options de l'Article</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, popular: !formData.popular })}
+                                    className={`flex items-center gap-2 px-3 py-2 border rounded-xl transition text-left text-sm font-semibold ${formData.popular
+                                        ? 'border-red-200 bg-red-50 text-red-700'
+                                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <Star className={`w-4 h-4 flex-shrink-0 ${formData.popular ? 'text-red-500 fill-red-500' : 'text-slate-400'}`} />
+                                    <span className="truncate">Populaire</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, active: !formData.active })}
+                                    className={`flex items-center gap-2 px-3 py-2 border rounded-xl transition text-left text-sm font-semibold ${formData.active
+                                        ? 'border-red-200 bg-red-50 text-red-700'
+                                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <CheckCircle className={`w-4 h-4 flex-shrink-0 ${formData.active ? 'text-red-500' : 'text-slate-400'}`} />
+                                    <span className="truncate">Actif</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, inStock: !formData.inStock })}
+                                    className={`flex items-center gap-2 px-3 py-2 border rounded-xl transition text-left text-sm font-semibold ${formData.inStock
+                                        ? 'border-red-200 bg-red-50 text-red-700'
+                                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <Package className={`w-4 h-4 flex-shrink-0 ${formData.inStock ? 'text-red-500' : 'text-slate-400'}`} />
+                                    <span className="truncate">En stock</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, isUpsell: !formData.isUpsell })}
+                                    className={`flex items-center gap-2 px-3 py-2 border rounded-xl transition text-left text-sm font-semibold ${formData.isUpsell
+                                        ? 'border-red-200 bg-red-50 text-red-700'
+                                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <ShoppingCart className={`w-4 h-4 flex-shrink-0 ${formData.isUpsell ? 'text-red-500' : 'text-slate-400'}`} />
+                                    <span className="truncate">Upsell <span className="text-[10px] font-normal uppercase tracking-wider opacity-70">(Panier)</span></span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Footer */}
