@@ -98,6 +98,16 @@ export const getPopularItems = query({
   },
 });
 
+export const listUpsellItems = query({
+  args: {},
+  handler: async (ctx) => {
+    const allItems = await ctx.db.query("menuItems").collect();
+    const upsellItems = allItems.filter((item) => item.isUpsell === true && item.active !== false && item.inStock !== false);
+    const sorted = upsellItems.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    return resolveItemsWithImages(ctx, sorted);
+  },
+});
+
 export const create = mutation({
   args: {
     adminToken: v.string(),
@@ -116,6 +126,7 @@ export const create = mutation({
     active: v.optional(v.boolean()),
     inStock: v.optional(v.boolean()),
     platformPrice: v.optional(v.number()),
+    isUpsell: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -132,6 +143,7 @@ export const create = mutation({
       active: args.active ?? true,
       inStock: args.inStock ?? true,
       platformPrice: args.platformPrice,
+      isUpsell: args.isUpsell ?? false,
     });
     return itemId;
   },
@@ -156,6 +168,7 @@ export const update = mutation({
     active: v.optional(v.boolean()),
     inStock: v.optional(v.boolean()),
     platformPrice: v.optional(v.number()),
+    isUpsell: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -180,6 +193,7 @@ export const update = mutation({
       active: args.active,
       inStock: args.inStock,
       platformPrice: args.platformPrice,
+      isUpsell: args.isUpsell,
     });
     return args.id;
   },

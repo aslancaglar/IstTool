@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from 'react';
-import { X, ShoppingBag, Trash2, Sandwich, Gift } from 'lucide-react';
+import { X, ShoppingBag, Trash2, Sandwich, Gift, Plus, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { useOrder } from '../context/OrderContext';
 import FreeDeliveryBar from './FreeDeliveryBar';
@@ -15,10 +15,11 @@ interface OrderListProps {
 }
 
 export default function OrderList({ isOpen, onClose }: OrderListProps) {
-  const { orderItems, removeFromOrder, clearOrder, getTotalPrice } = useOrder();
+  const { orderItems, removeFromOrder, getTotalPrice, addToOrder } = useOrder();
   const { user } = useAuth();
   const restaurantInfo = useQuery(api.restaurantInfo.get);
   const activeCampaigns = useQuery(api.promoCodes.listActiveCampaigns);
+  const upsellItems = useQuery(api.menuItems.listUpsellItems);
 
   const bogoFreeItems = useMemo(() => {
     if (!activeCampaigns) return [];
@@ -205,15 +206,56 @@ export default function OrderList({ isOpen, onClose }: OrderListProps) {
           )}
         </div>
 
+        {orderItems.length > 0 && upsellItems && upsellItems.length > 0 && (() => {
+          const cartItemIds = new Set(orderItems.map(i => i.menuItemId));
+          const visibleUpsells = upsellItems.filter(u => !cartItemIds.has(u._id));
+          if (visibleUpsells.length === 0) return null;
+          return (
+            <div className="border-t px-5 py-4 bg-orange-50/40">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">Ajouter à votre commande</p>
+              </div>
+              <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                {visibleUpsells.map((item) => (
+                  <button
+                    key={item._id}
+                    onClick={() => addToOrder({
+                      id: `${item._id}-${Date.now()}`,
+                      menuItemId: item._id,
+                      name: item.name,
+                      image: item.image || '',
+                      basePrice: item.price,
+                      selectedToppings: [],
+                      totalPrice: item.price,
+                    })}
+                    className="flex-shrink-0 flex items-center gap-2.5 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-300 rounded-xl p-2.5 transition-all group w-44"
+                  >
+                    {item.image ? (
+                      <div className="relative w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100">
+                        <Image src={item.image} alt={item.name} fill sizes="44px" className="object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-11 h-11 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                        <Sandwich className="w-5 h-5 text-slate-400" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-xs font-semibold text-slate-800 truncate leading-tight">{item.name}</p>
+                      <p className="text-xs text-orange-600 font-bold mt-0.5">{item.price.toFixed(2)}€</p>
+                    </div>
+                    <div className="w-6 h-6 rounded-full bg-orange-500 group-hover:bg-orange-600 flex items-center justify-center flex-shrink-0 transition-colors">
+                      <Plus className="w-3.5 h-3.5 text-white" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
         {orderItems.length > 0 && (
           <div className="border-t p-6 space-y-4">
-            <button
-              onClick={clearOrder}
-              className="w-full text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
-            >
-              Vider la commande
-            </button>
-
             {(() => {
               // 1. Prioritize general threshold if it exists
               let effectiveThreshold = restaurantInfo?.freeDeliveryThreshold;

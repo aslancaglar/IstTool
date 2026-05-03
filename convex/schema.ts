@@ -42,6 +42,7 @@ export default defineSchema({
     }))),
     active: v.optional(v.boolean()),
     inStock: v.optional(v.boolean()),
+    isUpsell: v.optional(v.boolean()),
   }).index("by_display_order", ["displayOrder"]),
 
   toppingCategories: defineTable({
