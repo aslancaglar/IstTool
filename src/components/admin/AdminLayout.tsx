@@ -48,11 +48,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin', label: 'Tableau de bord', icon: LayoutDashboard },
     { path: '/admin/users', label: 'Utilisateurs', icon: User },
     { path: '/admin/menu-items', label: 'Menu', icon: Pizza },
-    { path: '/admin/platform-prices', label: 'Prix des Plateformes', icon: Globe },
     { path: '/admin/orders', label: 'Commandes', icon: ShoppingCart },
     { path: '/admin/promotions', label: 'Promotions', icon: Tag },
     { path: '/admin/reviews', label: 'Avis', icon: Star },
     { path: '/admin/gallery', label: 'Galerie', icon: Image },
+    { path: '/admin/platform-prices', label: 'Prix des Plateformes', icon: Globe },
     { path: '/admin/settings', label: 'Paramètres', icon: Settings },
   ];
 
