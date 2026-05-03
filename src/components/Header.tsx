@@ -20,8 +20,7 @@ const navLinks = [
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isOrderListOpen, setIsOrderListOpen] = useState(false);
-  const { itemCount, isInitialized } = useOrder();
+  const { itemCount, isInitialized, isCartOpen, setIsCartOpen } = useOrder();
   const { user, logout } = useAuth();
   const { openLoginModal } = useAuthModal();
   const pathname = usePathname();
@@ -118,7 +117,7 @@ export default function Header() {
 
             <div className="flex items-center gap-3 pr-2 border-r border-white/10">
               <button
-                onClick={() => setIsOrderListOpen(true)}
+                onClick={() => setIsCartOpen(true)}
                 className="relative w-10 h-10 flex items-center justify-center rounded-full bg-white text-primary-600 hover:bg-gray-50 transition-all shadow-md active:scale-95"
                 aria-label="Voir la commande"
               >
@@ -303,7 +302,7 @@ export default function Header() {
         </div>
       )}
 
-      <OrderList isOpen={isOrderListOpen} onClose={() => setIsOrderListOpen(false)} />
+      <OrderList isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 }

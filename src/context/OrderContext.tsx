@@ -9,6 +9,8 @@ interface OrderContextType {
   isInitialized: boolean;
   totalPrice: number;
   itemCount: number;
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
   addToOrder: (item: OrderItem) => void;
   removeFromOrder: (itemId: string) => void;
   clearOrder: () => void;
@@ -43,6 +45,7 @@ function saveOrderItems(items: OrderItem[]): void {
 export function OrderProvider({ children }: { children: ReactNode }) {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Initialize from localStorage ONLY on client
   useEffect(() => {
@@ -89,12 +92,14 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     isInitialized,
     totalPrice,
     itemCount,
+    isCartOpen,
+    setIsCartOpen,
     addToOrder,
     removeFromOrder,
     clearOrder,
     getTotalPrice,
     getItemCount,
-  }), [orderItems, isInitialized, totalPrice, itemCount, addToOrder, removeFromOrder, clearOrder, getTotalPrice, getItemCount]);
+  }), [orderItems, isInitialized, totalPrice, itemCount, isCartOpen, addToOrder, removeFromOrder, clearOrder, getTotalPrice, getItemCount]);
 
   return (
     <OrderContext.Provider value={contextValue}>
