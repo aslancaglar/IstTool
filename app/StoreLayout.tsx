@@ -45,6 +45,8 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith('/admin');
     const isCheckout = pathname === '/checkout';
+    const isOrderSuccess = pathname?.startsWith('/order-success');
+    const hideFooter = isCheckout || isOrderSuccess;
 
     if (isAdmin) {
         return <main className="min-h-screen">{children}</main>;
@@ -58,7 +60,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
             <main className="min-h-screen">
                 {children}
             </main>
-            <Footer />
+            {!hideFooter && <Footer />}
             {!isCheckout && <MobileStickyCart />}
             <AuthModal />
         </AuthModalProvider>
