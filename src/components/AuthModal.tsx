@@ -311,7 +311,7 @@ export default function AuthModal() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div className="space-y-2">
                   <label htmlFor="signup-password" className="text-sm font-bold text-gray-700">Mot de passe</label>
                   <div className="relative">
@@ -330,7 +330,7 @@ export default function AuthModal() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="signup-confirmPassword" className="text-sm font-bold text-gray-700">Confirmer</label>
+                  <label htmlFor="signup-confirmPassword" className="text-sm font-bold text-gray-700">Confirmer le mot de passe</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
