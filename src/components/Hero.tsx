@@ -24,10 +24,11 @@ export default function Hero() {
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <FadeIn delay={200} className="max-w-2xl text-left">
-            <h1 style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-6xl md:text-7xl lg:text-[86px] tracking-wide leading-tight mb-3 text-white uppercase text-stroke-title">
+            <h1 className="sr-only">Mondo Pizza, votre pizzeria artisanale à Metz</h1>
+            <h2 style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-6xl md:text-7xl lg:text-[86px] tracking-wide leading-tight mb-3 text-white uppercase text-stroke-title">
               Une bonne pizza,<br />
               <span className="text-secondary-400">ça te dit ?</span>
-            </h1>
+            </h2>
             <p className="text-lg md:text-xl text-white/90 mb-8 max-w-lg leading-relaxed">
               La pizzeria incontournable de Metz. Pizzas artisanales faites maison, livrées ou à emporter. On ne peut pas acheter le bonheur, mais nos pizzas, c'est à peu près la même chose.
             </p>

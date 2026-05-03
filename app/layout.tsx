@@ -109,7 +109,7 @@ export default function RootLayout({
                             servesCuisine: ['Pizza', 'Italienne', 'Burger', 'Tacos'],
                             address: {
                                 '@type': 'PostalAddress',
-                                streetAddress: '',
+                                streetAddress: '20 Rue Saint-Pierre',
                                 addressLocality: 'Metz',
                                 postalCode: '57000',
                                 addressRegion: 'Moselle',
