@@ -50,7 +50,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/menu-items', label: 'Menu', icon: Pizza },
     { path: '/admin/platform-prices', label: 'Prix des Plateformes', icon: Globe },
     { path: '/admin/orders', label: 'Commandes', icon: ShoppingCart },
-    { path: '/admin/kds', label: 'KDS Kanban', icon: Package },
     { path: '/admin/promotions', label: 'Promotions', icon: Tag },
     { path: '/admin/reviews', label: 'Avis', icon: Star },
     { path: '/admin/gallery', label: 'Galerie', icon: Image },

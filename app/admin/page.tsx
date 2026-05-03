@@ -2,13 +2,11 @@
 
 import { useQuery } from 'convex/react';
 import { useMemo } from 'react';
-import Link from 'next/link';
 import { api } from '../../convex/_generated/api';
 import StatsCards from '../../src/components/admin/Dashboard/StatsCards';
 import RecentOrders from '../../src/components/admin/Dashboard/RecentOrders';
 import QuickStats from '../../src/components/admin/Dashboard/QuickStats';
 import { useAdminAuth } from '../../src/context/AdminAuthContext';
-import { Package } from 'lucide-react';
 
 export default function DashboardPage() {
   const { adminToken } = useAdminAuth();
@@ -38,13 +36,6 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Tableau de bord</h1>
           <p className="text-slate-500 mt-1">Bienvenue dans l'interface d'administration de votre restaurant</p>
-          <Link
-            href="/admin/kds"
-            className="mt-4 inline-flex items-center gap-2 bg-red-600 px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:bg-red-700 transition"
-          >
-            <Package className="w-4 h-4" />
-            Ouvrir KDS Kanban
-          </Link>
         </div>
 
         <StatsCards
