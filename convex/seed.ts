@@ -1,6 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { MutationCtx } from "./_generated/server";
+import { hashPassword, requireAdminSession } from "./lib/auth";
 
 // Internal helper functions
 async function runSeedCategories(ctx: MutationCtx) {
@@ -240,8 +241,11 @@ async function runSeedReviews(ctx: MutationCtx) {
 
 // Exported Mutations
 export const clearAllData = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    adminToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
     const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery", "orders", "promoCodes", "users", "userSessions", "adminUsers", "adminSessions"] as const;
     for (const table of tables) {
       const items = await ctx.db.query(table).collect();
@@ -254,8 +258,11 @@ export const clearAllData = mutation({
 });
 
 export const seedAll = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    adminToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
     // 1. Clear everything
     const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery"] as const;
     for (const table of tables) {
@@ -279,8 +286,11 @@ export const seedAll = mutation({
 });
 
 export const exportData = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    adminToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
     const menuCategories = await ctx.db.query("menuCategories").collect();
     const menuItems = await ctx.db.query("menuItems").collect();
     const toppingCategories = await ctx.db.query("toppingCategories").collect();
@@ -305,10 +315,12 @@ export const exportData = mutation({
 
 export const importData = mutation({
   args: {
+    adminToken: v.string(),
     data: v.any(),
     clearFirst: v.boolean(),
   },
   handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
     if (args.clearFirst) {
       const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery"] as const;
       for (const table of tables) {
@@ -340,3 +352,20 @@ export const importData = mutation({
     return { success: true };
   },
 });
+
+export const createAdminUser = mutation({
+  args: {
+    username: v.string(),
+    password: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const passwordHash = await hashPassword(args.password);
+    const adminId = await ctx.db.insert("adminUsers", {
+      username: args.username,
+      passwordHash,
+      createdAt: Date.now(),
+    });
+    return adminId;
+  },
+});
+
