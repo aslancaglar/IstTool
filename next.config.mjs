@@ -13,8 +13,8 @@ function extractHostname(url) {
 
 const imageHostnames = Array.from(
     new Set([
-        '**.convex.cloud',
-        '**.convex.site',
+        '*.convex.cloud',
+        '*.convex.site',
         extractHostname(convexUrl),
         extractHostname(convexSiteUrl),
         'images.pexels.com',
