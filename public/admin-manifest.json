@@ -1,0 +1,44 @@
+{
+  "name": "Mondo Pizza — Administration",
+  "short_name": "MondoAdmin",
+  "description": "Tableau de bord d'administration Mondo Pizza",
+  "start_url": "/admin",
+  "scope": "/admin/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/admin-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/admin-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/LogoMondo.png",
+      "sizes": "250x176",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Commandes",
+      "url": "/admin/orders",
+      "description": "Voir les commandes en cours"
+    },
+    {
+      "name": "Menu",
+      "url": "/admin/menu-items",
+      "description": "Gérer le menu"
+    }
+  ]
+}

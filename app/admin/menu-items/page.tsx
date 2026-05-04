@@ -142,10 +142,10 @@ function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick, di
         </p>
       </div>
       <div className="flex gap-1 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition ml-auto">
-        <button onClick={() => onEdit(topping)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+        <button onClick={() => onEdit(topping)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
           <Edit className="w-4 h-4" />
         </button>
-        <button onClick={() => onDeleteClick(topping._id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+        <button onClick={() => onDeleteClick(topping._id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -680,7 +680,7 @@ export default function MenuItemsPage() {
                   ) : (
                     <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-slate-300 text-center">
                       <p className="text-slate-400 text-sm mb-3">Aucun article dans cette catégorie</p>
-                      <button onClick={handleCreateArticle} className="flex items-center gap-2 text-sm text-slate-600 border border-slate-300 px-4 py-2 rounded-lg hover:bg-slate-50 transition">
+                      <button onClick={handleCreateArticle} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition font-semibold text-sm">
                         <Plus className="w-4 h-4" /> Ajouter un article
                       </button>
                     </div>
@@ -758,7 +758,7 @@ export default function MenuItemsPage() {
                   ) : (
                     <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-slate-300 text-center">
                       <p className="text-slate-400 text-sm mb-3">Aucune garniture{toppingCategoryFilter !== 'all' ? ' dans cette catégorie' : ''}</p>
-                      <button onClick={handleCreateTopping} className="flex items-center gap-2 text-sm text-slate-600 border border-slate-300 px-4 py-2 rounded-lg hover:bg-slate-50 transition">
+                      <button onClick={handleCreateTopping} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition font-semibold text-sm">
                         <Plus className="w-4 h-4" /> Ajouter une garniture
                       </button>
                     </div>

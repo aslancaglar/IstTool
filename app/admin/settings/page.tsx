@@ -407,7 +407,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 mt-4">
+                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 mt-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-medium text-slate-900">Délai minimum de préparation</h3>
@@ -428,7 +428,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 mt-4">
+                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 mt-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-medium text-slate-900">Livraison gratuite à partir de</h3>
@@ -519,7 +519,7 @@ export default function SettingsPage() {
               <div className="p-6 pt-0 border-t border-slate-100 mt-0">
                 <div className="mt-4 space-y-6">
                   {/* Default Delivery Fee */}
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-medium text-slate-900">Frais de livraison par défaut</h3>
@@ -555,7 +555,7 @@ export default function SettingsPage() {
 
                     <div className="space-y-3">
                       {deliveryZones.map((zone, index) => (
-                        <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
+                        <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-100 relative group">
                           <button
                             type="button"
                             onClick={() => removeDeliveryZone(index)}
@@ -662,7 +662,7 @@ export default function SettingsPage() {
 
                 <div className="space-y-6">
                   {schedule.map((day, dayIndex) => (
-                    <div key={dayIndex} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
+                    <div key={dayIndex} className="p-4 bg-slate-50 rounded-lg border border-slate-100 relative group">
                       <button
                         type="button"
                         onClick={() => removeDay(dayIndex)}
@@ -766,7 +766,7 @@ export default function SettingsPage() {
 
                 <div className="space-y-4">
                   {holidays.map((holiday, index) => (
-                    <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group">
+                    <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-100 relative group">
                       <button
                         type="button"
                         onClick={() => removeHoliday(index)}

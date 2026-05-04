@@ -1,52 +1,31 @@
-"use client";
+import type { Metadata, Viewport } from 'next';
+import AdminAuthLayout from '../../src/components/admin/AdminAuthLayout';
 
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useAdminAuth } from '../../src/context/AdminAuthContext';
-import AdminLayout from '../../src/components/admin/AdminLayout';
+export const viewport: Viewport = {
+    themeColor: '#0f172a',
+};
+
+export const metadata: Metadata = {
+    title: {
+        default: 'Administration — Mondo Pizza',
+        template: '%s | Admin Mondo Pizza',
+    },
+    description: "Tableau de bord d'administration Mondo Pizza",
+    manifest: '/admin-manifest.json',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'black-translucent',
+        title: 'MondoAdmin',
+    },
+    icons: {
+        icon: '/icons/admin-icon.svg',
+        apple: '/icons/admin-icon.svg',
+    },
+    other: {
+        'mobile-web-app-capable': 'yes',
+    },
+};
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
-    const pathname = usePathname();
-    const router = useRouter();
-    const { admin, adminToken, isLoading } = useAdminAuth();
-    const [isClient, setIsClient] = useState(false);
-
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
-
-    useEffect(() => {
-        if (!isLoading && (!admin || !adminToken) && pathname !== '/admin/login') {
-            router.push('/admin/login');
-        }
-    }, [admin, adminToken, isLoading, pathname, router]);
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <div className="text-slate-600 animate-pulse font-medium text-lg">Chargement...</div>
-            </div>
-        );
-    }
-
-    if (!isClient) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <div className="text-slate-600 animate-pulse font-medium text-lg">Chargement...</div>
-            </div>
-        );
-    }
-
-    // Login page doesn't get the sidebar layout
-    if (pathname === '/admin/login') {
-        return <>{children}</>;
-    }
-
-    // Prevent rendering protected content while redirecting
-    if (!admin || !adminToken) {
-        return null;
-    }
-
-    // All other admin pages get the sidebar layout
-    return <AdminLayout>{children}</AdminLayout>;
+    return <AdminAuthLayout>{children}</AdminAuthLayout>;
 }

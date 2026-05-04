@@ -47,6 +47,14 @@ const nextConfig = {
                     { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
                 ],
             },
+            {
+                // Allow the admin service worker (served from root) to control /admin/ scope
+                source: '/admin-sw.js',
+                headers: [
+                    { key: 'Service-Worker-Allowed', value: '/admin/' },
+                    { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+                ],
+            },
         ];
     },
 };
