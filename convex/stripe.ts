@@ -1,6 +1,36 @@
 import { action } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import Stripe from "stripe";
+
+export const verifyAndConfirmPayment = action({
+  args: {
+    orderId: v.id("orders"),
+    paymentIntentId: v.string(),
+    expectedAmount: v.number(), // euros
+  },
+  handler: async (ctx, args) => {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) throw new Error("Stripe non configuré.");
+
+    const stripe = new Stripe(stripeKey, { apiVersion: "2026-04-22.dahlia" as any });
+    const pi = await stripe.paymentIntents.retrieve(args.paymentIntentId);
+
+    if (pi.status !== "succeeded") {
+      throw new Error("Paiement non confirmé par Stripe.");
+    }
+
+    const piAmountEuros = pi.amount / 100;
+    if (Math.abs(piAmountEuros - args.expectedAmount) > 0.10) {
+      throw new Error("Montant du paiement incorrect.");
+    }
+
+    await ctx.runMutation(internal.mutations.markOrderPaid, {
+      orderId: args.orderId,
+      stripePaymentIntentId: args.paymentIntentId,
+    });
+  },
+});
 
 export const createPaymentIntent = action({
   args: {

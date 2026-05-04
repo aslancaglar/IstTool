@@ -87,6 +87,10 @@ export const addOrderReview = mutation({
             throw new Error("Vous avez déjà laissé un avis pour cette commande.");
         }
 
+        if (args.rating < 1 || args.rating > 5) throw new Error("La note doit être entre 1 et 5.");
+        if (args.comment.trim().length === 0) throw new Error("Le commentaire ne peut pas être vide.");
+        if (args.comment.length > 1000) throw new Error("Le commentaire ne peut pas dépasser 1000 caractères.");
+
         return await ctx.db.insert("reviews", {
             userId: user._id,
             orderId: args.orderId,
@@ -94,7 +98,7 @@ export const addOrderReview = mutation({
             rating: args.rating,
             comment: args.comment,
             date: new Date().toLocaleDateString('fr-FR'),
-            active: true, // Default to true for user ratings, or false if you want moderation
+            active: false,
         });
     },
 });

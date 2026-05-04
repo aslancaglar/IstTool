@@ -150,7 +150,7 @@ export default function PaymentSection({
                 </div>
             )}
 
-            {paymentMethod === 'stripe' && showStripeForm && (
+            {paymentMethod === 'stripe' && showStripeForm && process.env.NODE_ENV === 'development' && (
                 <div className="p-4 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-xl border border-indigo-100 flex gap-3 items-start">
                     <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-lg flex items-center justify-center shrink-0 shadow">
                         <CreditCard className="w-4 h-4" />

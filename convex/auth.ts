@@ -18,17 +18,10 @@ function normalizeEmail(email: string): string {
 }
 
 async function findUserByEmail(ctx: any, email: string) {
-  const exact = await ctx.db
+  return await ctx.db
     .query("users")
     .withIndex("by_email", (q: any) => q.eq("email", email))
-    .first();
-
-  if (exact) {
-    return exact;
-  }
-
-  const allUsers = await ctx.db.query("users").collect();
-  return allUsers.find((user: any) => normalizeEmail(user.email) === email) ?? null;
+    .first() ?? null;
 }
 
 async function assertAdminOrSelf(
@@ -54,8 +47,16 @@ export const createAdmin = mutation({
   args: {
     username: v.string(),
     password: v.string(),
+    bootstrapSecret: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const requiredSecret = process.env.ADMIN_BOOTSTRAP_SECRET;
+    if (requiredSecret) {
+      if (args.bootstrapSecret !== requiredSecret) {
+        throw new Error("Unauthorized");
+      }
+    }
+
     const existingAdmins = await ctx.db.query("adminUsers").collect();
     if (existingAdmins.length > 0) {
       throw new Error("Admin user is already initialized");
@@ -165,6 +166,8 @@ export const createAdminUser = mutation({
     const { admin } = await requireAdminSession(ctx, args.adminToken);
     if (admin.role && admin.role !== "admin") throw new Error("Unauthorized");
 
+    if (args.password.length < 8) throw new Error("Le mot de passe doit contenir au moins 8 caractères.");
+
     const existing = await ctx.db
       .query("adminUsers")
       .withIndex("by_username", (q) => q.eq("username", args.username))
@@ -211,6 +214,8 @@ export const updateAdminPassword = mutation({
     const { admin } = await requireAdminSession(ctx, args.adminToken);
     if (admin.role && admin.role !== "admin") throw new Error("Unauthorized");
 
+    if (args.newPassword.length < 8) throw new Error("Le mot de passe doit contenir au moins 8 caractères.");
+
     const passwordHash = await hashPassword(args.newPassword);
     await ctx.db.patch(args.targetId, { passwordHash });
   },
@@ -240,6 +245,11 @@ export const signupUser = mutation({
     if (args.lastName.trim().length === 0 || args.lastName.length > 100) {
       throw new Error("Nom invalide.");
     }
+
+    if (args.phone.length > 20) throw new Error("Numéro de téléphone invalide.");
+    if ((args.street ?? "").length > 200) throw new Error("Adresse trop longue.");
+    if ((args.city ?? "").length > 100) throw new Error("Ville trop longue.");
+    if ((args.zipCode ?? "").length > 10) throw new Error("Code postal invalide.");
 
     const email = normalizeEmail(args.email);
 

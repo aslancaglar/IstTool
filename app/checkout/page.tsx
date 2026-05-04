@@ -27,6 +27,7 @@ export default function CheckoutPage() {
     const { openLoginModal } = useAuthModal();
     const restaurantInfo = useQuery(api.restaurantInfo.get);
     const createOrder = useMutation(api.mutations.createOrder);
+    const confirmStripePayment = useAction(api.stripe.verifyAndConfirmPayment);
 
     // State
     const [step, setStep] = useState<Step>('details');
@@ -263,7 +264,7 @@ export default function CheckoutPage() {
         }
     };
 
-    const handleFinalOrder = async (pMethod: 'stripe' | 'cash', pStatus: 'paid' | 'unpaid', pIntentId?: string) => {
+    const handleFinalOrder = async (pMethod: 'stripe' | 'cash', _pStatus: 'paid' | 'unpaid', pIntentId?: string) => {
         setIsSubmitting(true);
         try {
             const orderId = await createOrder({
@@ -273,7 +274,6 @@ export default function CheckoutPage() {
                 address: orderType === 'delivery' ? address : undefined,
                 scheduledTime,
                 paymentMethod: pMethod,
-                paymentStatus: pStatus,
                 stripePaymentIntentId: pIntentId,
                 totalPrice: subtotal + effectiveDeliveryFee + bogoFreeItems.reduce((sum, item) => sum + item.finalPrice, 0),
                 promoCode: appliedPromoCode,
@@ -301,6 +301,13 @@ export default function CheckoutPage() {
                 ],
                 appliedCampaignIds,
             });
+            if (pMethod === 'stripe' && pIntentId) {
+                await confirmStripePayment({
+                    orderId,
+                    paymentIntentId: pIntentId,
+                    expectedAmount: finalTotal,
+                });
+            }
             setIsRedirecting(true);
             clearOrder();
             router.push(`/order-success/${orderId}`);

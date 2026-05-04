@@ -1,7 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { MutationCtx } from "./_generated/server";
-import { hashPassword, requireAdminSession } from "./lib/auth";
+import { requireAdminSession } from "./lib/auth";
 
 // Internal helper functions
 async function runSeedCategories(ctx: MutationCtx) {
@@ -246,7 +246,7 @@ export const clearAllData = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
-    const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery", "orders", "promoCodes", "users", "userSessions", "adminUsers", "adminSessions"] as const;
+    const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery", "orders", "promoCodes", "users", "userSessions"] as const;
     for (const table of tables) {
       const items = await ctx.db.query(table).collect();
       for (const item of items) {
@@ -353,19 +353,4 @@ export const importData = mutation({
   },
 });
 
-export const createAdminUser = mutation({
-  args: {
-    username: v.string(),
-    password: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const passwordHash = await hashPassword(args.password);
-    const adminId = await ctx.db.insert("adminUsers", {
-      username: args.username,
-      passwordHash,
-      createdAt: Date.now(),
-    });
-    return adminId;
-  },
-});
 

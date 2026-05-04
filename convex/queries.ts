@@ -163,18 +163,15 @@ export const getOrder = query({
       }
     }
 
-    // Unauthenticated / non-owner: return limited confirmation info, but include enriched items and address
-    const enriched = await enrichOrder(order);
+    // Unauthenticated / non-owner: return only non-sensitive confirmation info
     return {
-      _id: enriched._id,
-      _creationTime: enriched._creationTime,
-      status: enriched.status,
-      type: enriched.type,
-      scheduledTime: enriched.scheduledTime,
-      totalPrice: enriched.totalPrice,
-      createdAt: enriched.createdAt,
-      items: enriched.items,
-      address: enriched.address,
+      _id: order._id,
+      _creationTime: order._creationTime,
+      status: order.status,
+      type: order.type,
+      scheduledTime: order.scheduledTime,
+      totalPrice: order.totalPrice,
+      createdAt: order.createdAt,
     };
   },
 });

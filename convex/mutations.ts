@@ -1,6 +1,40 @@
-import { mutation } from "./_generated/server";
+import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdminSession, requireUserSession } from "./lib/auth";
+
+function matchesPostalCode(pattern: string, zipCode: string): boolean {
+  const p = pattern.trim();
+  if (p.includes("-")) {
+    const [start, end] = p.split("-").map((s) => s.trim());
+    return zipCode >= start && zipCode <= end;
+  }
+  if (p.endsWith("*")) {
+    return zipCode.startsWith(p.slice(0, -1));
+  }
+  return p === zipCode;
+}
+
+async function computeDeliveryFee(ctx: any, zipCode: string, subtotal: number): Promise<number> {
+  const info = await ctx.db
+    .query("restaurantInfo")
+    .withIndex("by_key", (q: any) => q.eq("key", "main"))
+    .first();
+  if (!info) return 0;
+
+  const zones = info.deliveryFees ?? [];
+  const match = zones.find((z: any) => matchesPostalCode(z.postalCode, zipCode));
+
+  if (match) {
+    const threshold = match.freeDeliveryThreshold ?? info.freeDeliveryThreshold ?? 0;
+    if (threshold > 0 && subtotal >= threshold) return 0;
+    return match.price;
+  }
+
+  const defaultFee = info.defaultDeliveryFee ?? 0;
+  const globalThreshold = info.freeDeliveryThreshold ?? 0;
+  if (globalThreshold > 0 && subtotal >= globalThreshold) return 0;
+  return defaultFee;
+}
 
 export const createOrder = mutation({
   args: {
@@ -20,7 +54,6 @@ export const createOrder = mutation({
     })),
     scheduledTime: v.string(),
     paymentMethod: v.union(v.literal("stripe"), v.literal("cash")),
-    paymentStatus: v.union(v.literal("unpaid"), v.literal("paid"), v.literal("failed")),
     stripePaymentIntentId: v.optional(v.string()),
     items: v.array(v.object({
       menuItemId: v.string(),
@@ -175,6 +208,11 @@ export const createOrder = mutation({
       });
     }
 
+    // ── Server-side delivery fee ──────────────────────────────────
+    const serverDeliveryFee = args.type === "delivery" && args.address?.zipCode
+      ? await computeDeliveryFee(ctx, args.address.zipCode, computedTotal)
+      : 0;
+
     // ── Campaign (automatic) validation ──────────────────────────
     let campaignDiscount = 0;
     let campaignFreeDelivery = false;
@@ -263,7 +301,7 @@ export const createOrder = mutation({
 
       if (promo.discountType === "free_delivery") {
         if (args.type === "pickup") throw new Error("Code valable uniquement pour la livraison.");
-        discountAmount = args.deliveryFee ?? 0;
+        discountAmount = serverDeliveryFee;
       } else if (promo.discountType === "percent_off_items") {
         const cats = promo.applicableCategoryIds ?? [];
         const catMap = new Map((args.itemCategoryIds ?? []).map((x) => [x.menuItemId, x.categoryIds]));
@@ -304,14 +342,14 @@ export const createOrder = mutation({
     }
     // ── End promo validation ──────────────────────────────────────
 
-    // Verify total price (allow tolerance for delivery fee which is validated separately)
-    if (Math.abs(computedTotal - args.totalPrice) > 0.02 && args.type === "pickup") {
+    // Verify total price
+    if (args.type === "pickup" && Math.abs(computedTotal - args.totalPrice) > 0.02) {
       throw new Error("Le total de la commande ne correspond pas aux prix du menu.");
     }
     // ── End price validation ──────────────────────────────────────
 
     const totalDiscountAmount = discountAmount + campaignDiscount;
-    const effectiveDeliveryFee = campaignFreeDelivery ? 0 : (args.deliveryFee ?? 0);
+    const effectiveDeliveryFee = campaignFreeDelivery ? 0 : serverDeliveryFee;
 
     const finalTotal = args.type === "pickup"
       ? Math.max(0, computedTotal - totalDiscountAmount)
@@ -324,7 +362,7 @@ export const createOrder = mutation({
       address: args.address,
       scheduledTime: args.scheduledTime,
       paymentMethod: args.paymentMethod,
-      paymentStatus: args.paymentStatus,
+      paymentStatus: "unpaid",
       stripePaymentIntentId: args.stripePaymentIntentId,
       items: verifiedItems,
       totalPrice: finalTotal,
@@ -487,5 +525,19 @@ export const deleteOrder = mutation({
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
     await ctx.db.delete(args.orderId);
+  },
+});
+
+export const markOrderPaid = internalMutation({
+  args: {
+    orderId: v.id("orders"),
+    stripePaymentIntentId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.orderId, {
+      paymentStatus: "paid",
+      stripePaymentIntentId: args.stripePaymentIntentId,
+      updatedAt: Date.now(),
+    });
   },
 });

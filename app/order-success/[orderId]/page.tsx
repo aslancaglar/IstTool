@@ -484,7 +484,7 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                             </div>
 
                             {/* Delivery address */}
-                            {isDelivery && order.address && (
+                            {'address' in order && isDelivery && order.address && (
                                 <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
                                         <MapPin className="w-4 h-4 text-slate-500" />
@@ -497,9 +497,9 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                             )}
 
                             {/* Items */}
-                            {order.items && order.items.length > 0 && (
+                            {'items' in order && order.items && order.items.length > 0 && (
                                 <div className="border-t border-slate-100 pt-4 space-y-4">
-                                    {order.items.map((item: any, i: number) => (
+                                    {(order as any).items.map((item: any, i: number) => (
                                         <div key={i} className="flex flex-col">
                                             <div className="flex justify-between items-start">
                                                 <span className="text-sm font-semibold text-slate-800">{item.name || 'Produit'}</span>
@@ -532,7 +532,7 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                             {/* Totals */}
                             <div className="border-t border-slate-100 pt-3 space-y-2">
                                 {isDelivery && (() => {
-                                    const subtotal = order.items?.reduce((sum: number, item: any) => sum + (item.finalPrice || 0), 0) || 0;
+                                    const subtotal = ('items' in order ? order.items : [])?.reduce((sum: number, item: any) => sum + (item.finalPrice || 0), 0) || 0;
                                     const deliveryFee = Math.max(0, order.totalPrice - subtotal);
                                     if (deliveryFee > 0) {
                                         return (

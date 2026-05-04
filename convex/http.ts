@@ -118,6 +118,14 @@ http.route({
   path: "/api/vapi/order",
   method: "POST",
   handler: httpAction(async (ctx, req) => {
+    const requiredKey = process.env.VAPI_API_KEY;
+    if (requiredKey) {
+      const provided = req.headers.get("X-Api-Key");
+      if (provided !== requiredKey) {
+        return json({ error: "Unauthorized" }, 401);
+      }
+    }
+
     let body: any;
     try {
       body = await req.json();
@@ -259,7 +267,6 @@ http.route({
         } : undefined,
         scheduledTime: "asap",
         paymentMethod: "cash",
-        paymentStatus: "unpaid",
         items: orderItems,
         totalPrice,
       });
