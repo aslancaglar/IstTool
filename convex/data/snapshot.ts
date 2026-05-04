@@ -408,20 +408,6 @@ export const snapshot: any = {
       "toppingCategoryId": "supplements"
     },
     {
-      "_creationTime": 1777551933008.5051,
-      "_id": "jn72akgxm1r0m3n040z1s707ed85ty7j",
-      "displayOrder": 0,
-      "menuItemId": "js77shftwn80ea7q21vhhdkra585thad",
-      "toppingCategoryId": "taille"
-    },
-    {
-      "_creationTime": 1777551933008.5054,
-      "_id": "jn709tdqz68nnkgrs3ayve7vy585tb5s",
-      "displayOrder": 1,
-      "menuItemId": "js77shftwn80ea7q21vhhdkra585thad",
-      "toppingCategoryId": "supplements"
-    },
-    {
       "_creationTime": 1777551933008.5056,
       "_id": "jn7e3tq36mrfdvpk2zwdn32rrs85vv8s",
       "displayOrder": 0,
@@ -639,80 +625,10 @@ export const snapshot: any = {
       "toppingCategoryId": "crudites"
     },
     {
-      "_creationTime": 1777551933008.5132,
-      "_id": "jn7261kpxz6v5jt091z2yx6btd85vbzb",
-      "displayOrder": 0,
-      "menuItemId": "js7fz7d7q2wx8tmgy1r43s419985trxw",
-      "toppingCategoryId": "viandes"
-    },
-    {
-      "_creationTime": 1777551933008.5134,
-      "_id": "jn71270k1mh10ygagqz9w86kjh85tez8",
-      "displayOrder": 1,
-      "menuItemId": "js7fz7d7q2wx8tmgy1r43s419985trxw",
-      "toppingCategoryId": "sauces"
-    },
-    {
-      "_creationTime": 1777551933008.5137,
-      "_id": "jn79jh1svajnhw8rx50hy4n1t185tmhy",
-      "displayOrder": 2,
-      "menuItemId": "js7fz7d7q2wx8tmgy1r43s419985trxw",
-      "toppingCategoryId": "supplements"
-    },
-    {
-      "_creationTime": 1777551933008.514,
-      "_id": "jn701ebtphqff44p44m35vzdrh85t7fe",
-      "displayOrder": 0,
-      "menuItemId": "js702hkxv40qz4zh2dn8t3g9r985t5fg",
-      "toppingCategoryId": "2-viandes"
-    },
-    {
-      "_creationTime": 1777551933008.5142,
-      "_id": "jn7ew3j0td6v5yam4r2g96mvf985vje5",
-      "displayOrder": 1,
-      "menuItemId": "js702hkxv40qz4zh2dn8t3g9r985t5fg",
-      "toppingCategoryId": "sauces"
-    },
-    {
-      "_creationTime": 1777551933008.5144,
-      "_id": "jn7660g74q4x26ys6gwq7p4fs985vg7z",
-      "displayOrder": 2,
-      "menuItemId": "js702hkxv40qz4zh2dn8t3g9r985t5fg",
-      "toppingCategoryId": "supplements"
-    },
-    {
-      "_creationTime": 1777551933008.5146,
-      "_id": "jn71b3r4ctz435q2jz7455wbp585v3tn",
-      "displayOrder": 0,
-      "menuItemId": "js7189d04vj3dc1hceq4t288t985vk6p",
-      "toppingCategoryId": "sauces"
-    },
-    {
-      "_creationTime": 1777551933008.515,
-      "_id": "jn71w3v06t7r21q4e8tnq6t1jh85vfyf",
-      "displayOrder": 0,
-      "menuItemId": "js7bn3z89ms4afm94rse3v6syx85tgmp",
-      "toppingCategoryId": "sauces"
-    },
-    {
-      "_creationTime": 1777551933008.5151,
-      "_id": "jn7344ejgp1vf1n08vq85vcqy585vdbc",
-      "displayOrder": 0,
-      "menuItemId": "js7ej14z7r1d5qeaevvy3rvnvx85tpyc",
-      "toppingCategoryId": "sauces"
-    },
-    {
       "_creationTime": 1777551933008.5154,
       "_id": "jn74p0qcg5qwcs16179169b8j585t5b0",
       "displayOrder": 0,
       "menuItemId": "js78vnp3e11dv4gtqkxkdtmvrs85taqh",
-      "toppingCategoryId": "sauces"
-    },
-    {
-      "_creationTime": 1777551933008.5156,
-      "_id": "jn70haf8dn0vsp0zsjwe9608zs85v45y",
-      "displayOrder": 0,
-      "menuItemId": "js759s0mp17vydgnedc0xnfaan85vmt1",
       "toppingCategoryId": "sauces"
     },
     {
@@ -777,6 +693,97 @@ export const snapshot: any = {
       "displayOrder": 1,
       "menuItemId": "js7atd4j7dt7jy0pvqj1thgfw985vkxs",
       "toppingCategoryId": "supplements"
+    },
+    {
+      "_creationTime": 1777835250825.5857,
+      "_id": "jn71r7bjfv6c1wtyr9tvj3324s860798",
+      "displayOrder": 0,
+      "menuItemId": "js77shftwn80ea7q21vhhdkra585thad",
+      "toppingCategoryId": "taille"
+    },
+    {
+      "_creationTime": 1777835250825.586,
+      "_id": "jn7b5ah3k6pe9x14mzsn4w2n85860h95",
+      "displayOrder": 1,
+      "menuItemId": "js77shftwn80ea7q21vhhdkra585thad",
+      "toppingCategoryId": "supplements"
+    },
+    {
+      "_creationTime": 1777835274623.6245,
+      "_id": "jn74v4nf9hp683k94nhmkx5ca9860xra",
+      "displayOrder": 0,
+      "menuItemId": "js7fz7d7q2wx8tmgy1r43s419985trxw",
+      "toppingCategoryId": "viandes"
+    },
+    {
+      "_creationTime": 1777835274623.6248,
+      "_id": "jn7c54eywh4krn12b50nr934ns861kvy",
+      "displayOrder": 1,
+      "menuItemId": "js7fz7d7q2wx8tmgy1r43s419985trxw",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1777835274623.625,
+      "_id": "jn79zdxh3za4ezhxkwh3kp2ce98607wt",
+      "displayOrder": 2,
+      "menuItemId": "js7fz7d7q2wx8tmgy1r43s419985trxw",
+      "toppingCategoryId": "supplements"
+    },
+    {
+      "_creationTime": 1777835285215.0012,
+      "_id": "jn77zzgcy5yfz2m1e077j85yz1860r29",
+      "displayOrder": 0,
+      "menuItemId": "js702hkxv40qz4zh2dn8t3g9r985t5fg",
+      "toppingCategoryId": "2-viandes"
+    },
+    {
+      "_creationTime": 1777835285215.0015,
+      "_id": "jn77cy1z3y3qqn4swrdpgxects861knk",
+      "displayOrder": 1,
+      "menuItemId": "js702hkxv40qz4zh2dn8t3g9r985t5fg",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1777835285215.0017,
+      "_id": "jn7cb2kx18fafxzkzwx5j85cy9860t7p",
+      "displayOrder": 2,
+      "menuItemId": "js702hkxv40qz4zh2dn8t3g9r985t5fg",
+      "toppingCategoryId": "supplements"
+    },
+    {
+      "_creationTime": 1777844012133.0547,
+      "_id": "jn78pkk8xcpjfe75fy67ytq90s8614rx",
+      "displayOrder": 0,
+      "menuItemId": "js7bn3z89ms4afm94rse3v6syx85tgmp",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1777844221128.0073,
+      "_id": "jn76m7wzsqtmbtg47088t2bnh18612r6",
+      "displayOrder": 0,
+      "menuItemId": "js7ej14z7r1d5qeaevvy3rvnvx85tpyc",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1777844227634.145,
+      "_id": "jn7969r6wg46pht1azgv9pqt9s860g1w",
+      "displayOrder": 0,
+      "menuItemId": "js759s0mp17vydgnedc0xnfaan85vmt1",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1777844769688.3984,
+      "_id": "jn76t3wzr7kh7q87cffbz8gfbn860pvz",
+      "displayOrder": 0,
+      "menuItemId": "js78ybpvbtnf5bg6cqz8k51gm9860b2p",
+      "toppingCategoryId": "taille"
+    },
+    {
+      "_creationTime": 1777844977142.5464,
+      "_id": "jn76mnjkqbkef39h583wkbgman861z1a",
+      "displayOrder": 0,
+      "menuItemId": "js7189d04vj3dc1hceq4t288t985vk6p",
+      "toppingCategoryId": "sauces"
     }
   ],
   "menuItems": [
@@ -792,6 +799,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/Margherita.jpg",
       "inStock": true,
       "name": "MARGHERITA",
+      "platformPrice": 11.05,
       "price": 8.5
     },
     {
@@ -806,6 +814,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/regina.jpg",
       "inStock": true,
       "name": "REGINA",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -820,6 +829,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/au-thon.jpg",
       "inStock": true,
       "name": "THON",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -834,6 +844,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/4-fromages.jpg",
       "inStock": true,
       "name": "4 FROMAGES",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -848,6 +859,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/campione.jpg",
       "inStock": true,
       "name": "CAMPIONE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -862,6 +874,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/orientale.jpg",
       "inStock": true,
       "name": "ORIENTALE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -876,6 +889,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/royale.jpg",
       "inStock": true,
       "name": "ROYALE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -890,6 +904,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/vegetarienne.jpg",
       "inStock": true,
       "name": "VÉGÉTARIENNE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -904,6 +919,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/napolitaine.jpg",
       "inStock": true,
       "name": "NAPOLITAINE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -918,6 +934,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/4jambons.jpg",
       "inStock": true,
       "name": "4 JAMBONS",
+      "platformPrice": 14.95,
       "price": 11.5
     },
     {
@@ -932,6 +949,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/pepperoni.jpg",
       "inStock": true,
       "name": "PEPPERONI",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -946,6 +964,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/kebab.jpg",
       "inStock": true,
       "name": "KEBAB",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -960,6 +979,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/calzone.jpg",
       "inStock": false,
       "name": "CALZONE",
+      "platformPrice": 17.55,
       "price": 13.5
     },
     {
@@ -974,6 +994,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/fruitsdemer.jpg",
       "inStock": true,
       "name": "FRUITS DE MER",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -988,6 +1009,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-tomate/hawaienne.jpg",
       "inStock": true,
       "name": "HAWAÏENNE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1002,6 +1024,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/saumon.jpg",
       "inStock": true,
       "name": "SAUMON",
+      "platformPrice": 14.95,
       "price": 11.5
     },
     {
@@ -1016,6 +1039,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/chevre-miel.jpg",
       "inStock": true,
       "name": "CHÈVRE MIEL",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1030,6 +1054,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/raclette.jpg",
       "inStock": true,
       "name": "RACLETTE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1044,6 +1069,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/flamme.jpg",
       "inStock": true,
       "name": "FLAMME",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1058,6 +1084,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/chicken.jpg",
       "inStock": true,
       "name": "CHICKEN",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1072,6 +1099,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/4fromages.jpg",
       "inStock": true,
       "name": "4 FROMAGES",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1086,6 +1114,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/fcmetz.jpg",
       "inStock": true,
       "name": "FC METZ",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1100,6 +1129,7 @@ export const snapshot: any = {
       "image": "/pizzas/base-creme/mondo.jpg",
       "inStock": true,
       "name": "MONDO",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1109,11 +1139,13 @@ export const snapshot: any = {
       "categories": [
         "pizzas-speciales"
       ],
+      "categoryOrders": [],
       "description": "Sauce algérienne, mozzarella, viande hachée, pomme de terre, poivron, olives noires",
       "displayOrder": 0,
       "image": "/pizzas/pizzaicon.jpg",
       "inStock": true,
       "name": "ALGÉRIENNE",
+      "popular": false,
       "price": 10
     },
     {
@@ -1128,6 +1160,7 @@ export const snapshot: any = {
       "image": "/pizzas/pizzaicon.jpg",
       "inStock": true,
       "name": "INDIENNE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1142,6 +1175,7 @@ export const snapshot: any = {
       "image": "/pizzas/pizzaicon.jpg",
       "inStock": true,
       "name": "ANDALOUSE",
+      "platformPrice": 13,
       "price": 10
     },
     {
@@ -1156,6 +1190,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "PANINI MERGUEZ",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1170,6 +1205,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "POULET",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1184,6 +1220,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "VIANDE HACHÉE",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1198,6 +1235,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "SAUMON",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1212,6 +1250,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "4 FROMAGES",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1226,6 +1265,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "THON",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1240,6 +1280,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "CHEESEBURGER",
+      "platformPrice": 8.45,
       "price": 6.5
     },
     {
@@ -1254,6 +1295,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "DOBLE CHEESE",
+      "platformPrice": 11.05,
       "price": 8.5
     },
     {
@@ -1268,6 +1310,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "LE CHICKEN",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1277,11 +1320,13 @@ export const snapshot: any = {
       "categories": [
         "tacos"
       ],
+      "categoryOrders": [],
       "description": "1 Viande au choix, servi with a drink 33cl",
       "displayOrder": 0,
-      "image": "",
+      "image": "/tacos/tacos.jpg",
       "inStock": true,
       "name": "TACOS 1 VIANDE",
+      "popular": false,
       "price": 7
     },
     {
@@ -1291,11 +1336,13 @@ export const snapshot: any = {
       "categories": [
         "tacos"
       ],
+      "categoryOrders": [],
       "description": "2 Viandes au choix, servi with a drink 33cl",
       "displayOrder": 1,
-      "image": "/tacos2.jpeg",
+      "image": "/tacos/tacos.jpg",
       "inStock": true,
       "name": "TACOS 2 VIANDES",
+      "popular": false,
       "price": 9
     },
     {
@@ -1305,11 +1352,14 @@ export const snapshot: any = {
       "categories": [
         "tex-mex"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 0,
       "image": "/tex-mex/frites.jpg",
       "inStock": true,
+      "isUpsell": true,
       "name": "FRITES",
+      "popular": false,
       "price": 3.5
     },
     {
@@ -1319,11 +1369,14 @@ export const snapshot: any = {
       "categories": [
         "tex-mex"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 1,
       "image": "/tex-mex/potatoes.jpg",
       "inStock": true,
+      "isUpsell": true,
       "name": "POTATOES",
+      "popular": false,
       "price": 3.5
     },
     {
@@ -1333,11 +1386,14 @@ export const snapshot: any = {
       "categories": [
         "tex-mex"
       ],
+      "categoryOrders": [],
       "description": "Servi avec frites ou potatoes",
       "displayOrder": 2,
       "image": "/tex-mex/nuggets.jpg",
       "inStock": true,
+      "isUpsell": true,
       "name": "NUGGETS X8",
+      "popular": false,
       "price": 10
     },
     {
@@ -1352,6 +1408,7 @@ export const snapshot: any = {
       "image": "/tex-mex/nuggets.jpg",
       "inStock": true,
       "name": "NUGGETS X12",
+      "platformPrice": 16.9,
       "price": 13
     },
     {
@@ -1361,11 +1418,14 @@ export const snapshot: any = {
       "categories": [
         "tex-mex"
       ],
+      "categoryOrders": [],
       "description": "Servi avec frites ou potatoes",
       "displayOrder": 4,
       "image": "/tex-mex/wings.jpg",
       "inStock": true,
+      "isUpsell": true,
       "name": "CHICKEN WINGS X10",
+      "popular": false,
       "price": 10
     },
     {
@@ -1380,6 +1440,7 @@ export const snapshot: any = {
       "image": "/tex-mex/wings.jpg",
       "inStock": true,
       "name": "CHICKEN WINGS X12",
+      "platformPrice": 16.9,
       "price": 13
     },
     {
@@ -1394,6 +1455,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "SAUMON",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1408,6 +1470,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "THON",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1422,6 +1485,7 @@ export const snapshot: any = {
       "image": "",
       "inStock": false,
       "name": "CHÈVRE CHAUD",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1436,6 +1500,7 @@ export const snapshot: any = {
       "image": "/salade-poulet-min.jpg",
       "inStock": false,
       "name": "FERMIÈRE",
+      "platformPrice": 9.75,
       "price": 7.5
     },
     {
@@ -1445,10 +1510,13 @@ export const snapshot: any = {
       "categories": [
         "desserts"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 0,
-      "image": "",
+      "image": "/desserts/desserticon.jpg",
+      "inStock": true,
       "name": "TARTE AU DAIM",
+      "popular": false,
       "price": 4
     },
     {
@@ -1458,10 +1526,14 @@ export const snapshot: any = {
       "categories": [
         "desserts"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 1,
-      "image": "/tiramisu.jpeg",
+      "image": "/desserts/desserticon.jpg",
+      "inStock": true,
+      "isUpsell": true,
       "name": "TIRAMISU",
+      "popular": false,
       "price": 4
     },
     {
@@ -1471,10 +1543,13 @@ export const snapshot: any = {
       "categories": [
         "desserts"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 2,
-      "image": "",
+      "image": "/desserts/desserticon.jpg",
+      "inStock": true,
       "name": "BROWNIES",
+      "popular": false,
       "price": 4
     },
     {
@@ -1484,10 +1559,13 @@ export const snapshot: any = {
       "categories": [
         "desserts"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 3,
-      "image": "",
+      "image": "/desserts/desserticon.jpg",
+      "inStock": true,
       "name": "TARTE AU CITRON",
+      "popular": false,
       "price": 4
     },
     {
@@ -1497,10 +1575,13 @@ export const snapshot: any = {
       "categories": [
         "desserts"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 4,
-      "image": "",
+      "image": "/desserts/desserticon.jpg",
+      "inStock": true,
       "name": "BEN & JERRY'S 100 ml",
+      "popular": false,
       "price": 3
     },
     {
@@ -1510,10 +1591,13 @@ export const snapshot: any = {
       "categories": [
         "desserts"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 5,
-      "image": "",
+      "image": "/desserts/desserticon.jpg",
+      "inStock": true,
       "name": "BEN & JERRY'S 500 ml",
+      "popular": false,
       "price": 6
     },
     {
@@ -1523,11 +1607,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 2
+        }
+      ],
       "description": "",
       "displayOrder": 100,
-      "image": "",
+      "image": "/boissons/fanta-orange-33cl.jpg",
       "inStock": true,
       "name": "Fanta Orange 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1537,11 +1628,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 3
+        }
+      ],
       "description": "",
       "displayOrder": 101,
-      "image": "",
+      "image": "/boissons/coca-cola-cherry33cl.jpg",
       "inStock": true,
       "name": "Coca-Cola Cherry 33cl",
+      "platformPrice": 2.34,
       "popular": true,
       "price": 1.8
     },
@@ -1552,11 +1650,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 4
+        }
+      ],
       "description": "",
       "displayOrder": 102,
-      "image": "",
+      "image": "/boissons/orangina33cl.jpg",
       "inStock": true,
       "name": "Orangina 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1566,11 +1671,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 5
+        }
+      ],
       "description": "",
       "displayOrder": 103,
-      "image": "",
+      "image": "/boissons/perrier33cl.jpg",
       "inStock": true,
       "name": "Perrier 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1580,11 +1692,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 6
+        }
+      ],
       "description": "",
       "displayOrder": 104,
-      "image": "",
+      "image": "/boissons/7up33cl.jpg",
       "inStock": true,
       "name": "7 Up 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1594,11 +1713,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 7
+        }
+      ],
       "description": "",
       "displayOrder": 105,
-      "image": "",
+      "image": "/boissons/schweppes-agrumes33cl.jpg",
       "inStock": true,
       "name": "Schweppes Agrumes 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1608,11 +1734,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 8
+        }
+      ],
       "description": "",
       "displayOrder": 106,
-      "image": "",
+      "image": "/boissons/sprite33cl.jpg",
       "inStock": true,
       "name": "Sprite 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1622,11 +1755,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 9
+        }
+      ],
       "description": "",
       "displayOrder": 107,
-      "image": "",
+      "image": "/boissons/redbull.jpg",
       "inStock": true,
       "name": "Red Bull 25cl",
+      "platformPrice": 3.25,
       "price": 2.5
     },
     {
@@ -1636,11 +1776,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 10
+        }
+      ],
       "description": "",
       "displayOrder": 108,
-      "image": "",
+      "image": "/boissons/coca-cola1.5L.jpg",
       "inStock": true,
       "name": "Coca Cola 1.5L",
+      "platformPrice": 4.55,
       "popular": true,
       "price": 3.5
     },
@@ -1651,11 +1798,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 11
+        }
+      ],
       "description": "",
       "displayOrder": 109,
-      "image": "",
+      "image": "/boissons/fanta1.5L.jpg",
       "inStock": true,
       "name": "Fanta Orange 1.5L",
+      "platformPrice": 4.55,
       "price": 3.5
     },
     {
@@ -1665,11 +1819,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 12
+        }
+      ],
       "description": "",
       "displayOrder": 110,
-      "image": "",
+      "image": "/boissons/monster.jpg",
       "inStock": true,
       "name": "Monster Energy 50cl",
+      "platformPrice": 3.25,
       "price": 2.5
     },
     {
@@ -1679,9 +1840,16 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 0
+        }
+      ],
       "description": "",
       "displayOrder": 111,
-      "image": "",
+      "image": "/boissons/coca-cola33cl.jpg",
+      "imageStorageId": "kg23m5h2w585qmt5zgsynyqbcx861jt7",
       "inStock": true,
       "name": "Coca-Cola 33cl",
       "popular": true,
@@ -1694,11 +1862,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 1
+        }
+      ],
       "description": "",
       "displayOrder": 112,
-      "image": "",
+      "image": "/boissons/coca-cola-zero33cl.jpg",
       "inStock": true,
       "name": "Coca-Cola Zéro 33cl",
+      "platformPrice": 2.34,
       "popular": true,
       "price": 1.8
     },
@@ -1709,11 +1884,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 13
+        }
+      ],
       "description": "",
       "displayOrder": 113,
-      "image": "",
+      "image": "/boissons/lipton-icetea33cl.jpg",
       "inStock": true,
       "name": "Ice Tea 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1723,11 +1905,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 14
+        }
+      ],
       "description": "",
       "displayOrder": 114,
-      "image": "",
+      "image": "/boissons/oasis-tropical-33cl.jpg",
       "inStock": true,
       "name": "Oasis 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1737,11 +1926,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 15
+        }
+      ],
       "description": "",
       "displayOrder": 115,
       "image": "",
-      "inStock": true,
+      "inStock": false,
       "name": "Eau Minérale 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1751,11 +1947,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 16
+        }
+      ],
       "description": "",
       "displayOrder": 116,
       "image": "",
-      "inStock": true,
+      "inStock": false,
       "name": "Dada 33cl",
+      "platformPrice": 2.34,
       "price": 1.8
     },
     {
@@ -1765,11 +1968,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 17
+        }
+      ],
       "description": "",
       "displayOrder": 117,
-      "image": "",
+      "image": "/boissons/icetea1.5L.jpg",
       "inStock": true,
       "name": "Ice Tea 1.5L",
+      "platformPrice": 4.55,
       "price": 3.5
     },
     {
@@ -1779,11 +1989,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 18
+        }
+      ],
       "description": "",
       "displayOrder": 118,
-      "image": "",
+      "image": "/boissons/oasis2L.jpg",
       "inStock": true,
       "name": "Oasis 2L",
+      "popular": false,
       "price": 3.5
     },
     {
@@ -1793,11 +2010,18 @@ export const snapshot: any = {
       "categories": [
         "boissons"
       ],
+      "categoryOrders": [
+        {
+          "category": "boissons",
+          "order": 19
+        }
+      ],
       "description": "",
       "displayOrder": 0,
-      "image": "",
+      "image": "/boissons/coca-cola-zero1.5L.jpg",
       "inStock": true,
       "name": "Coca Cola Zéro 1.5L",
+      "popular": false,
       "price": 3.5
     }
   ],
@@ -1806,11 +2030,14 @@ export const snapshot: any = {
       "_creationTime": 1777551933008.518,
       "_id": "k174grr1py4qcbwrt5rc95598585tfx8",
       "address": "20 Rue Saint-Pierre 57000 Metz",
-      "defaultDeliveryFee": 0,
+      "cashEnabled": true,
+      "defaultDeliveryFee": 2,
       "deliveryEnabled": true,
+      "deliveryFees": [],
       "email": "contact@mondopizza57.fr",
       "freeDeliveryThreshold": 0,
       "galleryEnabled": false,
+      "holidays": [],
       "hours": [
         {
           "day": "Lundi",
@@ -1850,7 +2077,8 @@ export const snapshot: any = {
         "facebook": "",
         "instagram": "",
         "twitter": ""
-      }
+      },
+      "stripeEnabled": true
     }
   ],
   "reviews": [
@@ -1948,6 +2176,7 @@ export const snapshot: any = {
       "active": true,
       "categoryId": "taille",
       "displayOrder": 0,
+      "freeForBogo": true,
       "maxSelection": 1,
       "minSelection": 0,
       "name": "Taille Pizza"
@@ -2360,7 +2589,7 @@ export const snapshot: any = {
       "active": true,
       "categoryId": "taille",
       "displayOrder": 41,
-      "name": "33 CM",
+      "name": "Senior (33 CM)",
       "price": 3,
       "toppingId": "topping-1777548068398"
     },
@@ -2370,7 +2599,7 @@ export const snapshot: any = {
       "active": true,
       "categoryId": "taille",
       "displayOrder": 40,
-      "name": "29 CM",
+      "name": "Junior (29 CM)",
       "price": 0,
       "toppingId": "topping-1777548084889"
     }
