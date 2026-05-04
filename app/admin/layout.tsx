@@ -18,8 +18,8 @@ export const metadata: Metadata = {
         title: 'MondoAdmin',
     },
     icons: {
-        icon: '/icons/admin-icon.svg',
-        apple: '/icons/admin-icon.svg',
+        icon: '/pwaicon.png',
+        apple: '/pwaicon.png',
     },
     other: {
         'mobile-web-app-capable': 'yes',
