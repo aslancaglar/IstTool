@@ -30,6 +30,12 @@ export default function AdminAuthLayout({ children }: { children: React.ReactNod
         }
     }, [admin, adminToken, isLoading, pathname, router]);
 
+    useEffect(() => {
+        if (!isLoading && admin?.role === 'orders_manager' && pathname !== '/admin/orders' && pathname !== '/admin/login') {
+            router.replace('/admin/orders');
+        }
+    }, [admin, isLoading, pathname, router]);
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">

@@ -66,6 +66,7 @@ export const createAdmin = mutation({
       username: args.username,
       passwordHash,
       createdAt: Date.now(),
+      role: "admin",
     });
 
     return adminId;
@@ -103,6 +104,7 @@ export const verifyAdmin = mutation({
     return {
       id: admin._id,
       username: admin.username,
+      role: admin.role ?? "admin",
       sessionToken,
     };
   },
@@ -131,7 +133,86 @@ export const getCurrentAdmin = query({
     return {
       id: admin._id,
       username: admin.username,
+      role: admin.role ?? "admin",
     };
+  },
+});
+
+export const listAdminUsers = query({
+  args: { adminToken: v.string() },
+  handler: async (ctx, args) => {
+    const { admin } = await requireAdminSession(ctx, args.adminToken);
+    if (admin.role && admin.role !== "admin") throw new Error("Unauthorized");
+
+    const admins = await ctx.db.query("adminUsers").collect();
+    return admins.map((a) => ({
+      _id: a._id,
+      username: a.username,
+      role: a.role ?? "admin",
+      createdAt: a.createdAt,
+    }));
+  },
+});
+
+export const createAdminUser = mutation({
+  args: {
+    adminToken: v.string(),
+    username: v.string(),
+    password: v.string(),
+    role: v.union(v.literal("admin"), v.literal("orders_manager")),
+  },
+  handler: async (ctx, args) => {
+    const { admin } = await requireAdminSession(ctx, args.adminToken);
+    if (admin.role && admin.role !== "admin") throw new Error("Unauthorized");
+
+    const existing = await ctx.db
+      .query("adminUsers")
+      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .first();
+    if (existing) throw new Error("Ce nom d'utilisateur est déjà pris.");
+
+    const passwordHash = await hashPassword(args.password);
+    await ctx.db.insert("adminUsers", {
+      username: args.username,
+      passwordHash,
+      createdAt: Date.now(),
+      role: args.role,
+    });
+  },
+});
+
+export const deleteAdminUser = mutation({
+  args: {
+    adminToken: v.string(),
+    targetId: v.id("adminUsers"),
+  },
+  handler: async (ctx, args) => {
+    const { admin } = await requireAdminSession(ctx, args.adminToken);
+    if (admin.role && admin.role !== "admin") throw new Error("Unauthorized");
+    if (admin._id === args.targetId) throw new Error("Impossible de supprimer votre propre compte.");
+
+    const sessions = await ctx.db
+      .query("adminSessions")
+      .withIndex("by_admin", (q) => q.eq("adminId", args.targetId))
+      .collect();
+    for (const session of sessions) await ctx.db.delete(session._id);
+
+    await ctx.db.delete(args.targetId);
+  },
+});
+
+export const updateAdminPassword = mutation({
+  args: {
+    adminToken: v.string(),
+    targetId: v.id("adminUsers"),
+    newPassword: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { admin } = await requireAdminSession(ctx, args.adminToken);
+    if (admin.role && admin.role !== "admin") throw new Error("Unauthorized");
+
+    const passwordHash = await hashPassword(args.newPassword);
+    await ctx.db.patch(args.targetId, { passwordHash });
   },
 });
 

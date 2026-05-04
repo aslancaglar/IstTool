@@ -17,6 +17,7 @@ import {
   Globe,
   User,
   Tag,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -44,17 +45,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const menuItems = [
-    { path: '/admin', label: 'Tableau de bord', icon: LayoutDashboard },
-    { path: '/admin/users', label: 'Utilisateurs', icon: User },
-    { path: '/admin/menu-items', label: 'Menu', icon: Pizza },
-    { path: '/admin/orders', label: 'Commandes', icon: ShoppingCart },
-    { path: '/admin/promotions', label: 'Promotions', icon: Tag },
-    { path: '/admin/reviews', label: 'Avis', icon: Star },
-    { path: '/admin/gallery', label: 'Galerie', icon: Image },
-    { path: '/admin/platform-prices', label: 'Prix des Plateformes', icon: Globe },
-    { path: '/admin/settings', label: 'Paramètres', icon: Settings },
-  ];
+  const isSuperAdmin = !admin?.role || admin.role === 'admin';
+
+  const menuItems = isSuperAdmin
+    ? [
+        { path: '/admin', label: 'Tableau de bord', icon: LayoutDashboard },
+        { path: '/admin/users', label: 'Utilisateurs', icon: User },
+        { path: '/admin/menu-items', label: 'Menu', icon: Pizza },
+        { path: '/admin/orders', label: 'Commandes', icon: ShoppingCart },
+        { path: '/admin/promotions', label: 'Promotions', icon: Tag },
+        { path: '/admin/reviews', label: 'Avis', icon: Star },
+        { path: '/admin/gallery', label: 'Galerie', icon: Image },
+        { path: '/admin/platform-prices', label: 'Prix des Plateformes', icon: Globe },
+        { path: '/admin/admin-accounts', label: 'Comptes admin', icon: ShieldCheck },
+        { path: '/admin/settings', label: 'Paramètres', icon: Settings },
+      ]
+    : [
+        { path: '/admin/orders', label: 'Commandes', icon: ShoppingCart },
+      ];
 
   const handleLogout = () => {
     logout();
@@ -103,7 +111,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-sm font-medium text-white">{admin?.username}</p>
-              <p className="text-xs text-slate-400">Administrateur</p>
+              <p className="text-xs text-slate-400">{isSuperAdmin ? 'Administrateur' : 'Gestionnaire de commandes'}</p>
             </div>
           </div>
           <button

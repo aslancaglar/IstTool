@@ -6,6 +6,7 @@ import { api } from '../../convex/_generated/api';
 interface AdminUser {
   id: string;
   username: string;
+  role: string;
 }
 
 interface AdminAuthContextType {
@@ -53,6 +54,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         setAdmin({
           id: currentAdmin.id,
           username: currentAdmin.username,
+          role: currentAdmin.role,
         });
         setAdminToken(sessionToken);
       } catch (error) {
@@ -74,6 +76,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         const adminUser = {
           id: result.id,
           username: result.username,
+          role: result.role,
         };
         setAdmin(adminUser);
         setAdminToken(result.sessionToken);

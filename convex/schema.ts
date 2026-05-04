@@ -6,6 +6,7 @@ export default defineSchema({
     username: v.string(),
     passwordHash: v.string(),
     createdAt: v.number(),
+    role: v.optional(v.union(v.literal("admin"), v.literal("orders_manager"))),
   }).index("by_username", ["username"]),
 
   adminSessions: defineTable({
