@@ -268,24 +268,24 @@ export default function OrderDetailsModal({
                                             <div className="flex items-center justify-between gap-3">
                                                 <div className="flex items-center gap-2 min-w-0">
                                                     <Gift className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-200 px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0">Offert</span>
-                                                    <p className="font-bold text-emerald-800 text-sm truncate">{item.name.replace(/ \(offert\)$/i, '')}</p>
+                                                    <span className="text-xs font-bold text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wide shrink-0">Offert</span>
+                                                    <p className="font-bold text-emerald-800 text-base truncate">{item.name.replace(/ \(offert\)$/i, '')}</p>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 shrink-0">
                                                     {paidCounterpart && (
-                                                        <span className="text-sm text-emerald-400 line-through tabular-nums">
+                                                        <span className="text-base text-emerald-400 line-through tabular-nums">
                                                             {paidCounterpart.finalPrice.toFixed(2)}€
                                                         </span>
                                                     )}
-                                                    <span className="text-sm font-black text-emerald-600 tabular-nums">
+                                                    <span className="text-base font-black text-emerald-600 tabular-nums">
                                                         {item.finalPrice > 0 ? `+${item.finalPrice.toFixed(2)}€` : 'Gratuit'}
                                                     </span>
                                                 </div>
                                             </div>
                                             {freeToppings.length > 0 && (
-                                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                                <div className="flex flex-wrap gap-2 mt-2">
                                                     {freeToppings.map((t, tidx) => (
-                                                        <span key={tidx} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-white border border-emerald-200 text-emerald-700 font-medium">
+                                                        <span key={tidx} className="inline-flex items-center gap-1 text-sm px-2.5 py-1 rounded-md bg-white border border-emerald-200 text-emerald-700 font-medium">
                                                             {t.name}
                                                             {t.isFreeForBogo
                                                                 ? <span className="text-emerald-400 font-bold">offert</span>
@@ -300,26 +300,26 @@ export default function OrderDetailsModal({
                                 }
 
                                 return (
-                                    <div key={index} className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                    <div key={index} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
                                         {/* Item header */}
                                         <div className="flex items-center justify-between gap-3 mb-1">
-                                            <p className="font-bold text-slate-900 text-sm">{item.name}</p>
-                                            <p className="font-black text-slate-900 tabular-nums text-sm shrink-0">
+                                            <p className="font-bold text-slate-900 text-base">{item.name}</p>
+                                            <p className="font-black text-slate-900 tabular-nums text-base shrink-0">
                                                 {item.finalPrice.toFixed(2)}€
                                             </p>
                                         </div>
 
                                         {/* Base price line */}
-                                        <p className="text-[11px] text-slate-400 mb-1">Prix de base: {item.price.toFixed(2)}€</p>
+                                        <p className="text-sm text-slate-500 mb-2 font-medium">Prix de base: {item.price.toFixed(2)}€</p>
 
                                         {/* Toppings - compact */}
                                         {Object.keys(toppingsByCategory).length > 0 && (
-                                            <div className="flex flex-wrap gap-1 mt-1.5">
+                                            <div className="flex flex-wrap gap-2 mt-2">
                                                 {Object.entries(toppingsByCategory).map(([cat, tops]) => (
                                                     tops.map((tp, tIdx) => (
                                                         <span
                                                             key={`${cat}-${tIdx}`}
-                                                            className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 font-medium"
+                                                            className="inline-flex items-center gap-1 text-sm px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-700 font-medium shadow-sm"
                                                         >
                                                             {tp.name}
                                                             {tp.price > 0 && (
