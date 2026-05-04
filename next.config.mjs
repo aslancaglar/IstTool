@@ -54,7 +54,7 @@ const nextConfig = {
                             "font-src 'self' https://fonts.gstatic.com",
                             "img-src 'self' data: blob: https:",
                             "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://api.stripe.com",
-                            "frame-src https://js.stripe.com https://hooks.stripe.com",
+                            "frame-src https://js.stripe.com https://hooks.stripe.com https://maps.google.com https://www.google.com",
                             "worker-src 'self' blob:",
                         ].join('; '),
                     },
