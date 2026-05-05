@@ -3,27 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { Save, Plus, Trash2, Clock, ChevronDown, ChevronRight } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { useAdminAuth } from '../../../src/context/AdminAuthContext';
-
-type TimeSlot = {
-  start: string;
-  end: string;
-};
-
-type DaySchedule = {
-  day: string;
-  slots: TimeSlot[];
-};
+import SettingsAccordion from '../../../src/components/admin/Settings/SettingsAccordion';
+import HoursSection, { type DaySchedule, type TimeSlot } from '../../../src/components/admin/Settings/HoursSection';
+import HolidaysSection, { type Holiday } from '../../../src/components/admin/Settings/HolidaysSection';
+import DeliveryZonesSection, { type DeliveryZone } from '../../../src/components/admin/Settings/DeliveryZonesSection';
 
 type SectionId = 'contact' | 'ordering' | 'hours' | 'holidays' | 'social' | 'delivery' | 'sections';
-
-type DeliveryZone = {
-  postalCode: string;
-  price: number;
-  name?: string;
-  freeDeliveryThreshold?: number;
-};
 
 export default function SettingsPage() {
   const { adminToken } = useAdminAuth();
@@ -31,13 +18,8 @@ export default function SettingsPage() {
   const upsertRestaurantInfo = useMutation(api.restaurantInfo.upsert);
 
   const [expandedSections, setExpandedSections] = useState<Record<SectionId, boolean>>({
-    contact: false,
-    ordering: false,
-    hours: false,
-    holidays: false,
-    social: false,
-    delivery: false,
-    sections: false,
+    contact: false, ordering: false, hours: false, holidays: false,
+    social: false, delivery: false, sections: false,
   });
 
   const toggleSection = (id: SectionId) => {
@@ -49,12 +31,8 @@ export default function SettingsPage() {
     phone: '',
     email: '',
     hours: [] as { day: string, time: string }[],
-    socialLinks: {
-      facebook: '',
-      instagram: '',
-      twitter: '',
-    },
-    holidays: [] as { startDate: string, endDate: string, name?: string, active: boolean }[],
+    socialLinks: { facebook: '', instagram: '', twitter: '' },
+    holidays: [] as Holiday[],
     pickupEnabled: true,
     deliveryEnabled: true,
     minimumAdvanceNotice: 30,
@@ -68,98 +46,78 @@ export default function SettingsPage() {
   });
 
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
-  const [holidays, setHolidays] = useState<{ startDate: string, endDate: string, name?: string, active: boolean }[]>([]);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
 
-  // Parse valid hours string into slots
-  // Format expected: "11h00 - 15h00" or "11:00 - 15:00"
-  // Multi-slot: "11h00 - 15h00 et 18h00 - 22h00"
+  // Format expected: "11h00 - 15h00" or "11:00 - 15:00"; multi-slot: "11h00 - 15h00 et 18h00 - 22h00"
   const parseTime = (timeStr: string): TimeSlot[] => {
     if (!timeStr) return [];
-
-    // Normalize string: replace 'h' with ':' and logic parsers
     const normalized = timeStr.toLowerCase().replace(/h/g, ':');
     const parts = normalized.split(/ et | and |,/);
-
     return parts.map(part => {
       const times = part.match(/(\d{1,2}:\d{2})/g);
-      if (times && times.length >= 2) {
-        return { start: times[0], end: times[1] };
-      }
+      if (times && times.length >= 2) return { start: times[0], end: times[1] };
       return { start: '', end: '' };
     }).filter(slot => slot.start && slot.end);
   };
 
   useEffect(() => {
-    if (restaurantInfo) {
-      setFormData({
-        address: restaurantInfo.address || '',
-        phone: restaurantInfo.phone || '',
-        email: restaurantInfo.email || '',
-        hours: restaurantInfo.hours || [],
-        socialLinks: restaurantInfo.socialLinks ? {
-          facebook: restaurantInfo.socialLinks.facebook || '',
-          instagram: restaurantInfo.socialLinks.instagram || '',
-          twitter: restaurantInfo.socialLinks.twitter || '',
-        } : { facebook: '', instagram: '', twitter: '' },
-        holidays: restaurantInfo.holidays || [],
-        pickupEnabled: restaurantInfo.pickupEnabled ?? true,
-        deliveryEnabled: restaurantInfo.deliveryEnabled ?? true,
-        minimumAdvanceNotice: restaurantInfo.minimumAdvanceNotice ?? 30,
-        deliveryFees: restaurantInfo.deliveryFees || [],
-        defaultDeliveryFee: restaurantInfo.defaultDeliveryFee ?? 0,
-        freeDeliveryThreshold: restaurantInfo.freeDeliveryThreshold ?? 0,
-        galleryEnabled: restaurantInfo.galleryEnabled ?? true,
-        reviewsEnabled: restaurantInfo.reviewsEnabled ?? true,
-        cashEnabled: restaurantInfo.cashEnabled ?? true,
-        stripeEnabled: restaurantInfo.stripeEnabled ?? true,
-      });
+    if (!restaurantInfo) return;
+    setFormData({
+      address: restaurantInfo.address || '',
+      phone: restaurantInfo.phone || '',
+      email: restaurantInfo.email || '',
+      hours: restaurantInfo.hours || [],
+      socialLinks: restaurantInfo.socialLinks ? {
+        facebook: restaurantInfo.socialLinks.facebook || '',
+        instagram: restaurantInfo.socialLinks.instagram || '',
+        twitter: restaurantInfo.socialLinks.twitter || '',
+      } : { facebook: '', instagram: '', twitter: '' },
+      holidays: restaurantInfo.holidays || [],
+      pickupEnabled: restaurantInfo.pickupEnabled ?? true,
+      deliveryEnabled: restaurantInfo.deliveryEnabled ?? true,
+      minimumAdvanceNotice: restaurantInfo.minimumAdvanceNotice ?? 30,
+      deliveryFees: restaurantInfo.deliveryFees || [],
+      defaultDeliveryFee: restaurantInfo.defaultDeliveryFee ?? 0,
+      freeDeliveryThreshold: restaurantInfo.freeDeliveryThreshold ?? 0,
+      galleryEnabled: restaurantInfo.galleryEnabled ?? true,
+      reviewsEnabled: restaurantInfo.reviewsEnabled ?? true,
+      cashEnabled: restaurantInfo.cashEnabled ?? true,
+      stripeEnabled: restaurantInfo.stripeEnabled ?? true,
+    });
 
-      setHolidays(restaurantInfo.holidays || []);
-      setDeliveryZones(restaurantInfo.deliveryFees || []);
+    setHolidays(restaurantInfo.holidays || []);
+    setDeliveryZones(restaurantInfo.deliveryFees || []);
 
-      // Initialize schedule from DB hours
-      if (restaurantInfo.hours) {
-        const parsedSchedule = restaurantInfo.hours.map(h => ({
-          day: h.day,
-          slots: parseTime(h.time)
-        }));
-        // If parsing failed (empty slots) but day exists, add default empty slot
-        const validSchedule = parsedSchedule.map(s =>
-          s.slots.length > 0 ? s : { ...s, slots: [{ start: '', end: '' }] }
-        );
-        setSchedule(validSchedule);
-      } else {
-        setSchedule([
-          { day: 'Lundi - Samedi', slots: [{ start: '11:00', end: '14:00' }, { start: '18:00', end: '22:00' }] }
-        ]);
-      }
+    if (restaurantInfo.hours) {
+      const parsedSchedule = restaurantInfo.hours.map(h => ({ day: h.day, slots: parseTime(h.time) }));
+      const validSchedule = parsedSchedule.map(s =>
+        s.slots.length > 0 ? s : { ...s, slots: [{ start: '', end: '' }] }
+      );
+      setSchedule(validSchedule);
+    } else {
+      setSchedule([
+        { day: 'Lundi - Samedi', slots: [{ start: '11:00', end: '14:00' }, { start: '18:00', end: '22:00' }] }
+      ]);
     }
   }, [restaurantInfo]);
 
-  const serializeSchedule = (): { day: string, time: string }[] => {
-    return schedule.map(day => {
+  const serializeSchedule = (): { day: string, time: string }[] =>
+    schedule.map(day => {
       const timeStr = day.slots
         .filter(s => s.start && s.end)
         .map(s => `${s.start.replace(':', 'h')} - ${s.end.replace(':', 'h')}`)
         .join(' et ');
-
-      return {
-        day: day.day,
-        time: timeStr || 'Fermé'
-      };
+      return { day: day.day, time: timeStr || 'Fermé' };
     });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveStatus('saving');
-
     try {
       if (!adminToken) return;
       const hoursToSave = serializeSchedule();
-
       await upsertRestaurantInfo({
         adminToken,
         address: formData.address,
@@ -167,7 +125,7 @@ export default function SettingsPage() {
         email: formData.email,
         hours: hoursToSave,
         socialLinks: formData.socialLinks,
-        holidays: holidays,
+        holidays,
         pickupEnabled: formData.pickupEnabled,
         deliveryEnabled: formData.deliveryEnabled,
         minimumAdvanceNotice: formData.minimumAdvanceNotice,
@@ -188,735 +146,314 @@ export default function SettingsPage() {
     }
   };
 
-  const addDay = () => {
-    setSchedule([...schedule, { day: '', slots: [{ start: '', end: '' }] }]);
-  };
-
-  const removeDay = (index: number) => {
-    setSchedule(schedule.filter((_, i) => i !== index));
-  };
-
+  // ── Schedule handlers ─────────────────────────────────────────────────
+  const addDay = () => setSchedule([...schedule, { day: '', slots: [{ start: '', end: '' }] }]);
+  const removeDay = (index: number) => setSchedule(schedule.filter((_, i) => i !== index));
   const updateDayName = (index: number, name: string) => {
-    const newSchedule = [...schedule];
-    newSchedule[index].day = name;
-    setSchedule(newSchedule);
+    const next = [...schedule];
+    next[index].day = name;
+    setSchedule(next);
   };
-
   const addSlot = (dayIndex: number) => {
-    const newSchedule = [...schedule];
-    newSchedule[dayIndex].slots.push({ start: '', end: '' });
-    setSchedule(newSchedule);
+    const next = [...schedule];
+    next[dayIndex].slots.push({ start: '', end: '' });
+    setSchedule(next);
   };
-
   const removeSlot = (dayIndex: number, slotIndex: number) => {
-    const newSchedule = [...schedule];
-    newSchedule[dayIndex].slots = newSchedule[dayIndex].slots.filter((_, i) => i !== slotIndex);
-    setSchedule(newSchedule);
+    const next = [...schedule];
+    next[dayIndex].slots = next[dayIndex].slots.filter((_, i) => i !== slotIndex);
+    setSchedule(next);
   };
-
   const updateSlot = (dayIndex: number, slotIndex: number, field: keyof TimeSlot, value: string) => {
-    const newSchedule = [...schedule];
-    newSchedule[dayIndex].slots[slotIndex][field] = value;
-    setSchedule(newSchedule);
+    const next = [...schedule];
+    next[dayIndex].slots[slotIndex][field] = value;
+    setSchedule(next);
   };
 
-  const addHoliday = () => {
-    setHolidays([...holidays, { startDate: '', endDate: '', name: '', active: true }]);
-  };
-
-  const removeHoliday = (index: number) => {
-    setHolidays(holidays.filter((_, i) => i !== index));
-  };
-
+  // ── Holiday handlers ─────────────────────────────────────────────────
+  const addHoliday = () => setHolidays([...holidays, { startDate: '', endDate: '', name: '', active: true }]);
+  const removeHoliday = (index: number) => setHolidays(holidays.filter((_, i) => i !== index));
   const updateHoliday = (index: number, field: string, value: any) => {
-    const newHolidays = [...holidays];
-    newHolidays[index] = { ...newHolidays[index], [field]: value };
-    setHolidays(newHolidays);
+    const next = [...holidays];
+    next[index] = { ...next[index], [field]: value };
+    setHolidays(next);
   };
 
-  // Delivery zone management functions
-  const addDeliveryZone = () => {
-    setDeliveryZones([...deliveryZones, { postalCode: '', price: 0, name: '', freeDeliveryThreshold: undefined }]);
-  };
-
-  const removeDeliveryZone = (index: number) => {
-    setDeliveryZones(deliveryZones.filter((_, i) => i !== index));
-  };
-
+  // ── Delivery zone handlers ─────────────────────────────────────────────────
+  const addDeliveryZone = () => setDeliveryZones([...deliveryZones, { postalCode: '', price: 0, name: '', freeDeliveryThreshold: undefined }]);
+  const removeDeliveryZone = (index: number) => setDeliveryZones(deliveryZones.filter((_, i) => i !== index));
   const updateDeliveryZone = (index: number, field: keyof DeliveryZone, value: string | number) => {
-    const newZones = [...deliveryZones];
-    newZones[index] = { ...newZones[index], [field]: value };
-    setDeliveryZones(newZones);
+    const next = [...deliveryZones];
+    next[index] = { ...next[index], [field]: value };
+    setDeliveryZones(next);
   };
 
   return (
-    <>
-      <div className="space-y-6 max-w-4xl pb-20">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Paramètres du Restaurant</h1>
-          <p className="text-slate-500 mt-1">Gérez les informations de votre restaurant</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection('contact')}
-              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-slate-900">Informations de Contact</h2>
-              {expandedSections.contact ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
-            </button>
-
-            {expandedSections.contact && (
-              <div className="p-6 pt-0 border-t border-slate-100 mt-0 space-y-4">
-                <div className="mt-4">
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Adresse</label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    placeholder="123 Rue de la Paix, 75001 Paris"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Téléphone</label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="+33 1 23 45 67 89"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="contact@restaurant.com"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection('ordering')}
-              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-slate-900">Options de Commande</h2>
-              {expandedSections.ordering ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
-            </button>
-
-            {expandedSections.ordering && (
-              <div className="p-6 pt-0 border-t border-slate-100 mt-0">
-                <div className="mt-4 space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Commandes à Emporter</h3>
-                      <p className="text-sm text-slate-500">Permettre aux clients de commander à emporter</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.pickupEnabled}
-                        onChange={(e) => setFormData({ ...formData, pickupEnabled: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Commandes en Livraison</h3>
-                      <p className="text-sm text-slate-500">Permettre aux clients de commander en livraison</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.deliveryEnabled}
-                        onChange={(e) => setFormData({ ...formData, deliveryEnabled: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                    </label>
-                  </div>
-
-                  {!formData.pickupEnabled && !formData.deliveryEnabled && (
-                    <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                      <p className="text-sm text-amber-800">
-                        <strong>⚠️ Attention:</strong> Le retrait et la livraison sont désactivés. Les clients ne pourront pas passer de commandes.
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="pt-2 border-t border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-700 mb-3">Modes de paiement acceptés</h3>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div>
-                          <h3 className="font-medium text-slate-900">Espèces / Carte à la récupération</h3>
-                          <p className="text-sm text-slate-500">Paiement en espèces ou par carte au comptoir</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.cashEnabled}
-                            onChange={(e) => setFormData({ ...formData, cashEnabled: e.target.checked })}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                        </label>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div>
-                          <h3 className="font-medium text-slate-900">Carte bancaire en ligne (Stripe)</h3>
-                          <p className="text-sm text-slate-500">Paiement sécurisé par carte via Stripe</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.stripeEnabled}
-                            onChange={(e) => setFormData({ ...formData, stripeEnabled: e.target.checked })}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                        </label>
-                      </div>
-
-                      {!formData.cashEnabled && !formData.stripeEnabled && (
-                        <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                          <p className="text-sm text-amber-800">
-                            <strong>⚠️ Attention:</strong> Aucun mode de paiement activé. Les clients ne pourront pas finaliser leurs commandes.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 mt-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-slate-900">Délai minimum de préparation</h3>
-                        <p className="text-sm text-slate-500">Temps minimum entre la commande et le retrait/livraison</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="15"
-                          max="120"
-                          step="5"
-                          value={formData.minimumAdvanceNotice}
-                          onChange={(e) => setFormData({ ...formData, minimumAdvanceNotice: parseInt(e.target.value) || 30 })}
-                          className="w-20 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
-                        />
-                        <span className="text-sm text-slate-600">min</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 mt-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-slate-900">Livraison gratuite à partir de</h3>
-                        <p className="text-sm text-slate-500">Montant minimum de commande pour offrir la livraison (0 = désactivé)</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={formData.freeDeliveryThreshold}
-                          onChange={(e) => setFormData({ ...formData, freeDeliveryThreshold: parseFloat(e.target.value) || 0 })}
-                          className="w-24 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
-                        />
-                        <span className="text-sm text-slate-600">€</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sections du Site */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection('sections')}
-              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-slate-900">Sections du Site</h2>
-              {expandedSections.sections ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
-            </button>
-
-            {expandedSections.sections && (
-              <div className="p-6 pt-0 border-t border-slate-100 mt-0">
-                <div className="mt-4 space-y-4">
-                  <p className="text-sm text-slate-500 mb-2">Afficher ou masquer des sections sur la page d'accueil.</p>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Section Avis</h3>
-                      <p className="text-sm text-slate-500">Afficher les avis clients sur la page d'accueil</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.reviewsEnabled}
-                        onChange={(e) => setFormData({ ...formData, reviewsEnabled: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Section Galerie</h3>
-                      <p className="text-sm text-slate-500">Afficher la galerie photos sur la page d'accueil</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.galleryEnabled}
-                        onChange={(e) => setFormData({ ...formData, galleryEnabled: e.target.checked })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Delivery Zones Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection('delivery')}
-              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-slate-900">Zones de livraison</h2>
-              {expandedSections.delivery ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
-            </button>
-
-            {expandedSections.delivery && (
-              <div className="p-6 pt-0 border-t border-slate-100 mt-0">
-                <div className="mt-4 space-y-6">
-                  {/* Default Delivery Fee */}
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-slate-900">Frais de livraison par défaut</h3>
-                        <p className="text-sm text-slate-500">Appliqué quand le code postal ne correspond à aucune zone</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.5"
-                          value={formData.defaultDeliveryFee}
-                          onChange={(e) => setFormData({ ...formData, defaultDeliveryFee: parseFloat(e.target.value) || 0 })}
-                          className="w-24 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
-                        />
-                        <span className="text-sm text-slate-600">€</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Delivery Zones List */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium text-slate-900">Zones de livraison</h3>
-                      <button
-                        type="button"
-                        onClick={addDeliveryZone}
-                        className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Ajouter une zone
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {deliveryZones.map((zone, index) => (
-                        <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-100 relative group">
-                          <button
-                            type="button"
-                            onClick={() => removeDeliveryZone(index)}
-                            className="absolute top-2 right-2 p-2 text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                            title="Supprimer la zone"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pr-8">
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                Nom de la zone
-                              </label>
-                              <input
-                                type="text"
-                                value={zone.name || ''}
-                                onChange={(e) => updateDeliveryZone(index, 'name', e.target.value)}
-                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                placeholder="Ex: Centre-ville"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                Code postal
-                              </label>
-                              <input
-                                type="text"
-                                value={zone.postalCode}
-                                onChange={(e) => updateDeliveryZone(index, 'postalCode', e.target.value)}
-                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                placeholder="Ex: 57190 ou 57* ou 57190-57199"
-                              />
-                              <p className="text-xs text-slate-400 mt-1">
-                                * = joker, 57190-57199 = plage
-                              </p>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                Prix (€)
-                              </label>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.5"
-                                value={zone.price}
-                                onChange={(e) => updateDeliveryZone(index, 'price', parseFloat(e.target.value) || 0)}
-                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                placeholder="0.00"
-                              />
-                            </div>
-                            <div className="md:col-start-3">
-                              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                Livraison gratuite dès (€)
-                              </label>
-                              <input
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={zone.freeDeliveryThreshold ?? ''}
-                                onChange={(e) => updateDeliveryZone(index, 'freeDeliveryThreshold', e.target.value === '' ? 0 : parseFloat(e.target.value))}
-                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                placeholder="Laisser vide pour désactiver"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-
-                      {deliveryZones.length === 0 && (
-                        <div className="text-center py-8 text-slate-500 italic bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                          Aucune zone de livraison configurée. Cliquez sur "Ajouter une zone" pour commencer.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection('hours')}
-              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-slate-900">Heures d'Ouverture</h2>
-              {expandedSections.hours ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
-            </button>
-
-            {expandedSections.hours && (
-              <div className="p-6 pt-0 border-t border-slate-100 mt-0">
-                <div className="flex justify-end mb-4 mt-4">
-                  <button
-                    type="button"
-                    onClick={addDay}
-                    className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Ajouter un Jour
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  {schedule.map((day, dayIndex) => (
-                    <div key={dayIndex} className="p-4 bg-slate-50 rounded-lg border border-slate-100 relative group">
-                      <button
-                        type="button"
-                        onClick={() => removeDay(dayIndex)}
-                        className="absolute top-2 right-2 p-2 text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Supprimer le jour"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-
-                      <div className="mb-4 pr-8">
-                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Jour(s)</label>
-                        <input
-                          type="text"
-                          value={day.day}
-                          onChange={(e) => updateDayName(dayIndex, e.target.value)}
-                          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                          placeholder="e.g. Lundi - Vendredi"
-                        />
-                      </div>
-
-                      <div className="space-y-3">
-                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Heures d'Ouverture</label>
-                        {day.slots.map((slot, slotIndex) => (
-                          <div key={slotIndex} className="flex items-center gap-2">
-                            <div className="flex-1 grid grid-cols-2 gap-2 items-center">
-                              <div className="relative">
-                                <Clock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                                <input
-                                  type="time"
-                                  value={slot.start}
-                                  onChange={(e) => updateSlot(dayIndex, slotIndex, 'start', e.target.value)}
-                                  className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                />
-                              </div>
-                              <span className="text-slate-400 text-center">-</span>
-                              <div className="relative">
-                                <Clock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                                <input
-                                  type="time"
-                                  value={slot.end}
-                                  onChange={(e) => updateSlot(dayIndex, slotIndex, 'end', e.target.value)}
-                                  className="w-full border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                                />
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeSlot(dayIndex, slotIndex)}
-                              className="p-2 text-slate-400 hover:text-red-500"
-                              title="Supprimer le créneau"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() => addSlot(dayIndex)}
-                          className="text-xs flex items-center gap-1 text-red-600 hover:text-red-700 font-medium mt-2"
-                        >
-                          <Plus className="w-3 h-3" />
-                          Ajouter un créneau
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {schedule.length === 0 && (
-                    <div className="text-center py-8 text-slate-500 italic">
-                      Aucune heure d'ouverture configurée. Cliquez sur "Ajouter un Jour" pour commencer.
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection('holidays')}
-              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-slate-900">Fermetures Exceptionnelles</h2>
-              {expandedSections.holidays ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
-            </button>
-
-            {expandedSections.holidays && (
-              <div className="p-6 pt-0 border-t border-slate-100 mt-0">
-                <div className="flex justify-end mb-6 mt-4">
-                  <button
-                    type="button"
-                    onClick={addHoliday}
-                    className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Ajouter une période
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {holidays.map((holiday, index) => (
-                    <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-100 relative group">
-                      <button
-                        type="button"
-                        onClick={() => removeHoliday(index)}
-                        className="absolute top-2 right-2 p-2 text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Supprimer la période"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2">
-                          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Nom de la période</label>
-                          <input
-                            type="text"
-                            value={holiday.name || ''}
-                            onChange={(e) => updateHoliday(index, 'name', e.target.value)}
-                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                            placeholder="e.g. Vacances d'été"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Date de début</label>
-                          <input
-                            type="date"
-                            value={holiday.startDate}
-                            onChange={(e) => updateHoliday(index, 'startDate', e.target.value)}
-                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Date de fin</label>
-                          <input
-                            type="date"
-                            value={holiday.endDate}
-                            onChange={(e) => updateHoliday(index, 'endDate', e.target.value)}
-                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                            required
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id={`active-${index}`}
-                            checked={holiday.active}
-                            onChange={(e) => updateHoliday(index, 'active', e.target.checked)}
-                            className="w-4 h-4 text-red-600 border-slate-300 rounded focus:ring-red-500"
-                          />
-                          <label htmlFor={`active-${index}`} className="text-sm text-slate-700">Actif</label>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {holidays.length === 0 && (
-                    <div className="text-center py-8 text-slate-500 italic">
-                      Aucune fermeture exceptionnelle configurée. Cliquez sur "Ajouter une période" pour commencer.
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection('social')}
-              className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
-            >
-              <h2 className="text-xl font-bold text-slate-900">Réseaux Sociaux</h2>
-              {expandedSections.social ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
-            </button>
-
-            {expandedSections.social && (
-              <div className="p-6 pt-0 border-t border-slate-100 mt-0 space-y-4">
-                <div className="mt-4">
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">URL Facebook</label>
-                  <input
-                    type="url"
-                    value={formData.socialLinks.facebook}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        socialLinks: { ...formData.socialLinks, facebook: e.target.value },
-                      })
-                    }
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    placeholder="https://facebook.com/yourpage"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">URL Instagram</label>
-                  <input
-                    type="url"
-                    value={formData.socialLinks.instagram}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        socialLinks: { ...formData.socialLinks, instagram: e.target.value },
-                      })
-                    }
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    placeholder="https://instagram.com/yourpage"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">URL Twitter</label>
-                  <input
-                    type="url"
-                    value={formData.socialLinks.twitter}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        socialLinks: { ...formData.socialLinks, twitter: e.target.value },
-                      })
-                    }
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    placeholder="https://twitter.com/yourpage"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4 pt-4">
-            <button
-              type="submit"
-              disabled={saveStatus === 'saving'}
-              className="flex items-center gap-2 bg-red-600 text-white px-6 py-2.5 rounded-xl hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
-            >
-              <Save className="w-5 h-5" />
-              {saveStatus === 'saving' ? 'Enregistrement...' : 'Enregistrer les modifications'}
-            </button>
-
-            {saveStatus === 'success' && (
-              <span className="text-green-600 font-medium flex items-center gap-2 animate-fade-in">
-                <div className="w-2 h-2 bg-green-500 rounded-full" />
-                Modifications enregistrées avec succès !
-              </span>
-            )}
-
-            {saveStatus === 'error' && (
-              <span className="text-red-600 font-medium">Erreur lors de l'enregistrement. Veuillez réessayer.</span>
-            )}
-          </div>
-        </form>
+    <div className="space-y-6 max-w-4xl pb-20">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Paramètres du Restaurant</h1>
+        <p className="text-slate-500 mt-1">Gérez les informations de votre restaurant</p>
       </div>
-    </>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <SettingsAccordion title="Informations de Contact" isOpen={expandedSections.contact} onToggle={() => toggleSection('contact')}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Adresse</label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="123 Rue de la Paix, 75001 Paris"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Téléphone</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder="+33 1 23 45 67 89"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder="contact@restaurant.com"
+                />
+              </div>
+            </div>
+          </div>
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Options de Commande" isOpen={expandedSections.ordering} onToggle={() => toggleSection('ordering')}>
+          <div className="space-y-4">
+            <ToggleRow
+              title="Commandes à Emporter"
+              description="Permettre aux clients de commander à emporter"
+              checked={formData.pickupEnabled}
+              onChange={(v) => setFormData({ ...formData, pickupEnabled: v })}
+            />
+            <ToggleRow
+              title="Commandes en Livraison"
+              description="Permettre aux clients de commander en livraison"
+              checked={formData.deliveryEnabled}
+              onChange={(v) => setFormData({ ...formData, deliveryEnabled: v })}
+            />
+
+            {!formData.pickupEnabled && !formData.deliveryEnabled && (
+              <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                <p className="text-sm text-amber-800">
+                  <strong>⚠️ Attention:</strong> Le retrait et la livraison sont désactivés. Les clients ne pourront pas passer de commandes.
+                </p>
+              </div>
+            )}
+
+            <div className="pt-2 border-t border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Modes de paiement acceptés</h3>
+              <div className="space-y-3">
+                <ToggleRow
+                  title="Espèces / Carte à la récupération"
+                  description="Paiement en espèces ou par carte au comptoir"
+                  checked={formData.cashEnabled}
+                  onChange={(v) => setFormData({ ...formData, cashEnabled: v })}
+                />
+                <ToggleRow
+                  title="Carte bancaire en ligne (Stripe)"
+                  description="Paiement sécurisé par carte via Stripe"
+                  checked={formData.stripeEnabled}
+                  onChange={(v) => setFormData({ ...formData, stripeEnabled: v })}
+                />
+                {!formData.cashEnabled && !formData.stripeEnabled && (
+                  <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                    <p className="text-sm text-amber-800">
+                      <strong>⚠️ Attention:</strong> Aucun mode de paiement activé. Les clients ne pourront pas finaliser leurs commandes.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 mt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-slate-900">Délai minimum de préparation</h3>
+                  <p className="text-sm text-slate-500">Temps minimum entre la commande et le retrait/livraison</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="15"
+                    max="120"
+                    step="5"
+                    value={formData.minimumAdvanceNotice}
+                    onChange={(e) => setFormData({ ...formData, minimumAdvanceNotice: parseInt(e.target.value) || 30 })}
+                    className="w-20 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                  <span className="text-sm text-slate-600">min</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-slate-900">Livraison gratuite à partir de</h3>
+                  <p className="text-sm text-slate-500">Montant minimum de commande pour offrir la livraison (0 = désactivé)</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.freeDeliveryThreshold}
+                    onChange={(e) => setFormData({ ...formData, freeDeliveryThreshold: parseFloat(e.target.value) || 0 })}
+                    className="w-24 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                  <span className="text-sm text-slate-600">€</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Sections du Site" isOpen={expandedSections.sections} onToggle={() => toggleSection('sections')}>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-500 mb-2">Afficher ou masquer des sections sur la page d'accueil.</p>
+            <ToggleRow
+              title="Section Avis"
+              description="Afficher les avis clients sur la page d'accueil"
+              checked={formData.reviewsEnabled}
+              onChange={(v) => setFormData({ ...formData, reviewsEnabled: v })}
+            />
+            <ToggleRow
+              title="Section Galerie"
+              description="Afficher la galerie photos sur la page d'accueil"
+              checked={formData.galleryEnabled}
+              onChange={(v) => setFormData({ ...formData, galleryEnabled: v })}
+            />
+          </div>
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Zones de livraison" isOpen={expandedSections.delivery} onToggle={() => toggleSection('delivery')}>
+          <DeliveryZonesSection
+            defaultDeliveryFee={formData.defaultDeliveryFee}
+            onDefaultDeliveryFeeChange={(value) => setFormData({ ...formData, defaultDeliveryFee: value })}
+            zones={deliveryZones}
+            onAddZone={addDeliveryZone}
+            onRemoveZone={removeDeliveryZone}
+            onUpdateZone={updateDeliveryZone}
+          />
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Heures d'Ouverture" isOpen={expandedSections.hours} onToggle={() => toggleSection('hours')}>
+          <HoursSection
+            schedule={schedule}
+            onAddDay={addDay}
+            onRemoveDay={removeDay}
+            onUpdateDayName={updateDayName}
+            onAddSlot={addSlot}
+            onRemoveSlot={removeSlot}
+            onUpdateSlot={updateSlot}
+          />
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Fermetures Exceptionnelles" isOpen={expandedSections.holidays} onToggle={() => toggleSection('holidays')}>
+          <HolidaysSection
+            holidays={holidays}
+            onAdd={addHoliday}
+            onRemove={removeHoliday}
+            onUpdate={updateHoliday}
+          />
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Réseaux Sociaux" isOpen={expandedSections.social} onToggle={() => toggleSection('social')}>
+          <div className="space-y-4">
+            <SocialInput
+              label="URL Facebook"
+              value={formData.socialLinks.facebook}
+              placeholder="https://facebook.com/yourpage"
+              onChange={(value) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, facebook: value } })}
+            />
+            <SocialInput
+              label="URL Instagram"
+              value={formData.socialLinks.instagram}
+              placeholder="https://instagram.com/yourpage"
+              onChange={(value) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, instagram: value } })}
+            />
+            <SocialInput
+              label="URL Twitter"
+              value={formData.socialLinks.twitter}
+              placeholder="https://twitter.com/yourpage"
+              onChange={(value) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, twitter: value } })}
+            />
+          </div>
+        </SettingsAccordion>
+
+        <div className="flex items-center gap-4 pt-4">
+          <button
+            type="submit"
+            disabled={saveStatus === 'saving'}
+            className="flex items-center gap-2 bg-red-600 text-white px-6 py-2.5 rounded-xl hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
+          >
+            <Save className="w-5 h-5" />
+            {saveStatus === 'saving' ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          </button>
+
+          {saveStatus === 'success' && (
+            <span className="text-green-600 font-medium flex items-center gap-2 animate-fade-in">
+              <div className="w-2 h-2 bg-green-500 rounded-full" />
+              Modifications enregistrées avec succès !
+            </span>
+          )}
+
+          {saveStatus === 'error' && (
+            <span className="text-red-600 font-medium">Erreur lors de l'enregistrement. Veuillez réessayer.</span>
+          )}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function ToggleRow({ title, description, checked, onChange }: { title: string; description: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+      <div>
+        <h3 className="font-medium text-slate-900">{title}</h3>
+        <p className="text-sm text-slate-500">{description}</p>
+      </div>
+      <label className="relative inline-flex items-center cursor-pointer">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only peer"
+        />
+        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+      </label>
+    </div>
+  );
+}
+
+function SocialInput({ label, value, placeholder, onChange }: { label: string; value: string; placeholder: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-slate-600 mb-1.5">{label}</label>
+      <input
+        type="url"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+        placeholder={placeholder}
+      />
+    </div>
   );
 }

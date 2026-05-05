@@ -6,7 +6,13 @@ import { api } from '../../../convex/_generated/api';
 import ConfirmModal from '../../../src/components/admin/ConfirmModal';
 import MenuItemCard from '../../../src/components/admin/MenuItems/MenuItemCard';
 import MenuItemModal from '../../../src/components/admin/MenuItems/MenuItemModal';
-import { Plus, Edit, Trash2, X, Tag, LayoutGrid, GripVertical, UtensilsCrossed, Pizza } from 'lucide-react';
+import SortableSidebarItem from '../../../src/components/admin/MenuItems/SortableSidebarItem';
+import SortableArticleCard from '../../../src/components/admin/MenuItems/SortableArticleCard';
+import SortableTopping from '../../../src/components/admin/MenuItems/SortableTopping';
+import CategoryFormModal, { type CategoryFormData } from '../../../src/components/admin/MenuItems/CategoryFormModal';
+import ToppingCategoryFormModal, { type ToppingCategoryFormData } from '../../../src/components/admin/MenuItems/ToppingCategoryFormModal';
+import ToppingFormModal, { type ToppingFormData } from '../../../src/components/admin/MenuItems/ToppingFormModal';
+import { Plus, Tag, LayoutGrid, GripVertical, UtensilsCrossed, Pizza, X } from 'lucide-react';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { useAdminAuth } from '../../../src/context/AdminAuthContext';
 import {
@@ -15,145 +21,9 @@ import {
   type DragEndEvent, type DragStartEvent,
 } from '@dnd-kit/core';
 import {
-  SortableContext, sortableKeyboardCoordinates, useSortable,
+  SortableContext, sortableKeyboardCoordinates,
   arrayMove, verticalListSortingStrategy, rectSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface CategoryFormData {
-  name: string; slug: string; displayOrder: number; active: boolean;
-}
-interface ToppingCategoryFormData {
-  categoryId: string; name: string; minSelection: number;
-  maxSelection: number | undefined; displayOrder: number; active: boolean; freeForBogo: boolean;
-}
-interface ToppingFormData {
-  toppingId: string; name: string; price: number;
-  categoryId: string; displayOrder: number; active: boolean;
-  menuItemId?: Id<'menuItems'>;
-  specialPrice?: number;
-}
-
-// ── Shared sortable sidebar row ───────────────────────────────────────────────
-
-function SortableSidebarItem({ id, isSelected, label, count, active, onSelect, onEdit, onDeleteClick }: {
-  id: string; isSelected: boolean; label: string; count: number; active: boolean;
-  onSelect: () => void; onEdit: () => void; onDeleteClick: () => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  return (
-    <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`group relative flex items-center transition-colors ${isDragging ? 'opacity-30' : ''} ${isSelected ? 'bg-slate-900' : 'hover:bg-slate-50'}`}>
-      <button className={`flex-shrink-0 px-2 py-3 cursor-grab active:cursor-grabbing ${isSelected ? 'text-slate-400 hover:text-slate-200' : 'text-slate-300 hover:text-slate-500'}`}
-        {...attributes} {...listeners} tabIndex={-1}>
-        <GripVertical className="w-3.5 h-3.5" />
-      </button>
-      <button onClick={onSelect} className={`flex-1 flex items-center justify-between py-2.5 pr-16 text-sm text-left ${isSelected ? 'text-white' : 'text-slate-700'}`}>
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${active ? 'bg-green-500' : 'bg-slate-300'}`} />
-          <span className="font-medium truncate">{label}</span>
-        </div>
-        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ml-1 ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{count}</span>
-      </button>
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-0.5 bg-white shadow rounded-md">
-        <button onClick={onEdit} className="p-1.5 rounded text-slate-400 hover:text-blue-600 transition" title="Modifier"><Edit className="w-3.5 h-3.5" /></button>
-        <button onClick={onDeleteClick} className="p-1.5 rounded text-slate-400 hover:text-red-600 transition" title="Supprimer"><Trash2 className="w-3.5 h-3.5" /></button>
-      </div>
-    </li>
-  );
-}
-
-// ── Sortable article card ─────────────────────────────────────────────────────
-
-function SortableArticleCard({ item, categoryFilter, onEdit, onToggleStock, disabled }: {
-  item: any; categoryFilter: string;
-  onEdit: (item: any) => void;
-  onToggleStock: (id: Id<'menuItems'>, inStock: boolean) => void;
-  disabled?: boolean;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
-    id: item._id,
-    disabled
-  });
-  return (
-    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={isDragging ? 'opacity-30' : ''}>
-      <div className="relative group/card">
-        {!disabled && (
-          <div className="absolute top-0 inset-x-0 h-7 flex items-center justify-center cursor-grab active:cursor-grabbing z-10 opacity-60 lg:opacity-0 lg:group-hover/card:opacity-100 transition-opacity rounded-t-xl bg-gradient-to-b from-black/30 to-transparent"
-            {...attributes} {...listeners}>
-            <GripVertical className="w-4 h-4 text-white drop-shadow" />
-          </div>
-        )}
-        <MenuItemCard item={item} categoryFilter={categoryFilter} onEdit={onEdit} onToggleStock={onToggleStock} />
-      </div>
-    </div>
-  );
-}
-
-// ── Sortable topping row ──────────────────────────────────────────────────────
-
-function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick, disabled }: {
-  topping: any; toppingCategories: any[] | undefined;
-  onEdit: (t: any) => void; onDeleteClick: (id: Id<'toppings'>) => void;
-  disabled?: boolean;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
-    id: topping._id,
-    disabled
-  });
-  return (
-    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`group flex items-center gap-3 bg-white rounded-xl border border-slate-200 px-3 py-3 shadow-sm ${isDragging ? 'opacity-30' : 'hover:border-slate-300'}`}>
-      {!disabled && (
-        <button className="flex-shrink-0 p-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 touch-none"
-          {...attributes} {...listeners} tabIndex={-1}>
-          <GripVertical className="w-4 h-4" />
-        </button>
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <p className="font-semibold text-slate-900 text-sm truncate">{topping.name}</p>
-          {topping.menuItemId && (
-            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-blue-100 flex-shrink-0">
-              <LayoutGrid className="w-2.5 h-2.5" />
-              Article lié
-            </span>
-          )}
-          {topping.specialPrice !== undefined && (
-            <span className="text-[9px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter flex-shrink-0 shadow-sm">
-              Override
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
-          <span className="font-bold text-blue-600">
-            {topping.effectivePrice ? `+${topping.effectivePrice.toFixed(2)} €` : 'Gratuit'}
-          </span>
-          <span className="text-slate-300">·</span>
-          <span className="text-slate-400">{toppingCategories?.find((c: any) => c.categoryId === topping.categoryId)?.name ?? topping.categoryId}</span>
-          {topping.active === false && (
-            <>
-              <span className="text-slate-300">·</span>
-              <span className="text-[10px] text-red-500 font-medium">Inactif</span>
-            </>
-          )}
-        </p>
-      </div>
-      <div className="flex gap-1 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition ml-auto">
-        <button onClick={() => onEdit(topping)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
-          <Edit className="w-4 h-4" />
-        </button>
-        <button onClick={() => onDeleteClick(topping._id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function MenuItemsPage() {
   const { adminToken } = useAdminAuth();
@@ -215,9 +85,9 @@ export default function MenuItemsPage() {
   // ── Topping UI state ─────────────────────────────────────────────────────────
   const [isToppingModalOpen, setIsToppingModalOpen] = useState(false);
   const [editingToppingId, setEditingToppingId] = useState<Id<'toppings'> | null>(null);
-  const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({ 
-    toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true, 
-    menuItemId: undefined, specialPrice: undefined 
+  const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({
+    toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true,
+    menuItemId: undefined, specialPrice: undefined
   });
   const [toppingConfirmModal, setToppingConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppings'> | null }>({ isOpen: false, id: null });
 
@@ -461,18 +331,18 @@ export default function MenuItemsPage() {
   // ── Topping handlers ──────────────────────────────────────────────────────────
   const handleCreateTopping = () => {
     setEditingToppingId(null);
-    setToppingFormData({ 
-      toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '', 
-      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined, specialPrice: undefined 
+    setToppingFormData({
+      toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '',
+      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined, specialPrice: undefined
     });
     setIsToppingModalOpen(true);
     setActiveTab('garnitures');
   };
   const handleEditTopping = (topping: any) => {
     setEditingToppingId(topping._id);
-    setToppingFormData({ 
-      toppingId: topping.toppingId, name: topping.name, price: topping.price || 0, 
-      categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0, 
+    setToppingFormData({
+      toppingId: topping.toppingId, name: topping.name, price: topping.price || 0,
+      categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0,
       active: topping.active !== false, menuItemId: topping.menuItemId,
       specialPrice: topping.specialPrice
     });
@@ -655,23 +525,23 @@ export default function MenuItemsPage() {
                     <X className="w-3 h-3" /> Tout
                   </button>
                 )}
-                  {categoryFilter !== 'all' && (
-                    <p className="ml-auto text-xs text-slate-400 hidden sm:flex items-center gap-1">
-                      <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
-                    </p>
-                  )}
-                </div>
+                {categoryFilter !== 'all' && (
+                  <p className="ml-auto text-xs text-slate-400 hidden sm:flex items-center gap-1">
+                    <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
+                  </p>
+                )}
+              </div>
 
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleArticleDragStart} onDragEnd={handleArticleDragEnd}>
                 <SortableContext items={displayedArticles.map(a => a._id)} strategy={rectSortingStrategy}>
                   {displayedArticles.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                       {displayedArticles.map(item => (
-                        <SortableArticleCard 
-                          key={item._id} 
-                          item={item} 
-                          categoryFilter={categoryFilter} 
-                          onEdit={handleEditArticle} 
+                        <SortableArticleCard
+                          key={item._id}
+                          item={item}
+                          categoryFilter={categoryFilter}
+                          onEdit={handleEditArticle}
                           onToggleStock={handleToggleStock}
                           disabled={categoryFilter === 'all'}
                         />
@@ -733,21 +603,21 @@ export default function MenuItemsPage() {
                     <X className="w-3 h-3" /> Tout
                   </button>
                 )}
-                  {toppingCategoryFilter !== 'all' && (
-                    <p className="ml-auto text-xs text-slate-400 flex items-center gap-1">
-                      <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
-                    </p>
-                  )}
-                </div>
+                {toppingCategoryFilter !== 'all' && (
+                  <p className="ml-auto text-xs text-slate-400 flex items-center gap-1">
+                    <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
+                  </p>
+                )}
+              </div>
 
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleToppingDragStart} onDragEnd={handleToppingDragEnd}>
                 <SortableContext items={displayedToppings.map((t: any) => t._id)} strategy={verticalListSortingStrategy}>
                   {displayedToppings.length > 0 ? (
                     <div className="space-y-2">
                       {displayedToppings.map((topping: any) => (
-                        <SortableTopping 
-                          key={topping._id} 
-                          topping={topping} 
+                        <SortableTopping
+                          key={topping._id}
+                          topping={topping}
                           toppingCategories={toppingCategories}
                           onEdit={handleEditTopping}
                           onDeleteClick={(id) => setToppingConfirmModal({ isOpen: true, id })}
@@ -781,172 +651,40 @@ export default function MenuItemsPage() {
         )}
       </div>
 
-      {/* ── Article modal ── */}
       <MenuItemModal isOpen={isArticleModalOpen} onClose={() => { setIsArticleModalOpen(false); setEditingArticleId(null); }}
         onSubmit={handleArticleModalSubmit} editingItem={editingItem}
         onDelete={editingArticleId ? handleDeleteArticle : undefined}
         categories={categories} toppingCategories={toppingCategories} onRemoveImage={handleRemoveImage} />
 
-      {/* ── Menu category modal ── */}
-      {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsCategoryModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-slate-900">{editingCategoryId ? 'Modifier la Catégorie' : 'Ajouter une Catégorie'}</h2>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleCategorySubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
-                <input type="text" value={categoryFormData.name} onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Slug</label>
-                <input type="text" value={categoryFormData.slug} onChange={(e) => setCategoryFormData({ ...categoryFormData, slug: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Ordre d'affichage</label>
-                <input type="number" value={categoryFormData.displayOrder} onChange={(e) => setCategoryFormData({ ...categoryFormData, displayOrder: parseInt(e.target.value) })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="cat-active" checked={categoryFormData.active} onChange={(e) => setCategoryFormData({ ...categoryFormData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
-                <label htmlFor="cat-active" className="text-sm font-medium text-slate-700">Actif</label>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm">Annuler</button>
-                <button type="submit" className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm">{editingCategoryId ? 'Mettre à jour' : 'Créer'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <CategoryFormModal
+        isOpen={isCategoryModalOpen}
+        isEditing={!!editingCategoryId}
+        formData={categoryFormData}
+        setFormData={setCategoryFormData}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onSubmit={handleCategorySubmit}
+      />
 
-      {/* ── Topping category modal ── */}
-      {isToppingCatModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsToppingCatModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-slate-900">{editingToppingCatId ? 'Modifier la Catégorie' : 'Ajouter une Catégorie de Garniture'}</h2>
-              <button onClick={() => setIsToppingCatModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleToppingCatSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
-                <input type="text" value={toppingCatFormData.name} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, name: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="ex: Sauces, Crudités" required />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">ID de la Catégorie</label>
-                <input type="text" value={toppingCatFormData.categoryId} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, categoryId: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-mono" placeholder="ex: sauces" required />
-                <p className="text-xs text-slate-500 mt-1">Identifiant unique</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Sélection min</label>
-                  <input type="number" min="0" value={toppingCatFormData.minSelection} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, minSelection: parseInt(e.target.value) })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
-                  <p className="text-xs text-slate-500 mt-1">0 = facultatif</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Sélection max</label>
-                  <input type="number" min="0" value={toppingCatFormData.maxSelection ?? ''} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, maxSelection: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="∞" />
-                  <p className="text-xs text-slate-500 mt-1">Vide = illimité</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="tcat-active" checked={toppingCatFormData.active} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
-                <label htmlFor="tcat-active" className="text-sm font-medium text-slate-700">Actif</label>
-              </div>
-              <div className="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <input type="checkbox" id="tcat-freeForBogo" checked={toppingCatFormData.freeForBogo} onChange={(e) => setToppingCatFormData({ ...toppingCatFormData, freeForBogo: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600" />
-                <div>
-                  <label htmlFor="tcat-freeForBogo" className="text-sm font-medium text-emerald-800 cursor-pointer">Gratuit pour « 1 acheté = 1 offert »</label>
-                  <p className="text-xs text-emerald-600 mt-0.5">Les options de cette catégorie sont offertes sur le produit gratuit (ex : Taille Pizza).</p>
-                </div>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsToppingCatModalOpen(false)} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm">Annuler</button>
-                <button type="submit" className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm">{editingToppingCatId ? 'Mettre à jour' : 'Créer'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ToppingCategoryFormModal
+        isOpen={isToppingCatModalOpen}
+        isEditing={!!editingToppingCatId}
+        formData={toppingCatFormData}
+        setFormData={setToppingCatFormData}
+        onClose={() => setIsToppingCatModalOpen(false)}
+        onSubmit={handleToppingCatSubmit}
+      />
 
-      {/* ── Topping modal ── */}
-      {isToppingModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsToppingModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-slate-900">{editingToppingId ? 'Modifier la Garniture' : 'Ajouter une Garniture'}</h2>
-              <button onClick={() => setIsToppingModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleToppingSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
-                <input type="text" value={toppingFormData.name} onChange={(e) => setToppingFormData({ ...toppingFormData, name: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prix (€)</label>
-                <input type="number" step="0.01" min="0" value={toppingFormData.price} onChange={(e) => setToppingFormData({ ...toppingFormData, price: parseFloat(e.target.value) || 0 })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
-                <p className="text-xs text-slate-500 mt-1">0 = gratuit. Utilisé si aucun article n'est lié.</p>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prix Spécial (Override) (€)</label>
-                <input
-                  type="number" step="0.01" min="0"
-                  value={toppingFormData.specialPrice ?? ""}
-                  onChange={(e) => setToppingFormData({ ...toppingFormData, specialPrice: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  className="w-full border border-blue-200 bg-blue-50/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Laisser vide pour prix par défaut"
-                />
-                <p className="text-xs text-blue-600 mt-1">Si rempli, ce prix remplace le prix de l'article lié.</p>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Lier à un article du menu (Optionnel)</label>
-                <select
-                  value={toppingFormData.menuItemId || ""}
-                  onChange={(e) => {
-                    const selectedId = e.target.value as Id<'menuItems'> | "";
-                    const item = menuItems?.find(i => i._id === selectedId);
-                    setToppingFormData({
-                      ...toppingFormData,
-                      menuItemId: selectedId || undefined,
-                      name: toppingFormData.name || (item?.name || ""),
-                      price: toppingFormData.price || (item?.price || 0)
-                    });
-                  }}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                >
-                  <option value="">Aucun article lié</option>
-                  {menuItems?.map(item => (
-                    <option key={item._id} value={item._id}>{item.name} ({item.price.toFixed(2)}€)</option>
-                  ))}
-                </select>
-                <p className="text-xs text-slate-500 mt-1">L'article sélectionné sera traité comme une garniture.</p>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Catégorie</label>
-                <select value={toppingFormData.categoryId} onChange={(e) => setToppingFormData({ ...toppingFormData, categoryId: e.target.value })} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
-                  <option value="">Choisir une catégorie</option>
-                  {toppingCategories?.map(cat => <option key={cat._id} value={cat.categoryId}>{cat.name}</option>)}
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="topping-active" checked={toppingFormData.active} onChange={(e) => setToppingFormData({ ...toppingFormData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
-                <label htmlFor="topping-active" className="text-sm font-medium text-slate-700">Actif</label>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsToppingModalOpen(false)} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm">Annuler</button>
-                <button type="submit" className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm">{editingToppingId ? 'Mettre à jour' : 'Créer'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ToppingFormModal
+        isOpen={isToppingModalOpen}
+        isEditing={!!editingToppingId}
+        formData={toppingFormData}
+        setFormData={setToppingFormData}
+        onClose={() => setIsToppingModalOpen(false)}
+        onSubmit={handleToppingSubmit}
+        menuItems={menuItems}
+        toppingCategories={toppingCategories}
+      />
 
-      {/* ── Confirm modals ── */}
       <ConfirmModal isOpen={categoryConfirmModal.isOpen} onClose={() => setCategoryConfirmModal({ ...categoryConfirmModal, isOpen: false })} onConfirm={handleConfirmDeleteCategory} title="Supprimer la Catégorie" message="Êtes-vous sûr de vouloir supprimer cette catégorie ?" />
       <ConfirmModal isOpen={toppingCatConfirmModal.isOpen} onClose={() => setToppingCatConfirmModal({ ...toppingCatConfirmModal, isOpen: false })} onConfirm={handleConfirmDeleteToppingCategory} title="Supprimer la Catégorie de Garnitures" message="Êtes-vous sûr de vouloir supprimer cette catégorie ?" />
       <ConfirmModal isOpen={toppingConfirmModal.isOpen} onClose={() => setToppingConfirmModal({ ...toppingConfirmModal, isOpen: false })} onConfirm={handleConfirmDeleteTopping} title="Supprimer la Garniture" message="Êtes-vous sûr de vouloir supprimer cette garniture ?" />
