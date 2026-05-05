@@ -319,13 +319,13 @@ export default function CheckoutPage() {
     };
 
     if (!isInitialized || isRedirecting) return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-rose-50 pt-20">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20">
             <div className="w-12 h-12 border-4 border-orange-400 border-t-transparent rounded-full animate-spin" />
         </div>
     );
 
     if (orderItems.length === 0) return (
-        <div className="flex flex-col min-h-screen bg-gradient-to-br from-orange-50 via-white to-rose-50 pt-32 items-center justify-center p-4">
+        <div className="flex flex-col min-h-screen bg-gray-50 pt-32 items-center justify-center p-4">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-100 to-rose-100 flex items-center justify-center mb-5 shadow-sm">
                 <ShoppingBag className="w-10 h-10 text-orange-300" />
             </div>
@@ -367,7 +367,7 @@ export default function CheckoutPage() {
     };
 
     return (
-        <div className="bg-gradient-to-br from-orange-50/60 via-white to-rose-50/60 min-h-screen flex flex-col">
+        <div className="bg-gray-50 min-h-screen flex flex-col">
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-32 pb-20 lg:pb-20">
                 <div className="mb-6">
                     <CheckoutStepper currentStep={step} />

@@ -76,10 +76,10 @@ export default function PaymentSection({
                                 <Wallet className="w-5 h-5" />
                             </div>
                             <div className="text-left">
-                                <p className={`font-bold text-sm ${paymentMethod === 'cash' ? 'text-amber-700' : 'text-gray-700'}`}>
+                                <p className={`font-bold text-sm uppercase tracking-wide ${paymentMethod === 'cash' ? 'text-amber-700' : 'text-gray-700'}`}>
                                     Espèces / Carte
                                 </p>
-                                <p className="text-[11px] text-gray-400 mt-0.5">Paiement à la récupération</p>
+                                <p className="text-[12px] font-medium text-gray-500 mt-0.5">Paiement à la récupération</p>
                             </div>
                             {paymentMethod === 'cash' && (
                                 <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
@@ -110,10 +110,10 @@ export default function PaymentSection({
                                 <Lock className="w-5 h-5" />
                             </div>
                             <div className="text-left">
-                                <p className={`font-bold text-sm ${paymentMethod === 'stripe' ? 'text-indigo-700' : 'text-gray-700'}`}>
+                                <p className={`font-bold text-sm uppercase tracking-wide ${paymentMethod === 'stripe' ? 'text-indigo-700' : 'text-gray-700'}`}>
                                     Carte Bancaire
                                 </p>
-                                <p className="text-[11px] text-gray-400 mt-0.5">Cryptage sécurisé par Stripe</p>
+                                <p className="text-[12px] font-medium text-gray-500 mt-0.5">Cryptage sécurisé par Stripe</p>
                             </div>
                             {paymentMethod === 'stripe' && (
                                 <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">

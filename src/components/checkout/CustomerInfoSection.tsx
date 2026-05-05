@@ -59,7 +59,7 @@ export default function CustomerInfoSection({
 }: CustomerInfoSectionProps) {
     if (!isEditingInfo && user) {
         return (
-            <div className="space-y-5 pt-6 border-t border-gray-100 animate-in fade-in duration-500">
+            <div className="space-y-5 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between">
                     <SectionTitle icon={User} label="Mes informations" color="bg-gradient-to-br from-violet-400 to-purple-500" />
                     <button
@@ -119,7 +119,7 @@ export default function CustomerInfoSection({
     const inputClass = "w-full bg-white border-2 border-gray-100 rounded-xl p-3.5 focus:ring-2 focus:ring-violet-400 focus:border-violet-300 outline-none transition-all font-medium text-sm placeholder:text-gray-300 text-gray-800";
 
     return (
-        <div className="space-y-6 pt-6 border-t border-gray-100 animate-in slide-in-from-top-4 duration-500">
+        <div className="space-y-6 animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-center justify-between">
                 <SectionTitle icon={User} label="Édition des informations" color="bg-gradient-to-br from-violet-400 to-purple-500" />
                 {user && (

@@ -59,7 +59,7 @@ export default function OrderTypeSelector({
                         <Store className="w-6 h-6" />
                     </div>
                     <div className="text-center">
-                        <span className={`block font-bold text-sm ${orderType === 'pickup' ? 'text-orange-600' : 'text-gray-600'}`}>
+                        <span className={`block font-bold text-sm uppercase tracking-wide ${orderType === 'pickup' ? 'text-orange-600' : 'text-gray-600'}`}>
                             À emporter
                         </span>
                         {!pickupEnabled && (
@@ -90,7 +90,7 @@ export default function OrderTypeSelector({
                         <Truck className="w-6 h-6" />
                     </div>
                     <div className="text-center">
-                        <span className={`block font-bold text-sm ${orderType === 'delivery' ? 'text-teal-600' : 'text-gray-600'}`}>
+                        <span className={`block font-bold text-sm uppercase tracking-wide ${orderType === 'delivery' ? 'text-teal-600' : 'text-gray-600'}`}>
                             Livraison
                         </span>
                         {isDefaultAddressOutsideZone && (
