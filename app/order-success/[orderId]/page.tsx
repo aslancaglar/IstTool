@@ -307,7 +307,7 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
     const { orderId } = params;
     const order = useQuery(api.queries.getOrder, { orderId: orderId as Id<'orders'> });
     const [elapsedMin, setElapsedMin] = useState(0);
-    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(true);
 
     useEffect(() => {
         if (!order) return;
@@ -504,7 +504,7 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                                             <div className="flex justify-between items-start">
                                                 <span className="text-sm font-semibold text-slate-800">{item.name || 'Produit'}</span>
                                                 <span className="text-sm font-semibold text-slate-800 tabular-nums shrink-0">
-                                                    {(item.price || 0).toFixed(2)}€
+                                                    {(item.finalPrice || item.price || 0).toFixed(2)}€
                                                 </span>
                                             </div>
                                             {item.selectedToppings && item.selectedToppings.length > 0 && (
@@ -532,8 +532,11 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                             {/* Totals */}
                             <div className="border-t border-slate-100 pt-3 space-y-2">
                                 {isDelivery && (() => {
-                                    const subtotal = ('items' in order ? order.items : [])?.reduce((sum: number, item: any) => sum + (item.finalPrice || 0), 0) || 0;
-                                    const deliveryFee = Math.max(0, order.totalPrice - subtotal);
+                                    const deliveryFee = order.deliveryFee ?? (() => {
+                                        const subtotal = ('items' in order ? order.items : [])?.reduce((sum: number, item: any) => sum + (item.finalPrice || 0), 0) || 0;
+                                        return Math.max(0, order.totalPrice - subtotal);
+                                    })();
+
                                     if (deliveryFee > 0) {
                                         return (
                                             <div className="flex justify-between items-center text-sm">
@@ -544,6 +547,12 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                                     }
                                     return null;
                                 })()}
+                                {order.discountAmount && order.discountAmount > 0 && (
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-emerald-600 font-medium">Réduction</span>
+                                        <span className="font-semibold text-emerald-600 tabular-nums">-{order.discountAmount.toFixed(2)}€</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-center pt-1">
                                     <span className="text-base font-bold text-slate-800">Total</span>
                                     <span className="text-xl font-black text-slate-900 tabular-nums">{order.totalPrice.toFixed(2)}€</span>

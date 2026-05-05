@@ -147,31 +147,42 @@ export const getOrder = query({
       return { ...o, items: enrichedItems };
     };
 
-    // Admin can see everything
+    const enrichedOrder = await enrichOrder(order);
+    
+    // Admin can see everything (including DB internal fields)
     if (args.adminToken) {
       try {
         await requireAdminSession(ctx, args.adminToken);
-        return await enrichOrder(order);
+        return enrichedOrder;
       } catch { /* fall through */ }
     }
 
-    // Authenticated user who owns the order can see everything
+    // Authenticated user who owns the order
     if (args.sessionToken) {
       const user = await maybeGetUserFromSession(ctx, args.sessionToken);
       if (user && order.userId === user._id) {
-        return await enrichOrder(order);
+        return enrichedOrder;
       }
     }
 
-    // Unauthenticated / non-owner: return only non-sensitive confirmation info
+    // Unauthenticated / non-owner: return confirmation info including items
+    // (We exclude userId and session links, but show order details)
     return {
-      _id: order._id,
-      _creationTime: order._creationTime,
-      status: order.status,
-      type: order.type,
-      scheduledTime: order.scheduledTime,
-      totalPrice: order.totalPrice,
-      createdAt: order.createdAt,
+      _id: enrichedOrder._id,
+      _creationTime: enrichedOrder._creationTime,
+      status: enrichedOrder.status,
+      type: enrichedOrder.type,
+      scheduledTime: enrichedOrder.scheduledTime,
+      totalPrice: enrichedOrder.totalPrice,
+      deliveryFee: enrichedOrder.deliveryFee,
+      discountAmount: enrichedOrder.discountAmount,
+      items: enrichedOrder.items,
+      address: enrichedOrder.address,
+      customer: {
+        firstName: enrichedOrder.customer.firstName,
+        lastName: enrichedOrder.customer.lastName,
+      },
+      createdAt: enrichedOrder.createdAt,
     };
   },
 });

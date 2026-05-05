@@ -164,6 +164,7 @@ export default defineSchema({
       isFree: v.optional(v.boolean()),
     })),
     totalPrice: v.number(),
+    deliveryFee: v.optional(v.number()),
     promoCode: v.optional(v.string()),
     discountAmount: v.optional(v.number()),
     appliedCampaignIds: v.optional(v.array(v.string())),

@@ -379,6 +379,7 @@ export const createOrder = mutation({
       stripePaymentIntentId: args.stripePaymentIntentId,
       items: verifiedItems,
       totalPrice: finalTotal,
+      deliveryFee: effectiveDeliveryFee,
       promoCode: appliedPromoCode,
       discountAmount: totalDiscountAmount > 0 ? totalDiscountAmount : undefined,
       appliedCampaignIds: effectiveCampaignIds.length > 0 ? effectiveCampaignIds : undefined,
