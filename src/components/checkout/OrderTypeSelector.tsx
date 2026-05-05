@@ -45,10 +45,10 @@ export default function OrderTypeSelector({
                 <button
                     onClick={() => setOrderType('pickup')}
                     disabled={!pickupEnabled}
-                    className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 overflow-hidden ${
+                    className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 overflow-hidden bg-white ${
                         orderType === 'pickup'
-                            ? 'border-orange-300 bg-gradient-to-br from-orange-50 to-amber-50 ring-4 ring-orange-500/10'
-                            : 'border-gray-100 bg-white hover:border-orange-200 hover:bg-orange-50/30'
+                            ? 'border-orange-300 ring-4 ring-orange-500/10'
+                            : 'border-gray-100 hover:border-orange-200'
                     } ${!pickupEnabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                 >
                     <div className={`p-3 rounded-xl transition-all duration-300 ${
@@ -76,10 +76,10 @@ export default function OrderTypeSelector({
                 <button
                     onClick={() => setOrderType('delivery')}
                     disabled={!deliveryEnabled || isDefaultAddressOutsideZone}
-                    className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 overflow-hidden ${
+                    className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 overflow-hidden bg-white ${
                         orderType === 'delivery'
-                            ? 'border-teal-300 bg-gradient-to-br from-teal-50 to-cyan-50 ring-4 ring-teal-500/10'
-                            : 'border-gray-100 bg-white hover:border-teal-200 hover:bg-teal-50/30'
+                            ? 'border-teal-300 ring-4 ring-teal-500/10'
+                            : 'border-gray-100 hover:border-teal-200'
                     } ${(!deliveryEnabled || isDefaultAddressOutsideZone) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                 >
                     <div className={`p-3 rounded-xl transition-all duration-300 ${

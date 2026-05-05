@@ -216,6 +216,7 @@ export const createOrder = mutation({
     // ── Campaign (automatic) validation ──────────────────────────
     let campaignDiscount = 0;
     let campaignFreeDelivery = false;
+    const effectiveCampaignIds: string[] = [];
 
     if (args.appliedCampaignIds && args.appliedCampaignIds.length > 0) {
       const catMap = new Map((args.itemCategoryIds ?? []).map((x) => [x.menuItemId, x.categoryIds]));
@@ -232,40 +233,52 @@ export const createOrder = mutation({
           const hour = nowParis.getHours();
           if (hour < campaign.timeWindow.startHour || hour >= campaign.timeWindow.endHour) continue;
         }
+        let applied = false;
         if (campaign.discountType === "free_delivery") {
+          if (args.type !== "delivery") continue;
           campaignFreeDelivery = true;
+          applied = true;
         } else if (campaign.discountType === "percent_off_items") {
           const cats = campaign.applicableCategoryIds ?? [];
           const eligibleSubtotal = verifiedItems
             .filter((item) => (catMap.get(item.menuItemId) ?? []).some((c: string) => cats.includes(c)))
             .reduce((sum, item) => sum + item.finalPrice, 0);
+          if (eligibleSubtotal <= 0) continue;
           campaignDiscount += Math.min(
             Math.round((eligibleSubtotal * campaign.discountValue) / 100 * 100) / 100,
             eligibleSubtotal,
           );
+          applied = true;
         } else if (campaign.discountType === "percent_off_specific_items") {
           const ids = campaign.applicableMenuItemIds ?? [];
           const eligibleSubtotal = verifiedItems
             .filter((item) => ids.includes(item.menuItemId))
             .reduce((sum, item) => sum + item.finalPrice, 0);
+          if (eligibleSubtotal <= 0) continue;
           campaignDiscount += Math.min(
             Math.round((eligibleSubtotal * campaign.discountValue) / 100 * 100) / 100,
             eligibleSubtotal,
           );
+          applied = true;
         } else if (campaign.discountType === "bogo_same") {
-          // bogo_same is handled by adding free items at €0 — no monetary discount needed
-          // (isFree items are excluded to avoid double-discounting)
+          const ids = campaign.applicableMenuItemIds ?? [];
+          const matchCount = verifiedItems.filter((i) => ids.length === 0 || ids.includes(i.menuItemId)).length;
+          if (matchCount < 2) continue;
+          applied = true;
         } else if (campaign.discountType === "bogo_gift") {
           const hasTrigger = verifiedItems.some(i => i.menuItemId === campaign.bogoTriggerItemId);
           const giftItems = verifiedItems.filter(i => i.menuItemId === campaign.bogoGiftItemId);
-          if (hasTrigger && giftItems.length > 0) {
-            campaignDiscount += Math.min(...giftItems.map(i => i.finalPrice));
-          }
+          if (!hasTrigger || giftItems.length === 0) continue;
+          campaignDiscount += Math.min(...giftItems.map(i => i.finalPrice));
+          applied = true;
         } else if (campaign.discountType === "percentage") {
           campaignDiscount += Math.min((computedTotal * campaign.discountValue) / 100, computedTotal);
+          applied = true;
         } else if (campaign.discountType === "fixed") {
           campaignDiscount += Math.min(campaign.discountValue, computedTotal);
+          applied = true;
         }
+        if (applied) effectiveCampaignIds.push(campaignId);
       }
       campaignDiscount = Math.round(campaignDiscount * 100) / 100;
     }
@@ -368,7 +381,7 @@ export const createOrder = mutation({
       totalPrice: finalTotal,
       promoCode: appliedPromoCode,
       discountAmount: totalDiscountAmount > 0 ? totalDiscountAmount : undefined,
-      appliedCampaignIds: args.appliedCampaignIds && args.appliedCampaignIds.length > 0 ? args.appliedCampaignIds : undefined,
+      appliedCampaignIds: effectiveCampaignIds.length > 0 ? effectiveCampaignIds : undefined,
       status: "pending",
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -525,6 +538,19 @@ export const deleteOrder = mutation({
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
     await ctx.db.delete(args.orderId);
+  },
+});
+
+export const attachPaymentIntent = internalMutation({
+  args: {
+    orderId: v.id("orders"),
+    paymentIntentId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.orderId, {
+      stripePaymentIntentId: args.paymentIntentId,
+      updatedAt: Date.now(),
+    });
   },
 });
 

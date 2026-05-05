@@ -145,6 +145,8 @@ export default function CheckoutPage() {
             } else if (campaign.discountType === 'fixed') {
                 computedDiscount = Math.min(campaign.discountValue, subtotal);
             }
+            const hasEffect = computedDiscount > 0 || isFreeDelivery || (bogoFreeCount ?? 0) > 0;
+            if (!hasEffect) continue;
             discount += computedDiscount;
             ids.push(campaign._id);
             list.push({ id: campaign._id, description: campaign.description, discountType: campaign.discountType, discountValue: campaign.discountValue, computedDiscount, isFreeDelivery, bogoFreeCount });
@@ -246,68 +248,85 @@ export default function CheckoutPage() {
     }, []);
 
     const createPaymentIntentAction = useAction(api.stripe.createPaymentIntent);
+    const [stripeOrderId, setStripeOrderId] = useState<string | null>(null);
 
-    const createPaymentIntent = async () => {
+    const buildOrderArgs = (pMethod: 'stripe' | 'cash') => ({
+        sessionToken: sessionToken ?? undefined,
+        customer,
+        type: orderType!,
+        address: orderType === 'delivery' ? address : undefined,
+        scheduledTime,
+        paymentMethod: pMethod,
+        totalPrice: subtotal + effectiveDeliveryFee + bogoFreeItems.reduce((sum, item) => sum + item.finalPrice, 0),
+        promoCode: appliedPromoCode,
+        deliveryFee: effectiveDeliveryFee,
+        itemCategoryIds: orderItems.map(item => ({
+            menuItemId: item.menuItemId,
+            categoryIds: (item as any).categories ?? [],
+        })),
+        items: [
+            ...orderItems.map(item => ({
+                menuItemId: item.menuItemId,
+                name: item.name,
+                price: item.basePrice,
+                selectedToppings: item.selectedToppings.map(t => ({ categoryId: '', toppingIds: [t.toppingId] })),
+                finalPrice: item.totalPrice,
+            })),
+            ...bogoFreeItems.map(item => ({
+                menuItemId: item.menuItemId,
+                name: `${item.name} (offert)`,
+                price: 0,
+                selectedToppings: item.selectedToppings.map((t: any) => ({ categoryId: '', toppingIds: [t.toppingId] })),
+                finalPrice: item.finalPrice,
+                isFree: true,
+            })),
+        ],
+        appliedCampaignIds,
+    });
+
+    // Stripe path: create the order first, then mint a PI bound to that order.
+    // Server derives the PI amount from order.totalPrice — no client-supplied amount.
+    const initStripePayment = async () => {
         setStripeError(null);
         try {
-            const { clientSecret } = await createPaymentIntentAction({ amount: finalTotal });
-            if (clientSecret) {
-                setClientSecret(clientSecret);
+            const orderId = stripeOrderId ?? (await createOrder(buildOrderArgs('stripe') as any));
+            setStripeOrderId(orderId as string);
+            const { clientSecret: cs } = await createPaymentIntentAction({ orderId: orderId as any });
+            if (cs) {
+                setClientSecret(cs);
                 setShowStripeForm(true);
             } else {
-                setStripeError('Erreur d\'initialisation du paiement');
+                setStripeError("Erreur d'initialisation du paiement");
             }
         } catch (error: any) {
-            console.error('Error in createPaymentIntent:', error);
+            console.error('Error initializing Stripe payment:', error);
             setStripeError(error.message || 'Erreur de connexion avec le service de paiement');
             setShowStripeForm(false);
         }
     };
 
-    const handleFinalOrder = async (pMethod: 'stripe' | 'cash', _pStatus: 'paid' | 'unpaid', pIntentId?: string) => {
+    const handleStripeSuccess = async (paymentIntentId: string) => {
+        if (!stripeOrderId) {
+            setStripeError("Commande introuvable, veuillez recommencer.");
+            return;
+        }
         setIsSubmitting(true);
         try {
-            const orderId = await createOrder({
-                sessionToken: sessionToken ?? undefined,
-                customer,
-                type: orderType!,
-                address: orderType === 'delivery' ? address : undefined,
-                scheduledTime,
-                paymentMethod: pMethod,
-                stripePaymentIntentId: pIntentId,
-                totalPrice: subtotal + effectiveDeliveryFee + bogoFreeItems.reduce((sum, item) => sum + item.finalPrice, 0),
-                promoCode: appliedPromoCode,
-                deliveryFee: effectiveDeliveryFee,
-                itemCategoryIds: orderItems.map(item => ({
-                    menuItemId: item.menuItemId,
-                    categoryIds: (item as any).categories ?? [],
-                })),
-                items: [
-                    ...orderItems.map(item => ({
-                        menuItemId: item.menuItemId,
-                        name: item.name,
-                        price: item.basePrice,
-                        selectedToppings: item.selectedToppings.map(t => ({ categoryId: '', toppingIds: [t.toppingId] })),
-                        finalPrice: item.totalPrice,
-                    })),
-                    ...bogoFreeItems.map(item => ({
-                        menuItemId: item.menuItemId,
-                        name: `${item.name} (offert)`,
-                        price: 0,
-                        selectedToppings: item.selectedToppings.map((t: any) => ({ categoryId: '', toppingIds: [t.toppingId] })),
-                        finalPrice: item.finalPrice,
-                        isFree: true,
-                    })),
-                ],
-                appliedCampaignIds,
-            });
-            if (pMethod === 'stripe' && pIntentId) {
-                await confirmStripePayment({
-                    orderId,
-                    paymentIntentId: pIntentId,
-                    expectedAmount: finalTotal,
-                });
-            }
+            await confirmStripePayment({ paymentIntentId });
+            setIsRedirecting(true);
+            clearOrder();
+            router.push(`/order-success/${stripeOrderId}`);
+        } catch (error: any) {
+            setStripeError(error.message ?? 'Erreur lors de la confirmation du paiement.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleCashSubmit = async () => {
+        setIsSubmitting(true);
+        try {
+            const orderId = await createOrder(buildOrderArgs('cash') as any);
             setIsRedirecting(true);
             clearOrder();
             router.push(`/order-success/${orderId}`);
@@ -316,6 +335,17 @@ export default function CheckoutPage() {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // If user goes back to step 1 after creating a Stripe order, drop the
+    // stale PI/order so the next attempt rebuilds with fresh totals.
+    const goBackToDetails = () => {
+        setStep('details');
+        setStripeOrderId(null);
+        setClientSecret(null);
+        setShowStripeForm(false);
+        setStripeError(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     if (!isInitialized || isRedirecting) return (
@@ -379,7 +409,7 @@ export default function CheckoutPage() {
                         {/* Left column */}
                         <div className="w-full lg:flex-1 flex flex-col gap-4">
                             {/* 1. Mode de récupération */}
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-5 md:p-6">
+                            <div className="bg-orange-50/70 rounded-2xl shadow-sm border border-orange-100 p-5 md:p-6">
                                 <OrderTypeSelector
                                     orderType={orderType}
                                     setOrderType={setOrderType}
@@ -394,7 +424,7 @@ export default function CheckoutPage() {
                             </div>
 
                             {/* 3. Mes informations */}
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-5 md:p-6">
+                            <div className="bg-violet-50/70 rounded-2xl shadow-sm border border-violet-100 p-5 md:p-6">
                                 <CustomerInfoSection
                                     user={user}
                                     customer={customer}
@@ -431,7 +461,7 @@ export default function CheckoutPage() {
                         <div className="w-full lg:flex-1 flex flex-col gap-4">
                             {/* Back button — top, visible */}
                             <button
-                                onClick={() => setStep('details')}
+                                onClick={goBackToDetails}
                                 className="flex items-center gap-2.5 self-start bg-white/80 backdrop-blur-sm border border-white shadow-sm text-gray-600 font-semibold text-sm px-4 py-2.5 rounded-xl hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all"
                             >
                                 <ArrowLeft className="w-4 h-4" />
@@ -439,7 +469,7 @@ export default function CheckoutPage() {
                             </button>
 
                             {/* Payment method + conditional forms */}
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white p-5 md:p-6">
+                            <div className="bg-emerald-50/60 rounded-2xl shadow-sm border border-emerald-100 p-5 md:p-6">
                                 <PaymentSection
                                     paymentMethod={paymentMethod}
                                     setPaymentMethod={setPaymentMethod}
@@ -448,10 +478,10 @@ export default function CheckoutPage() {
                                     clientSecret={clientSecret}
                                     stripeError={stripeError}
                                     setStripeError={setStripeError}
-                                    createPaymentIntent={createPaymentIntent}
-                                    handleStripeSuccess={(pid) => handleFinalOrder('stripe', 'paid', pid)}
+                                    createPaymentIntent={initStripePayment}
+                                    handleStripeSuccess={handleStripeSuccess}
                                     handleStripeError={setStripeError}
-                                    handleSubmit={() => handleFinalOrder(paymentMethod === 'cash' ? 'cash' : 'stripe', paymentMethod === 'cash' ? 'unpaid' : 'paid')}
+                                    handleSubmit={handleCashSubmit}
                                     isSubmitting={isSubmitting}
                                     totalPrice={finalTotal}
                                     hideSubmitButton
@@ -468,7 +498,7 @@ export default function CheckoutPage() {
                             {/* Confirm button — desktop only inline */}
                             {paymentMethod && (!showStripeForm || paymentMethod === 'cash') && (
                                 <button
-                                    onClick={() => handleFinalOrder(paymentMethod === 'cash' ? 'cash' : 'stripe', paymentMethod === 'cash' ? 'unpaid' : 'paid')}
+                                    onClick={handleCashSubmit}
                                     disabled={isSubmitting || (paymentMethod === 'stripe' && !showStripeForm)}
                                     className={`hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 shadow-xl shadow-orange-500/25 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${isSubmitting ? 'animate-pulse' : ''}`}
                                 >
@@ -495,7 +525,7 @@ export default function CheckoutPage() {
                         const ready = !!paymentMethod && (!showStripeForm || paymentMethod === 'cash') && !isSubmitting;
                         return (
                             <button
-                                onClick={() => ready && paymentMethod && handleFinalOrder(paymentMethod === 'cash' ? 'cash' : 'stripe', paymentMethod === 'cash' ? 'unpaid' : 'paid')}
+                                onClick={() => ready && paymentMethod && handleCashSubmit()}
                                 className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
                                     isSubmitting
                                         ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 animate-pulse'

@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdminSession, maybeGetUserFromSession } from "./lib/auth";
 
@@ -224,6 +224,14 @@ export const getAllOrders = query({
       }));
       return { ...order, items: enrichedItems };
     }));
+  },
+});
+
+// Server-only: load an order without auth checks. Callable from actions only.
+export const getOrderInternal = internalQuery({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.orderId);
   },
 });
 

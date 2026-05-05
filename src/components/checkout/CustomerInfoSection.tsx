@@ -72,7 +72,7 @@ export default function CustomerInfoSection({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-5 bg-gradient-to-br from-violet-50/60 to-purple-50/60 rounded-2xl border border-violet-100 hover:border-violet-200 transition-colors">
+                    <div className="p-5 bg-white rounded-2xl border border-violet-100 hover:border-violet-200 transition-colors">
                         <p className="text-[10px] text-violet-400 font-black uppercase tracking-[0.2em] mb-3">Contact</p>
                         <p className="font-bold text-gray-900 text-base">{customer.firstName} {customer.lastName}</p>
                         <div className="mt-2 space-y-1.5">
@@ -87,7 +87,7 @@ export default function CustomerInfoSection({
                         </div>
                     </div>
 
-                    <div className="p-5 bg-gradient-to-br from-teal-50/60 to-cyan-50/60 rounded-2xl border border-teal-100 hover:border-teal-200 transition-colors">
+                    <div className="p-5 bg-white rounded-2xl border border-teal-100 hover:border-teal-200 transition-colors">
                         <p className="text-[10px] text-teal-500 font-black uppercase tracking-[0.2em] mb-3">
                             {orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse'}
                         </p>
@@ -132,7 +132,7 @@ export default function CustomerInfoSection({
                 )}
             </div>
 
-            <div className="p-5 bg-gradient-to-br from-violet-50/50 to-purple-50/50 rounded-2xl border border-violet-100 space-y-4">
+            <div className="p-5 bg-white rounded-2xl border border-violet-100 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InputField label="Prénom" color="text-violet-500">
                         <input
@@ -181,7 +181,7 @@ export default function CustomerInfoSection({
                     label={orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse (Optionnelle)'}
                     color="bg-gradient-to-br from-teal-400 to-cyan-500"
                 />
-                <div className="p-5 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 rounded-2xl border border-teal-100 space-y-4">
+                <div className="p-5 bg-white rounded-2xl border border-teal-100 space-y-4">
                     <InputField label="Rue et Numéro" color="text-teal-600">
                         <input
                             type="text"
