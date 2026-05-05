@@ -418,7 +418,12 @@ export const listAllUsers = query({
         const orderCount = (
           await ctx.db
             .query("orders")
-            .filter((q) => q.eq(q.field("userId"), user._id))
+            .filter((q) =>
+              q.and(
+                q.eq(q.field("userId"), user._id),
+                q.neq(q.field("status"), "awaiting_payment"),
+              ),
+            )
             .collect()
         ).length;
 
@@ -459,11 +464,13 @@ export const listUserOrders = query({
       throw new Error("Unauthorized");
     }
 
-    const orders = await ctx.db
-      .query("orders")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
-      .order("desc")
-      .collect();
+    const orders = (
+      await ctx.db
+        .query("orders")
+        .filter((q) => q.eq(q.field("userId"), args.userId))
+        .order("desc")
+        .collect()
+    ).filter((o) => o.status !== "awaiting_payment");
 
     // Enrich orders with topping names
     return await Promise.all(orders.map(async (order) => {

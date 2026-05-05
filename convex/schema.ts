@@ -168,6 +168,7 @@ export default defineSchema({
     discountAmount: v.optional(v.number()),
     appliedCampaignIds: v.optional(v.array(v.string())),
     status: v.union(
+      v.literal("awaiting_payment"),
       v.literal("pending"),
       v.literal("preparing"),
       v.literal("ready"),

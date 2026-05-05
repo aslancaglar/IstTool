@@ -182,11 +182,15 @@ export const getAllOrders = query({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
-    const orders = await ctx.db
+    const allOrders = await ctx.db
       .query("orders")
       .withIndex("by_created")
       .order("desc")
       .collect();
+
+    // Hide orders that haven't completed Stripe checkout — they aren't real
+    // orders until the customer pays.
+    const orders = allOrders.filter((o) => o.status !== "awaiting_payment");
 
     // Enrich orders with topping names
     return await Promise.all(orders.map(async (order) => {

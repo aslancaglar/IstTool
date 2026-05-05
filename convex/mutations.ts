@@ -382,7 +382,7 @@ export const createOrder = mutation({
       promoCode: appliedPromoCode,
       discountAmount: totalDiscountAmount > 0 ? totalDiscountAmount : undefined,
       appliedCampaignIds: effectiveCampaignIds.length > 0 ? effectiveCampaignIds : undefined,
-      status: "pending",
+      status: args.paymentMethod === "stripe" ? "awaiting_payment" : "pending",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -560,9 +560,12 @@ export const markOrderPaid = internalMutation({
     stripePaymentIntentId: v.string(),
   },
   handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
     await ctx.db.patch(args.orderId, {
       paymentStatus: "paid",
       stripePaymentIntentId: args.stripePaymentIntentId,
+      // Promote awaiting_payment orders into the operational queue once paid
+      status: order?.status === "awaiting_payment" ? "pending" : order?.status,
       updatedAt: Date.now(),
     });
   },
