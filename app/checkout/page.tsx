@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOrder } from '../../src/context/OrderContext';
 import { useAuth } from '../../src/context/AuthContext';
@@ -16,6 +16,7 @@ import OrderTypeSelector from '../../src/components/checkout/OrderTypeSelector';
 import OrderSummary from '../../src/components/checkout/OrderSummary';
 import CustomerInfoSection from '../../src/components/checkout/CustomerInfoSection';
 import PaymentSection from '../../src/components/checkout/PaymentSection';
+import { type StripeFormHandle } from '../../src/components/StripePaymentForm';
 
 type Step = 'details' | 'payment';
 
@@ -46,6 +47,8 @@ export default function CheckoutPage() {
     const [appliedPromoCode, setAppliedPromoCode] = useState<string | undefined>();
     const [discountAmount, setDiscountAmount] = useState(0);
     const [freeDeliveryFromPromo, setFreeDeliveryFromPromo] = useState(false);
+    const stripeFormRef = useRef<StripeFormHandle>(null);
+    const [isStripeProcessing, setIsStripeProcessing] = useState(false);
 
     const updateUser = useMutation(api.auth.updateUser);
     const activeCampaigns = useQuery(api.promoCodes.listActiveCampaigns);
@@ -487,6 +490,8 @@ export default function CheckoutPage() {
                                     hideSubmitButton
                                     cashEnabled={restaurantInfo?.cashEnabled ?? true}
                                     stripeEnabled={restaurantInfo?.stripeEnabled ?? true}
+                                    stripeFormRef={stripeFormRef}
+                                    onStripeProcessingChange={setIsStripeProcessing}
                                 />
                             </div>
 
@@ -496,15 +501,27 @@ export default function CheckoutPage() {
                             </div>
 
                             {/* Confirm button — desktop only inline */}
-                            {paymentMethod && (!showStripeForm || paymentMethod === 'cash') && (
+                            {paymentMethod && (
                                 <button
-                                    onClick={handleCashSubmit}
-                                    disabled={isSubmitting || (paymentMethod === 'stripe' && !showStripeForm)}
-                                    className={`hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 shadow-xl shadow-orange-500/25 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${isSubmitting ? 'animate-pulse' : ''}`}
+                                    onClick={() => {
+                                        if (paymentMethod === 'stripe') {
+                                            stripeFormRef.current?.submit();
+                                        } else {
+                                            handleCashSubmit();
+                                        }
+                                    }}
+                                    disabled={
+                                        isSubmitting ||
+                                        isStripeProcessing ||
+                                        (paymentMethod === 'stripe' && !showStripeForm)
+                                    }
+                                    className={`hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 shadow-xl shadow-orange-500/25 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${(isSubmitting || isStripeProcessing) ? 'animate-pulse' : ''}`}
                                 >
-                                    {isSubmitting
+                                    {(isSubmitting || isStripeProcessing)
                                         ? <><ShoppingBag className="w-5 h-5 animate-bounce" /> Traitement en cours...</>
-                                        : <>{paymentMethod === 'stripe' ? 'Continuer' : 'Confirmer ma commande'} <ArrowLeft className="w-5 h-5 rotate-180" /></>
+                                        : paymentMethod === 'stripe'
+                                            ? <>Payer {finalTotal.toFixed(2)}€ <ArrowLeft className="w-5 h-5 rotate-180" /></>
+                                            : <>Confirmer ma commande <ArrowLeft className="w-5 h-5 rotate-180" /></>
                                     }
                                 </button>
                             )}
@@ -522,21 +539,31 @@ export default function CheckoutPage() {
             {step === 'payment' && (
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3">
                     {(() => {
-                        const ready = !!paymentMethod && (!showStripeForm || paymentMethod === 'cash') && !isSubmitting;
+                        const processing = isSubmitting || isStripeProcessing;
+                        const stripeReady = paymentMethod === 'stripe' && showStripeForm;
+                        const cashReady = paymentMethod === 'cash';
+                        const ready = !processing && (stripeReady || cashReady);
+                        const onClick = () => {
+                            if (!ready) return;
+                            if (paymentMethod === 'stripe') stripeFormRef.current?.submit();
+                            else if (paymentMethod === 'cash') handleCashSubmit();
+                        };
                         return (
                             <button
-                                onClick={() => ready && paymentMethod && handleCashSubmit()}
+                                onClick={onClick}
                                 className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
-                                    isSubmitting
+                                    processing
                                         ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 animate-pulse'
                                         : ready
                                         ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 active:scale-[0.98]'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             >
-                                {isSubmitting
+                                {processing
                                     ? <><ShoppingBag className="w-5 h-5 animate-bounce" /> Traitement en cours...</>
-                                    : <>Confirmer ma commande <ArrowLeft className="w-5 h-5 rotate-180" /></>
+                                    : paymentMethod === 'stripe'
+                                        ? <>Payer {finalTotal.toFixed(2)}€ <ArrowLeft className="w-5 h-5 rotate-180" /></>
+                                        : <>Confirmer ma commande <ArrowLeft className="w-5 h-5 rotate-180" /></>
                                 }
                             </button>
                         );

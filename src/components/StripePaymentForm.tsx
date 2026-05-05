@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -8,49 +8,60 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 
-// Make sure to call `loadStripe` outside of a component’s render to avoid
-// recreating the `Stripe` object on every render.
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+
+export interface StripeFormHandle {
+  submit: () => Promise<void>;
+}
 
 interface StripePaymentFormProps {
   onSuccess: (paymentIntentId: string) => void;
   onError: (error: string) => void;
   amount: number;
   clientSecret: string;
+  hideInternalButton?: boolean;
+  onProcessingChange?: (processing: boolean) => void;
 }
 
-function CheckoutForm({ onSuccess, onError, amount }: Omit<StripePaymentFormProps, 'clientSecret'>) {
+interface CheckoutFormProps extends Omit<StripePaymentFormProps, 'clientSecret'> {
+  formRef?: React.Ref<StripeFormHandle>;
+}
+
+function CheckoutForm({ onSuccess, onError, amount, hideInternalButton, onProcessingChange, formRef }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    onProcessingChange?.(isLoading);
+  }, [isLoading, onProcessingChange]);
 
-    if (!stripe || !elements) {
-      // Stripe.js has not yet loaded.
-      return;
-    }
-
+  const submit = async () => {
+    if (!stripe || !elements || isLoading) return;
     setIsLoading(true);
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      redirect: 'if_required',
-      confirmParams: {
-        // Return URL is required if you want to redirect, but since we handle it in the same page:
-      },
-    });
-
-    if (error) {
-      onError(error.message || 'Une erreur est survenue lors du paiement.');
-    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      onSuccess(paymentIntent.id);
-    } else {
-      onError('Statut du paiement inattendu.');
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required',
+        confirmParams: {},
+      });
+      if (error) {
+        onError(error.message || 'Une erreur est survenue lors du paiement.');
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        onSuccess(paymentIntent.id);
+      } else {
+        onError('Statut du paiement inattendu.');
+      }
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setIsLoading(false);
+  useImperativeHandle(formRef, () => ({ submit }), [stripe, elements, isLoading]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submit();
   };
 
   return (
@@ -64,40 +75,51 @@ function CheckoutForm({ onSuccess, onError, amount }: Omit<StripePaymentFormProp
         <span>Paiement sécurisé par Stripe</span>
       </div>
 
-      <button
-        type="submit"
-        disabled={isLoading || !stripe || !elements}
-        className="w-full bg-red-500 text-white font-bold py-4 rounded-xl hover:bg-red-600 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
-      >
-        {isLoading ? (
-          <>
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            Traitement du paiement...
-          </>
-        ) : (
-          <>
-            Payer {amount.toFixed(2)}€
-          </>
-        )}
-      </button>
+      {!hideInternalButton && (
+        <button
+          type="submit"
+          disabled={isLoading || !stripe || !elements}
+          className="w-full bg-red-500 text-white font-bold py-4 rounded-xl hover:bg-red-600 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+        >
+          {isLoading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Traitement du paiement...
+            </>
+          ) : (
+            <>Payer {amount.toFixed(2)}€</>
+          )}
+        </button>
+      )}
     </form>
   );
 }
 
-export default function StripePaymentForm({ onSuccess, onError, amount, clientSecret }: StripePaymentFormProps) {
-  const options = {
-    clientSecret,
-    appearance: {
-      theme: 'stripe' as const,
-      variables: {
-        colorPrimary: '#ef4444', // red-500
+const StripePaymentForm = forwardRef<StripeFormHandle, StripePaymentFormProps>(
+  function StripePaymentForm({ onSuccess, onError, amount, clientSecret, hideInternalButton, onProcessingChange }, ref) {
+    const options = {
+      clientSecret,
+      appearance: {
+        theme: 'stripe' as const,
+        variables: {
+          colorPrimary: '#ef4444',
+        },
       },
-    },
-  };
+    };
 
-  return (
-    <Elements stripe={stripePromise} options={options}>
-      <CheckoutForm onSuccess={onSuccess} onError={onError} amount={amount} />
-    </Elements>
-  );
-}
+    return (
+      <Elements stripe={stripePromise} options={options}>
+        <CheckoutForm
+          onSuccess={onSuccess}
+          onError={onError}
+          amount={amount}
+          hideInternalButton={hideInternalButton}
+          onProcessingChange={onProcessingChange}
+          formRef={ref}
+        />
+      </Elements>
+    );
+  }
+);
+
+export default StripePaymentForm;

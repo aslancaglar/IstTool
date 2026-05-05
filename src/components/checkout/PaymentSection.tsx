@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { CreditCard, Wallet, Lock, CheckCircle2, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
-import StripePaymentForm from '../StripePaymentForm';
+import StripePaymentForm, { type StripeFormHandle } from '../StripePaymentForm';
 import { formatPrice } from '../../utils/formatters';
 
 interface PaymentSectionProps {
@@ -22,6 +22,8 @@ interface PaymentSectionProps {
     hideSubmitButton?: boolean;
     cashEnabled?: boolean;
     stripeEnabled?: boolean;
+    stripeFormRef?: React.Ref<StripeFormHandle>;
+    onStripeProcessingChange?: (processing: boolean) => void;
 }
 
 export default function PaymentSection({
@@ -41,6 +43,8 @@ export default function PaymentSection({
     hideSubmitButton = false,
     cashEnabled = true,
     stripeEnabled = true,
+    stripeFormRef,
+    onStripeProcessingChange,
 }: PaymentSectionProps) {
     const bothEnabled = cashEnabled && stripeEnabled;
 
@@ -128,10 +132,13 @@ export default function PaymentSection({
             {paymentMethod === 'stripe' && showStripeForm && clientSecret && (
                 <div className="p-6 bg-white rounded-2xl border border-indigo-100 shadow-sm animate-in slide-in-from-top-4 duration-500">
                     <StripePaymentForm
+                        ref={stripeFormRef}
                         clientSecret={clientSecret}
                         onSuccess={handleStripeSuccess}
                         onError={handleStripeError}
                         amount={totalPrice}
+                        hideInternalButton
+                        onProcessingChange={onStripeProcessingChange}
                     />
                 </div>
             )}
