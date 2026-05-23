@@ -3,9 +3,10 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { Package, Bell, BellOff } from 'lucide-react';
+import { Package, Bell, BellOff, Power } from 'lucide-react';
 import OrderCard from '../../../src/components/admin/Orders/OrderCard';
 import OrderDetailsModal from '../../../src/components/admin/Orders/OrderDetailsModal';
+import StopOrderingModal from '../../../src/components/admin/Orders/StopOrderingModal';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { useAdminAuth } from '../../../src/context/AdminAuthContext';
 
@@ -19,10 +20,15 @@ export default function OrdersPage() {
   const updateOrderStatus = useMutation(api.mutations.updateOrderStatus);
   const updatePaymentStatus = useMutation(api.mutations.updatePaymentStatus);
   const deleteOrderMutation = useMutation(api.mutations.deleteOrder);
+  const reprintOrderMutation = useMutation(api.printing.reprintOrder);
+  const toggleOrderingMutation = useMutation(api.restaurantInfo.toggleOrderingAvailability);
+  const restaurantInfo = useQuery(api.restaurantInfo.get);
 
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [stopOrderingModalOpen, setStopOrderingModalOpen] = useState(false);
+  const [savingOrdering, setSavingOrdering] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const soundEnabledRef = useRef(false);
 
@@ -175,6 +181,33 @@ export default function OrdersPage() {
     }
   }, [updatePaymentStatus, adminToken]);
 
+  const handleReprint = useCallback(async (orderId: Id<'orders'>) => {
+    if (!adminToken) return;
+    try {
+      await reprintOrderMutation({ orderId, adminToken });
+    } catch (error) {
+      console.error('Error reprinting order:', error);
+    }
+  }, [reprintOrderMutation, adminToken]);
+
+  const handleToggleOrdering = useCallback(async (pickup: boolean, delivery: boolean) => {
+    if (!adminToken) return;
+    setSavingOrdering(true);
+    try {
+      await toggleOrderingMutation({ adminToken, pickupEnabled: pickup, deliveryEnabled: delivery });
+      setStopOrderingModalOpen(false);
+    } catch (error) {
+      console.error('Error toggling ordering availability:', error);
+    } finally {
+      setSavingOrdering(false);
+    }
+  }, [toggleOrderingMutation, adminToken]);
+
+    const pickupEnabled = restaurantInfo?.pickupEnabled ?? true;
+    const deliveryEnabled = restaurantInfo?.deliveryEnabled ?? true;
+    const allActive = pickupEnabled && deliveryEnabled;
+    const allStopped = !pickupEnabled && !deliveryEnabled;
+
     const getCount = (status: string) => {
       if (!orders) return 0;
       if (status === 'all') return orders.length;
@@ -199,22 +232,51 @@ export default function OrdersPage() {
             <h1 className="text-2xl font-bold text-slate-900">Commandes</h1>
             <p className="text-slate-500 text-sm mt-1">{orders?.length ?? 0} commande{(orders?.length ?? 0) > 1 ? 's' : ''} au total</p>
           </div>
-          <button
-            onClick={toggleSound}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition group ${soundEnabled
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
-              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+          <div className="flex items-center gap-2">
+            {/* Stop ordering button */}
+            <button
+              onClick={() => setStopOrderingModalOpen(true)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition group ${
+                allStopped
+                  ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
+                  : !allActive
+                    ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
-          >
-            {soundEnabled ? (
-              <Bell className="w-4 h-4 text-emerald-600 active:scale-95 transition-transform" />
-            ) : (
-              <BellOff className="w-4 h-4 text-slate-400 group-hover:text-slate-500" />
-            )}
-            <span className="font-semibold text-sm">
-              {soundEnabled ? 'Son Activé' : 'Son Désactivé'}
-            </span>
-          </button>
+            >
+              <span className="relative flex items-center">
+                <Power className="w-4 h-4" />
+                <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-white ${
+                  allStopped ? 'bg-red-500' : allActive ? 'bg-emerald-500' : 'bg-amber-500'
+                }`} />
+              </span>
+              <span className="font-semibold text-sm hidden sm:inline">
+                {allStopped
+                  ? 'Commandes arrêtées'
+                  : !allActive
+                    ? (!pickupEnabled ? 'Emporter arrêté' : 'Livraison arrêtée')
+                    : 'Commandes actives'
+                }
+              </span>
+            </button>
+            {/* Sound toggle */}
+            <button
+              onClick={toggleSound}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition group ${soundEnabled
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+            >
+              {soundEnabled ? (
+                <Bell className="w-4 h-4 text-emerald-600 active:scale-95 transition-transform" />
+              ) : (
+                <BellOff className="w-4 h-4 text-slate-400 group-hover:text-slate-500" />
+              )}
+              <span className="font-semibold text-sm">
+                {soundEnabled ? 'Son Activé' : 'Son Désactivé'}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Filter tabs with counts */}
@@ -277,10 +339,20 @@ export default function OrdersPage() {
         onStatusChange={handleStatusChange}
         onPaymentStatusChange={handlePaymentStatusChange}
         onDeleteOrder={handleDeleteOrder}
+        onReprint={restaurantInfo?.printNodeApiKey ? handleReprint : undefined}
         toppings={toppings}
         toppingCategories={toppingCategories}
         promoCodes={promoCodes}
         campaigns={campaigns}
+      />
+
+      <StopOrderingModal
+        isOpen={stopOrderingModalOpen}
+        onClose={() => setStopOrderingModalOpen(false)}
+        pickupEnabled={pickupEnabled}
+        deliveryEnabled={deliveryEnabled}
+        onSave={handleToggleOrdering}
+        saving={savingOrdering}
       />
     </>
   );

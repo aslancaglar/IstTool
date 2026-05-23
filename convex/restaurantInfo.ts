@@ -49,6 +49,10 @@ export const upsert = mutation({
     reviewsEnabled: v.optional(v.boolean()),
     cashEnabled: v.optional(v.boolean()),
     stripeEnabled: v.optional(v.boolean()),
+    printingEnabled: v.optional(v.boolean()),
+    printNodeApiKey: v.optional(v.string()),
+    printerPickupId: v.optional(v.number()),
+    printerDeliveryId: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -76,6 +80,10 @@ export const upsert = mutation({
         reviewsEnabled: args.reviewsEnabled,
         cashEnabled: args.cashEnabled,
         stripeEnabled: args.stripeEnabled,
+        printingEnabled: args.printingEnabled,
+        printNodeApiKey: args.printNodeApiKey,
+        printerPickupId: args.printerPickupId,
+        printerDeliveryId: args.printerDeliveryId,
       });
       return existing._id;
     } else {
@@ -97,8 +105,37 @@ export const upsert = mutation({
         reviewsEnabled: args.reviewsEnabled ?? true,
         cashEnabled: args.cashEnabled ?? true,
         stripeEnabled: args.stripeEnabled ?? true,
+        printingEnabled: args.printingEnabled,
+        printNodeApiKey: args.printNodeApiKey,
+        printerPickupId: args.printerPickupId,
+        printerDeliveryId: args.printerDeliveryId,
       });
       return id;
     }
+  },
+});
+
+export const toggleOrderingAvailability = mutation({
+  args: {
+    adminToken: v.string(),
+    pickupEnabled: v.boolean(),
+    deliveryEnabled: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+
+    const existing = await ctx.db
+      .query("restaurantInfo")
+      .withIndex("by_key", (q) => q.eq("key", "main"))
+      .first();
+
+    if (!existing) {
+      throw new Error("Restaurant info not found");
+    }
+
+    await ctx.db.patch(existing._id, {
+      pickupEnabled: args.pickupEnabled,
+      deliveryEnabled: args.deliveryEnabled,
+    });
   },
 });

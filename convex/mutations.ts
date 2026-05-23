@@ -1,4 +1,5 @@
 import { mutation, internalMutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { requireAdminSession, requireUserSession } from "./lib/auth";
 
@@ -392,6 +393,13 @@ export const createOrder = mutation({
     if (promoId && promoUsageCount != null) {
       await ctx.db.patch(promoId as any, { usageCount: promoUsageCount + 1 });
     }
+
+    // Cash orders are confirmed at creation — print receipt immediately.
+    // Stripe orders are still `awaiting_payment` and print after markOrderPaid.
+    if (args.paymentMethod === "cash") {
+      await ctx.scheduler.runAfter(0, internal.printing.printOrderReceipt, { orderId });
+    }
+
     return orderId;
   },
 });
@@ -562,12 +570,20 @@ export const markOrderPaid = internalMutation({
   },
   handler: async (ctx, args) => {
     const order = await ctx.db.get(args.orderId);
+    const wasAwaitingPayment = order?.status === "awaiting_payment";
     await ctx.db.patch(args.orderId, {
       paymentStatus: "paid",
       stripePaymentIntentId: args.stripePaymentIntentId,
       // Promote awaiting_payment orders into the operational queue once paid
-      status: order?.status === "awaiting_payment" ? "pending" : order?.status,
+      status: wasAwaitingPayment ? "pending" : order?.status,
       updatedAt: Date.now(),
     });
+
+    // Newly-confirmed Stripe order: schedule the receipt print
+    if (wasAwaitingPayment) {
+      await ctx.scheduler.runAfter(0, internal.printing.printOrderReceipt, {
+        orderId: args.orderId,
+      });
+    }
   },
 });

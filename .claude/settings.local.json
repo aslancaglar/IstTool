@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npm install *)",
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(xargs cat *)",
+      "Bash(npx convex *)",
+      "Bash(curl -s -X POST https://quick-ptarmigan-724.eu-west-1.convex.site/api/vapi/order -H 'Content-Type: application/json' -H 'X-Vapi-Secret: ' -d '{ *)",
+      "Bash(curl -s -X POST https://quick-ptarmigan-724.eu-west-1.convex.site/api/vapi/order -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(CONVEX_DEPLOYMENT=dev:quick-ptarmigan-724 npx convex dev --once)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s https://quick-ptarmigan-724.eu-west-1.convex.site/api/vapi/menu)",
+      "mcp__claude_ai_Google_Drive__create_file",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s https://quick-ptarmigan-724.eu-west-1.convex.site/api/vapi/menu/full)",
+      "Bash(curl -s \"https://quick-ptarmigan-724.eu-west-1.convex.site/api/vapi/menu/full\")",
+      "Bash(identify /Users/caslanmmini/DEV/MondoPizza/public/LogoMondo.png)",
+      "Bash(node -e \"require\\('sharp'\\); console.log\\('sharp available'\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"require\\('jimp'\\)\")",
+      "Bash(xargs ls *)"
+    ]
+  }
+}

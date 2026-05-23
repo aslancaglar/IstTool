@@ -250,6 +250,58 @@ export const getOrderInternal = internalQuery({
   },
 });
 
+// Server-only: load restaurant settings (incl. PrintNode key). Callable from actions only.
+export const getRestaurantInfoInternal = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("restaurantInfo")
+      .withIndex("by_key", (q) => q.eq("key", "main"))
+      .first();
+  },
+});
+
+// Server-only: load order with topping names/prices resolved. Used by the
+// printing action to render receipts.
+export const getEnrichedOrderInternal = internalQuery({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) return null;
+
+    const enrichedItems = await Promise.all(order.items.map(async (item) => {
+      if (!item.selectedToppings) return item;
+      const enrichedToppings = await Promise.all(item.selectedToppings.map(async (group) => {
+        const details = await Promise.all(group.toppingIds.map(async (id) => {
+          const t = await ctx.db.query("toppings").filter(q => q.eq(q.field("toppingId"), id)).first();
+          if (!t) return { name: id, price: 0 };
+          if (t.menuItemId) {
+            const linked = await ctx.db.get(t.menuItemId);
+            if (linked) {
+              return {
+                name: t.name || linked.name,
+                price: t.specialPrice !== undefined ? t.specialPrice : linked.price,
+              };
+            }
+          }
+          return {
+            name: t.name,
+            price: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0),
+          };
+        }));
+        return {
+          ...group,
+          toppingNames: details.map(d => d.name),
+          toppingPrices: details.map(d => d.price),
+        };
+      }));
+      return { ...item, selectedToppings: enrichedToppings };
+    }));
+
+    return { ...order, items: enrichedItems };
+  },
+});
+
 export const getMenuCategories = query({
   args: {},
   handler: async (ctx) => {

@@ -5,7 +5,7 @@ import {
     X, Clock, Package, CheckCircle, XCircle,
     User, Phone, Mail, MapPin, Trash2,
     Truck, ShoppingBag, CreditCard, Banknote,
-    ChevronDown, ChevronUp, Copy, ExternalLink, Gift
+    ChevronDown, ChevronUp, Copy, ExternalLink, Gift, Printer
 } from 'lucide-react';
 import { Id } from '../../../../convex/_generated/dataModel';
 
@@ -16,6 +16,7 @@ interface OrderDetailsModalProps {
     onStatusChange: (orderId: Id<'orders'>, newStatus: string) => Promise<void>;
     onPaymentStatusChange?: (orderId: Id<'orders'>, paymentStatus: 'paid' | 'unpaid') => Promise<void>;
     onDeleteOrder: (orderId: Id<'orders'>) => Promise<void>;
+    onReprint?: (orderId: Id<'orders'>) => Promise<void>;
     toppings: any[] | undefined;
     toppingCategories: any[] | undefined;
     promoCodes?: any[] | undefined;
@@ -40,6 +41,7 @@ export default function OrderDetailsModal({
     onStatusChange,
     onPaymentStatusChange,
     onDeleteOrder,
+    onReprint,
     toppings,
     toppingCategories,
     promoCodes,
@@ -480,13 +482,25 @@ export default function OrderDetailsModal({
                                     </button>
                                 </div>
                             ) : (
-                                <button
-                                    onClick={() => setIsConfirmingDelete(true)}
-                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Supprimer"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                <>
+                                    <button
+                                        onClick={() => setIsConfirmingDelete(true)}
+                                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Supprimer"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                    {onReprint && (
+                                        <button
+                                            onClick={() => onReprint(order._id)}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors border border-slate-200"
+                                            title="Imprimer reçu"
+                                        >
+                                            <Printer className="w-3.5 h-3.5" />
+                                            Imprimer
+                                        </button>
+                                    )}
+                                </>
                             )}
                         </div>
                         <div className="flex items-baseline gap-2">

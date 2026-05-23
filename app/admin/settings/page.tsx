@@ -9,8 +9,9 @@ import SettingsAccordion from '../../../src/components/admin/Settings/SettingsAc
 import HoursSection, { type DaySchedule, type TimeSlot } from '../../../src/components/admin/Settings/HoursSection';
 import HolidaysSection, { type Holiday } from '../../../src/components/admin/Settings/HolidaysSection';
 import DeliveryZonesSection, { type DeliveryZone } from '../../../src/components/admin/Settings/DeliveryZonesSection';
+import PrintingSection from '../../../src/components/admin/Settings/PrintingSection';
 
-type SectionId = 'contact' | 'ordering' | 'hours' | 'holidays' | 'social' | 'delivery' | 'sections';
+type SectionId = 'contact' | 'ordering' | 'hours' | 'holidays' | 'social' | 'delivery' | 'sections' | 'printing';
 
 export default function SettingsPage() {
   const { adminToken } = useAdminAuth();
@@ -19,7 +20,7 @@ export default function SettingsPage() {
 
   const [expandedSections, setExpandedSections] = useState<Record<SectionId, boolean>>({
     contact: false, ordering: false, hours: false, holidays: false,
-    social: false, delivery: false, sections: false,
+    social: false, delivery: false, sections: false, printing: false,
   });
 
   const toggleSection = (id: SectionId) => {
@@ -43,6 +44,10 @@ export default function SettingsPage() {
     reviewsEnabled: true,
     cashEnabled: true,
     stripeEnabled: true,
+    printingEnabled: false,
+    printNodeApiKey: '',
+    printerPickupId: undefined as number | undefined,
+    printerDeliveryId: undefined as number | undefined,
   });
 
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
@@ -85,6 +90,10 @@ export default function SettingsPage() {
       reviewsEnabled: restaurantInfo.reviewsEnabled ?? true,
       cashEnabled: restaurantInfo.cashEnabled ?? true,
       stripeEnabled: restaurantInfo.stripeEnabled ?? true,
+      printingEnabled: restaurantInfo.printingEnabled ?? false,
+      printNodeApiKey: restaurantInfo.printNodeApiKey ?? '',
+      printerPickupId: restaurantInfo.printerPickupId,
+      printerDeliveryId: restaurantInfo.printerDeliveryId,
     });
 
     setHolidays(restaurantInfo.holidays || []);
@@ -136,6 +145,10 @@ export default function SettingsPage() {
         reviewsEnabled: formData.reviewsEnabled,
         cashEnabled: formData.cashEnabled,
         stripeEnabled: formData.stripeEnabled,
+        printingEnabled: formData.printingEnabled,
+        printNodeApiKey: formData.printNodeApiKey || undefined,
+        printerPickupId: formData.printerPickupId,
+        printerDeliveryId: formData.printerDeliveryId,
       });
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
@@ -322,6 +335,20 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Impression des reçus" isOpen={expandedSections.printing} onToggle={() => toggleSection('printing')}>
+          <PrintingSection
+            adminToken={adminToken}
+            printingEnabled={formData.printingEnabled}
+            printNodeApiKey={formData.printNodeApiKey}
+            printerPickupId={formData.printerPickupId}
+            printerDeliveryId={formData.printerDeliveryId}
+            onPrintingEnabledChange={(v) => setFormData({ ...formData, printingEnabled: v })}
+            onApiKeyChange={(v) => setFormData({ ...formData, printNodeApiKey: v })}
+            onPickupPrinterChange={(id) => setFormData({ ...formData, printerPickupId: id })}
+            onDeliveryPrinterChange={(id) => setFormData({ ...formData, printerDeliveryId: id })}
+          />
         </SettingsAccordion>
 
         <SettingsAccordion title="Sections du Site" isOpen={expandedSections.sections} onToggle={() => toggleSection('sections')}>

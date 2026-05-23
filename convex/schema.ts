@@ -111,6 +111,10 @@ export default defineSchema({
     reviewsEnabled: v.optional(v.boolean()),
     cashEnabled: v.optional(v.boolean()),
     stripeEnabled: v.optional(v.boolean()),
+    printingEnabled: v.optional(v.boolean()),
+    printNodeApiKey: v.optional(v.string()),
+    printerPickupId: v.optional(v.number()),
+    printerDeliveryId: v.optional(v.number()),
   }).index("by_key", ["key"]),
 
   users: defineTable({
