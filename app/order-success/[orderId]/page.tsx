@@ -308,6 +308,7 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
     const order = useQuery(api.queries.getOrder, { orderId: orderId as Id<'orders'> });
     const [elapsedMin, setElapsedMin] = useState(0);
     const [detailsOpen, setDetailsOpen] = useState(true);
+    const [nowMs, setNowMs] = useState(() => Date.now());
 
     useEffect(() => {
         if (!order) return;
@@ -319,6 +320,14 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
         const interval = setInterval(update, 30000);
         return () => clearInterval(interval);
     }, [order]);
+
+    useEffect(() => {
+        if (!order) return;
+        if (!order.acceptedAt) return;
+        if (order.status !== 'preparing' && order.status !== 'delivering') return;
+        const tick = setInterval(() => setNowMs(Date.now()), 1000);
+        return () => clearInterval(tick);
+    }, [order?.acceptedAt, order?.status]);
 
     if (order === undefined) {
         return (
@@ -351,25 +360,102 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
 
     const isDelivery = order.type === 'delivery';
     const isCancelled = order.status === 'cancelled';
-    const FLOW_PICKUP = ['pending', 'preparing', 'completed'];
-    const FLOW_DELIVERY = ['pending', 'preparing', 'delivering', 'completed'];
+    const FLOW_PICKUP = ['pending', 'preparing', 'ready', 'completed'];
+    const FLOW_DELIVERY = ['pending', 'preparing', 'ready', 'delivering', 'completed'];
     const flow = isDelivery ? FLOW_DELIVERY : FLOW_PICKUP;
     const currentIdx = flow.indexOf(order.status);
     const statusConf = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
     const StatusSVG = statusConf.icon;
+    const readySubtitle = order.status === 'ready' && isDelivery
+        ? 'Votre commande est prête, en attente du livreur.'
+        : statusConf.subtitle;
 
     const stepLabels: Record<string, string> = {
         pending: 'Reçue',
         preparing: 'Préparation',
+        ready: 'Prêt',
         delivering: 'Livraison',
         completed: 'Terminée',
     };
 
     const progressPercent = isCancelled ? 0 : ((currentIdx) / (flow.length - 1)) * 100;
 
+    const prepMin = (order as any).prepTimeMinutes as number | undefined;
+    const deliveryMin = (order as any).deliveryTimeMinutes as number | undefined;
+    const acceptedAt = (order as any).acceptedAt as number | undefined;
+    const totalEtaMin = (prepMin ?? 0) + (isDelivery ? (deliveryMin ?? 0) : 0);
+    const isTerminalStatus = isCancelled || order.status === 'completed' || order.status === 'ready';
+    const showWaiting = !isTerminalStatus && !acceptedAt;
+    const showCountdown = !isTerminalStatus && !!acceptedAt && totalEtaMin > 0;
+
+    let etaLabel = '';
+    let etaValue = '';
+    const etaColors = isDelivery ? 'from-violet-500 to-purple-600' : 'from-blue-500 to-indigo-600';
+    if (showCountdown) {
+        const targetMs = acceptedAt! + totalEtaMin * 60_000;
+        const remainingMs = targetMs - nowMs;
+        etaLabel = isDelivery && order.status === 'delivering'
+            ? 'Livré dans'
+            : isDelivery
+                ? 'Livraison dans'
+                : 'Prêt dans';
+        if (remainingMs <= 0) {
+            etaValue = 'Bientôt prêt…';
+        } else {
+            const totalSec = Math.floor(remainingMs / 1000);
+            const mm = Math.floor(totalSec / 60);
+            const ss = totalSec % 60;
+            etaValue = `${mm} min ${String(ss).padStart(2, '0')}`;
+        }
+    }
+
     return (
         <div className={`min-h-screen bg-gradient-to-br ${statusConf.bg} flex items-start justify-center p-4 pt-32 pb-12 transition-colors duration-700`}>
             <div className="max-w-lg w-full space-y-5">
+
+                {/* ── Waiting card (pre-acceptance) ─────────────────── */}
+                {showWaiting && (
+                    <div className="relative overflow-hidden rounded-3xl bg-white border border-amber-200 shadow-lg p-5">
+                        <div className="flex items-start gap-4">
+                            <div className="relative w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
+                                <Clock className="w-6 h-6 text-amber-600" />
+                                <span className="absolute -inset-1 rounded-2xl bg-amber-400/30 animate-ping" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-black uppercase tracking-wider text-amber-700">
+                                    En attente de confirmation
+                                </p>
+                                <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                                    Le restaurant va confirmer votre commande dans un instant. Le temps {isDelivery ? 'de livraison' : 'de préparation'} s&apos;affichera ici dès qu&apos;elle sera acceptée.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Countdown banner (post-acceptance) ─────────────────── */}
+                {showCountdown && (
+                    <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${etaColors} shadow-2xl text-white p-6`}>
+                        <div className="absolute inset-0 opacity-10 pointer-events-none">
+                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full blur-2xl" />
+                            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white rounded-full blur-2xl" />
+                        </div>
+                        <div className="relative flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shrink-0">
+                                {isDelivery ? <Truck className="w-7 h-7" /> : <Clock className="w-7 h-7" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-90">{etaLabel}</p>
+                                <p className="text-4xl sm:text-5xl font-black tabular-nums leading-tight">{etaValue}</p>
+                                {acceptedAt && (
+                                    <p className="text-xs opacity-80 mt-1">
+                                        Acceptée à {new Date(acceptedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Main status card ─────────────────── */}
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
@@ -384,7 +470,7 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                             {statusConf.title}
                         </h1>
                         <p className="text-slate-500 text-sm mb-1">
-                            {statusConf.subtitle}
+                            {readySubtitle}
                         </p>
                         <p className="text-xs text-slate-400 mt-2">
                             Commande <span className="font-mono font-bold text-slate-700">#{orderId?.slice(-6).toUpperCase()}</span>

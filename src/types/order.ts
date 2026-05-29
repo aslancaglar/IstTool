@@ -18,6 +18,7 @@ export interface SelectedTopping {
   price?: number;
   categoryName?: string;
   freeForBogo?: boolean;
+  tvaPercent?: number;
 }
 
 
@@ -29,6 +30,7 @@ export interface OrderItem {
   basePrice: number;
   selectedToppings: SelectedTopping[];
   totalPrice: number;
+  tvaPercent?: number;
 }
 
 export interface MenuItemToppingAssignment {

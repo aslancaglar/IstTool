@@ -17,6 +17,7 @@ interface MenuItemFormData {
     active: boolean;
     inStock: boolean;
     isUpsell: boolean;
+    tvaPercent: number | undefined;
 }
 
 interface MenuItemModalProps {
@@ -52,6 +53,7 @@ export default function MenuItemModal({
         active: true,
         inStock: true,
         isUpsell: false,
+        tvaPercent: undefined,
     });
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -79,6 +81,7 @@ export default function MenuItemModal({
                 active: editingItem.active !== false,
                 inStock: editingItem.inStock !== false,
                 isUpsell: editingItem.isUpsell || false,
+                tvaPercent: editingItem.tvaPercent,
             });
             setPreviewUrl(editingItem.image);
             const toppingIds = (editingItem.toppingCategoryIds as string[] | undefined) || [];
@@ -96,6 +99,7 @@ export default function MenuItemModal({
                 active: true,
                 inStock: true,
                 isUpsell: false,
+                tvaPercent: undefined,
             });
             setPreviewUrl(null);
             setSelectedToppingCategories([]);
@@ -182,6 +186,21 @@ export default function MenuItemModal({
                                 className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                                 required
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">TVA (%)</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="100"
+                                value={formData.tvaPercent ?? ''}
+                                onChange={(e) => setFormData({ ...formData, tvaPercent: e.target.value ? parseFloat(e.target.value) : undefined })}
+                                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                                placeholder="10"
+                            />
+                            <p className="text-xs text-slate-500 mt-1">Par défaut : 10%. Prix affiché TTC.</p>
                         </div>
 
 

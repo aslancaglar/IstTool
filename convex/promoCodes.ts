@@ -59,7 +59,7 @@ export const validate = query({
   args: {
     code: v.string(),
     orderSubtotal: v.number(),
-    orderType: v.optional(v.union(v.literal("pickup"), v.literal("delivery"))),
+    orderType: v.optional(v.union(v.literal("pickup"), v.literal("delivery"), v.literal("dine_in"))),
     items: v.optional(v.array(v.object({
       menuItemId: v.string(),
       price: v.number(),

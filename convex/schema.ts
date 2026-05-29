@@ -44,6 +44,7 @@ export default defineSchema({
     active: v.optional(v.boolean()),
     inStock: v.optional(v.boolean()),
     isUpsell: v.optional(v.boolean()),
+    tvaPercent: v.optional(v.number()),
   }).index("by_display_order", ["displayOrder"]),
 
   toppingCategories: defineTable({
@@ -65,6 +66,7 @@ export default defineSchema({
     active: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
+    tvaPercent: v.optional(v.number()),
   }).index("by_category", ["categoryId"])
     .index("by_display_order", ["displayOrder"])
     .index("by_topping_id", ["toppingId"])
@@ -98,12 +100,15 @@ export default defineSchema({
     }))),
     pickupEnabled: v.optional(v.boolean()),
     deliveryEnabled: v.optional(v.boolean()),
+    dineInEnabled: v.optional(v.boolean()),
     minimumAdvanceNotice: v.optional(v.number()), // Minimum minutes before pickup/delivery
+    defaultPrepTimeMinutes: v.optional(v.number()), // Default preparation time for all new orders
     deliveryFees: v.optional(v.array(v.object({
       postalCode: v.string(), // Can be exact, wildcard (57*), or range (57190-57199)
       price: v.number(),
       name: v.optional(v.string()), // e.g., "Zone A", "Zone B"
       freeDeliveryThreshold: v.optional(v.number()),
+      deliveryTimeMinutes: v.optional(v.number()), // Time added on top of prep for delivery in this zone
     }))),
     defaultDeliveryFee: v.optional(v.number()), // Fallback price for unmatched postal codes
     freeDeliveryThreshold: v.optional(v.number()), // Order amount for free delivery (0 = disabled)
@@ -145,7 +150,7 @@ export default defineSchema({
       email: v.string(),
       phone: v.string(),
     }),
-    type: v.union(v.literal("pickup"), v.literal("delivery")),
+    type: v.union(v.literal("pickup"), v.literal("delivery"), v.literal("dine_in")),
     address: v.optional(v.object({
       street: v.string(),
       city: v.string(),
@@ -181,6 +186,9 @@ export default defineSchema({
       v.literal("completed"),
       v.literal("cancelled")
     ),
+    prepTimeMinutes: v.optional(v.number()),
+    deliveryTimeMinutes: v.optional(v.number()),
+    acceptedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_status", ["status"])

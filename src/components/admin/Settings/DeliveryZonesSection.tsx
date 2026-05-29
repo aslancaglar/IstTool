@@ -7,6 +7,7 @@ export type DeliveryZone = {
   price: number;
   name?: string;
   freeDeliveryThreshold?: number;
+  deliveryTimeMinutes?: number;
 };
 
 interface DeliveryZonesSectionProps {
@@ -109,6 +110,20 @@ export default function DeliveryZonesSection({
                     onChange={(e) => onUpdateZone(index, 'price', parseFloat(e.target.value) || 0)}
                     className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                    Temps de livraison (min)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="5"
+                    value={zone.deliveryTimeMinutes ?? ''}
+                    onChange={(e) => onUpdateZone(index, 'deliveryTimeMinutes', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="Ex: 20"
                   />
                 </div>
                 <div className="md:col-start-3">

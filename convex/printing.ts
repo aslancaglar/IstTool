@@ -101,7 +101,7 @@ export const printOrderReceipt = internalAction({
     });
     if (!order) return;
 
-    const printerId = order.type === "pickup" ? info.printerPickupId : info.printerDeliveryId;
+    const printerId = order.type === "delivery" ? info.printerDeliveryId : info.printerPickupId;
     if (!printerId) {
       console.warn(`No printer configured for order type "${order.type}"`);
       return;
@@ -121,7 +121,7 @@ export const printOrderReceipt = internalAction({
         },
         body: JSON.stringify({
           printerId,
-          title: `Order #${order._id.toString().slice(-8).toUpperCase()}`,
+          title: `Order #${order._id.toString().slice(-6).toUpperCase()}`,
           contentType: "raw_base64",
           content,
           source: "MondoPizza",

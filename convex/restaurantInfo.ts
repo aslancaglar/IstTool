@@ -36,12 +36,15 @@ export const upsert = mutation({
     }))),
     pickupEnabled: v.optional(v.boolean()),
     deliveryEnabled: v.optional(v.boolean()),
+    dineInEnabled: v.optional(v.boolean()),
     minimumAdvanceNotice: v.optional(v.number()),
+    defaultPrepTimeMinutes: v.optional(v.number()),
     deliveryFees: v.optional(v.array(v.object({
       postalCode: v.string(),
       price: v.number(),
       name: v.optional(v.string()),
       freeDeliveryThreshold: v.optional(v.number()),
+      deliveryTimeMinutes: v.optional(v.number()),
     }))),
     defaultDeliveryFee: v.optional(v.number()),
     freeDeliveryThreshold: v.optional(v.number()),
@@ -72,7 +75,9 @@ export const upsert = mutation({
         holidays: args.holidays,
         pickupEnabled: args.pickupEnabled,
         deliveryEnabled: args.deliveryEnabled,
+        dineInEnabled: args.dineInEnabled,
         minimumAdvanceNotice: args.minimumAdvanceNotice,
+        defaultPrepTimeMinutes: args.defaultPrepTimeMinutes,
         deliveryFees: args.deliveryFees,
         defaultDeliveryFee: args.defaultDeliveryFee,
         freeDeliveryThreshold: args.freeDeliveryThreshold,
@@ -97,7 +102,9 @@ export const upsert = mutation({
         holidays: args.holidays,
         pickupEnabled: args.pickupEnabled ?? true,
         deliveryEnabled: args.deliveryEnabled ?? true,
+        dineInEnabled: args.dineInEnabled ?? true,
         minimumAdvanceNotice: args.minimumAdvanceNotice ?? 30,
+        defaultPrepTimeMinutes: args.defaultPrepTimeMinutes ?? 25,
         deliveryFees: args.deliveryFees,
         defaultDeliveryFee: args.defaultDeliveryFee ?? 0,
         freeDeliveryThreshold: args.freeDeliveryThreshold ?? 0,
@@ -120,6 +127,7 @@ export const toggleOrderingAvailability = mutation({
     adminToken: v.string(),
     pickupEnabled: v.boolean(),
     deliveryEnabled: v.boolean(),
+    dineInEnabled: v.boolean(),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -136,6 +144,7 @@ export const toggleOrderingAvailability = mutation({
     await ctx.db.patch(existing._id, {
       pickupEnabled: args.pickupEnabled,
       deliveryEnabled: args.deliveryEnabled,
+      dineInEnabled: args.dineInEnabled,
     });
   },
 });

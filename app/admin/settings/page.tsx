@@ -36,7 +36,9 @@ export default function SettingsPage() {
     holidays: [] as Holiday[],
     pickupEnabled: true,
     deliveryEnabled: true,
+    dineInEnabled: true,
     minimumAdvanceNotice: 30,
+    defaultPrepTimeMinutes: 25,
     deliveryFees: [] as DeliveryZone[],
     defaultDeliveryFee: 0,
     freeDeliveryThreshold: 0,
@@ -82,7 +84,9 @@ export default function SettingsPage() {
       holidays: restaurantInfo.holidays || [],
       pickupEnabled: restaurantInfo.pickupEnabled ?? true,
       deliveryEnabled: restaurantInfo.deliveryEnabled ?? true,
+      dineInEnabled: restaurantInfo.dineInEnabled ?? true,
       minimumAdvanceNotice: restaurantInfo.minimumAdvanceNotice ?? 30,
+      defaultPrepTimeMinutes: restaurantInfo.defaultPrepTimeMinutes ?? 25,
       deliveryFees: restaurantInfo.deliveryFees || [],
       defaultDeliveryFee: restaurantInfo.defaultDeliveryFee ?? 0,
       freeDeliveryThreshold: restaurantInfo.freeDeliveryThreshold ?? 0,
@@ -137,7 +141,9 @@ export default function SettingsPage() {
         holidays,
         pickupEnabled: formData.pickupEnabled,
         deliveryEnabled: formData.deliveryEnabled,
+        dineInEnabled: formData.dineInEnabled,
         minimumAdvanceNotice: formData.minimumAdvanceNotice,
+        defaultPrepTimeMinutes: formData.defaultPrepTimeMinutes,
         deliveryFees: deliveryZones.filter(z => z.postalCode.trim() !== ''),
         defaultDeliveryFee: formData.defaultDeliveryFee,
         freeDeliveryThreshold: formData.freeDeliveryThreshold,
@@ -260,11 +266,17 @@ export default function SettingsPage() {
               checked={formData.deliveryEnabled}
               onChange={(v) => setFormData({ ...formData, deliveryEnabled: v })}
             />
+            <ToggleRow
+              title="Commandes Sur Place"
+              description="Permettre aux clients de commander sur place (eat-in)"
+              checked={formData.dineInEnabled}
+              onChange={(v) => setFormData({ ...formData, dineInEnabled: v })}
+            />
 
-            {!formData.pickupEnabled && !formData.deliveryEnabled && (
+            {!formData.pickupEnabled && !formData.deliveryEnabled && !formData.dineInEnabled && (
               <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
                 <p className="text-sm text-amber-800">
-                  <strong>⚠️ Attention:</strong> Le retrait et la livraison sont désactivés. Les clients ne pourront pas passer de commandes.
+                  <strong>⚠️ Attention:</strong> Le retrait, la livraison et le sur place sont désactivés. Les clients ne pourront pas passer de commandes.
                 </p>
               </div>
             )}
@@ -308,6 +320,27 @@ export default function SettingsPage() {
                     step="5"
                     value={formData.minimumAdvanceNotice}
                     onChange={(e) => setFormData({ ...formData, minimumAdvanceNotice: parseInt(e.target.value) || 30 })}
+                    className="w-20 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                  <span className="text-sm text-slate-600">min</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-slate-900">Temps de préparation par défaut</h3>
+                  <p className="text-sm text-slate-500">Appliqué à chaque nouvelle commande (modifiable lors de l'acceptation)</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="5"
+                    max="120"
+                    step="5"
+                    value={formData.defaultPrepTimeMinutes}
+                    onChange={(e) => setFormData({ ...formData, defaultPrepTimeMinutes: parseInt(e.target.value) || 25 })}
                     className="w-20 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
                   <span className="text-sm text-slate-600">min</span>

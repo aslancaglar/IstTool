@@ -127,6 +127,7 @@ export const create = mutation({
     inStock: v.optional(v.boolean()),
     platformPrice: v.optional(v.number()),
     isUpsell: v.optional(v.boolean()),
+    tvaPercent: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -144,6 +145,7 @@ export const create = mutation({
       inStock: args.inStock ?? true,
       platformPrice: args.platformPrice,
       isUpsell: args.isUpsell ?? false,
+      tvaPercent: args.tvaPercent,
     });
     return itemId;
   },
@@ -169,6 +171,7 @@ export const update = mutation({
     inStock: v.optional(v.boolean()),
     platformPrice: v.optional(v.number()),
     isUpsell: v.optional(v.boolean()),
+    tvaPercent: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -194,6 +197,7 @@ export const update = mutation({
       inStock: args.inStock,
       platformPrice: args.platformPrice,
       isUpsell: args.isUpsell,
+      tvaPercent: args.tvaPercent,
     });
     return args.id;
   },

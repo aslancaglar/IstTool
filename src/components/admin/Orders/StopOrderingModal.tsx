@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { X, Store, Truck, Power, AlertTriangle } from 'lucide-react';
+import { X, Store, Truck, Power, AlertTriangle, Utensils } from 'lucide-react';
 
 interface StopOrderingModalProps {
   isOpen: boolean;
   onClose: () => void;
   pickupEnabled: boolean;
   deliveryEnabled: boolean;
-  onSave: (pickup: boolean, delivery: boolean) => void;
+  dineInEnabled: boolean;
+  onSave: (pickup: boolean, delivery: boolean, dineIn: boolean) => void;
   saving?: boolean;
 }
 
@@ -17,23 +18,26 @@ export default function StopOrderingModal({
   onClose,
   pickupEnabled,
   deliveryEnabled,
+  dineInEnabled,
   onSave,
   saving,
 }: StopOrderingModalProps) {
   const [pickup, setPickup] = useState(pickupEnabled);
   const [delivery, setDelivery] = useState(deliveryEnabled);
+  const [dineIn, setDineIn] = useState(dineInEnabled);
 
   // Sync local state when props change (e.g. another admin changed it)
   useEffect(() => {
     setPickup(pickupEnabled);
     setDelivery(deliveryEnabled);
-  }, [pickupEnabled, deliveryEnabled]);
+    setDineIn(dineInEnabled);
+  }, [pickupEnabled, deliveryEnabled, dineInEnabled]);
 
   if (!isOpen) return null;
 
-  const allStopped = !pickup && !delivery;
-  const allActive = pickup && delivery;
-  const hasChanges = pickup !== pickupEnabled || delivery !== deliveryEnabled;
+  const allStopped = !pickup && !delivery && !dineIn;
+  const allActive = pickup && delivery && dineIn;
+  const hasChanges = pickup !== pickupEnabled || delivery !== deliveryEnabled || dineIn !== dineInEnabled;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -74,9 +78,11 @@ export default function StopOrderingModal({
               if (allStopped) {
                 setPickup(true);
                 setDelivery(true);
+                setDineIn(true);
               } else {
                 setPickup(false);
                 setDelivery(false);
+                setDineIn(false);
               }
             }}
             className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
@@ -180,6 +186,39 @@ export default function StopOrderingModal({
               }`} />
             </div>
           </button>
+
+          {/* Dine-in toggle */}
+          <button
+            onClick={() => setDineIn(!dineIn)}
+            className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+              !dineIn
+                ? 'border-amber-300 bg-amber-50'
+                : 'border-slate-150 bg-white hover:border-emerald-200'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+              dineIn
+                ? 'bg-emerald-500 text-white'
+                : 'bg-amber-100 text-amber-600'
+            }`}>
+              <Utensils className="w-5 h-5" />
+            </div>
+            <div className="text-left flex-1 min-w-0">
+              <span className={`block font-bold text-sm ${!dineIn ? 'text-amber-700' : 'text-slate-700'}`}>
+                Sur Place
+              </span>
+              <span className="text-xs text-slate-500">
+                {dineIn ? 'Actuellement actif' : 'Actuellement désactivé'}
+              </span>
+            </div>
+            <div className={`w-12 h-7 rounded-full transition-colors relative shrink-0 ${
+              dineIn ? 'bg-emerald-500' : 'bg-slate-200'
+            }`}>
+              <div className={`w-5 h-5 rounded-full bg-white shadow-md absolute top-1 transition-transform ${
+                dineIn ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </div>
+          </button>
         </div>
 
         {/* Warning when all stopped */}
@@ -201,7 +240,7 @@ export default function StopOrderingModal({
             Annuler
           </button>
           <button
-            onClick={() => onSave(pickup, delivery)}
+            onClick={() => onSave(pickup, delivery, dineIn)}
             disabled={!hasChanges || saving}
             className={`flex-1 px-4 py-3 rounded-xl transition font-semibold text-sm ${
               !hasChanges || saving

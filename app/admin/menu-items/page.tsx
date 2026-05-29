@@ -87,7 +87,7 @@ export default function MenuItemsPage() {
   const [editingToppingId, setEditingToppingId] = useState<Id<'toppings'> | null>(null);
   const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({
     toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true,
-    menuItemId: undefined, specialPrice: undefined
+    menuItemId: undefined, specialPrice: undefined, tvaPercent: undefined
   });
   const [toppingConfirmModal, setToppingConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppings'> | null }>({ isOpen: false, id: null });
 
@@ -333,7 +333,8 @@ export default function MenuItemsPage() {
     setEditingToppingId(null);
     setToppingFormData({
       toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '',
-      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined, specialPrice: undefined
+      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined, specialPrice: undefined,
+      tvaPercent: undefined
     });
     setIsToppingModalOpen(true);
     setActiveTab('garnitures');
@@ -344,7 +345,7 @@ export default function MenuItemsPage() {
       toppingId: topping.toppingId, name: topping.name, price: topping.price || 0,
       categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0,
       active: topping.active !== false, menuItemId: topping.menuItemId,
-      specialPrice: topping.specialPrice
+      specialPrice: topping.specialPrice, tvaPercent: topping.tvaPercent
     });
     setIsToppingModalOpen(true);
   };

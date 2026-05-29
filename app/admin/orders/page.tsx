@@ -18,6 +18,7 @@ export default function OrdersPage() {
   const promoCodes = useQuery(api.promoCodes.list, adminToken ? { adminToken } : "skip");
   const campaigns = useQuery(api.promoCodes.listCampaigns, adminToken ? { adminToken } : "skip");
   const updateOrderStatus = useMutation(api.mutations.updateOrderStatus);
+  const updateOrderTimes = useMutation(api.mutations.updateOrderTimes);
   const updatePaymentStatus = useMutation(api.mutations.updatePaymentStatus);
   const deleteOrderMutation = useMutation(api.mutations.deleteOrder);
   const reprintOrderMutation = useMutation(api.printing.reprintOrder);
@@ -153,10 +154,20 @@ export default function OrdersPage() {
     };
   }, [orders, soundEnabled]);
 
-  const handleStatusChange = useCallback(async (orderId: Id<'orders'>, newStatus: string) => {
+  const handleStatusChange = useCallback(async (
+    orderId: Id<'orders'>,
+    newStatus: string,
+    options?: { prepTimeMinutes?: number; deliveryTimeMinutes?: number }
+  ) => {
     if (!adminToken) return;
     try {
-      await updateOrderStatus({ orderId, status: newStatus as any, adminToken });
+      await updateOrderStatus({
+        orderId,
+        status: newStatus as any,
+        adminToken,
+        prepTimeMinutes: options?.prepTimeMinutes,
+        deliveryTimeMinutes: options?.deliveryTimeMinutes,
+      });
     } catch (error) {
       console.error('Error updating order status:', error);
     }
@@ -190,11 +201,20 @@ export default function OrdersPage() {
     }
   }, [reprintOrderMutation, adminToken]);
 
-  const handleToggleOrdering = useCallback(async (pickup: boolean, delivery: boolean) => {
+  const handleUpdateTimes = useCallback(async (orderId: Id<'orders'>, prepTimeMinutes: number, deliveryTimeMinutes?: number) => {
+    if (!adminToken) return;
+    try {
+      await updateOrderTimes({ orderId, adminToken, prepTimeMinutes, deliveryTimeMinutes });
+    } catch (error) {
+      console.error('Error updating order times:', error);
+    }
+  }, [updateOrderTimes, adminToken]);
+
+  const handleToggleOrdering = useCallback(async (pickup: boolean, delivery: boolean, dineIn: boolean) => {
     if (!adminToken) return;
     setSavingOrdering(true);
     try {
-      await toggleOrderingMutation({ adminToken, pickupEnabled: pickup, deliveryEnabled: delivery });
+      await toggleOrderingMutation({ adminToken, pickupEnabled: pickup, deliveryEnabled: delivery, dineInEnabled: dineIn });
       setStopOrderingModalOpen(false);
     } catch (error) {
       console.error('Error toggling ordering availability:', error);
@@ -205,8 +225,9 @@ export default function OrdersPage() {
 
     const pickupEnabled = restaurantInfo?.pickupEnabled ?? true;
     const deliveryEnabled = restaurantInfo?.deliveryEnabled ?? true;
-    const allActive = pickupEnabled && deliveryEnabled;
-    const allStopped = !pickupEnabled && !deliveryEnabled;
+    const dineInEnabled = restaurantInfo?.dineInEnabled ?? true;
+    const allActive = pickupEnabled && deliveryEnabled && dineInEnabled;
+    const allStopped = !pickupEnabled && !deliveryEnabled && !dineInEnabled;
 
     const getCount = (status: string) => {
       if (!orders) return 0;
@@ -218,6 +239,7 @@ export default function OrdersPage() {
       { key: 'all', label: 'Toutes' },
       { key: 'pending', label: 'En attente', dot: 'bg-amber-500' },
       { key: 'preparing', label: 'En préparation', dot: 'bg-blue-500' },
+      { key: 'ready', label: 'Prête', dot: 'bg-emerald-500' },
       { key: 'delivering', label: 'En livraison', dot: 'bg-purple-500' },
       { key: 'completed', label: 'Terminée', dot: 'bg-emerald-500' },
       { key: 'cancelled', label: 'Annulée', dot: 'bg-slate-400' },
@@ -254,7 +276,11 @@ export default function OrdersPage() {
                 {allStopped
                   ? 'Commandes arrêtées'
                   : !allActive
-                    ? (!pickupEnabled ? 'Emporter arrêté' : 'Livraison arrêtée')
+                    ? [
+                        !pickupEnabled && 'Retrait',
+                        !deliveryEnabled && 'Livraison',
+                        !dineInEnabled && 'Sur Place'
+                      ].filter(Boolean).join(' / ') + ' arrêté(s)'
                     : 'Commandes actives'
                 }
               </span>
@@ -340,6 +366,7 @@ export default function OrdersPage() {
         onPaymentStatusChange={handlePaymentStatusChange}
         onDeleteOrder={handleDeleteOrder}
         onReprint={restaurantInfo?.printNodeApiKey ? handleReprint : undefined}
+        onUpdateTimes={handleUpdateTimes}
         toppings={toppings}
         toppingCategories={toppingCategories}
         promoCodes={promoCodes}
@@ -351,6 +378,7 @@ export default function OrdersPage() {
         onClose={() => setStopOrderingModalOpen(false)}
         pickupEnabled={pickupEnabled}
         deliveryEnabled={deliveryEnabled}
+        dineInEnabled={dineInEnabled}
         onSave={handleToggleOrdering}
         saving={savingOrdering}
       />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Package, CheckCircle, XCircle, User, Truck, ShoppingBag, CreditCard, Banknote, ChevronRight, ArrowRight } from 'lucide-react';
+import { Clock, Package, CheckCircle, XCircle, User, Truck, ShoppingBag, CreditCard, Banknote, ChevronRight, ArrowRight, Utensils } from 'lucide-react';
 
 interface OrderCardProps {
     order: any;
@@ -10,18 +10,20 @@ interface OrderCardProps {
 
 export default function OrderCard({ order, onClick, onStatusChange }: OrderCardProps) {
     const isDelivery = order.type === 'delivery';
+    const isDineIn = order.type === 'dine_in';
 
     const statusConfig: Record<string, { bg: string; text: string; border: string; accent: string; barBg: string; icon: any; label: string }> = {
         pending:    { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-l-amber-500',   accent: 'bg-amber-500',   barBg: 'bg-amber-50/80',   icon: Clock,        label: 'EN ATTENTE' },
         preparing:  { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-l-blue-500',    accent: 'bg-blue-500',    barBg: 'bg-blue-50/80',    icon: Package,      label: 'EN PRÉPARATION' },
+        ready:      { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-l-emerald-500', accent: 'bg-emerald-500', barBg: 'bg-emerald-50/80', icon: ShoppingBag,  label: 'PRÊTE' },
         delivering: { bg: 'bg-violet-50',  text: 'text-violet-700',  border: 'border-l-violet-500',  accent: 'bg-violet-500',  barBg: 'bg-violet-50/80',  icon: Truck,        label: 'EN LIVRAISON' },
         completed:  { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-l-emerald-500', accent: 'bg-emerald-500', barBg: 'bg-emerald-50/80', icon: CheckCircle,  label: 'TERMINÉE' },
         cancelled:  { bg: 'bg-slate-100',  text: 'text-slate-500',   border: 'border-l-slate-400',   accent: 'bg-slate-400',   barBg: 'bg-slate-50',      icon: XCircle,      label: 'ANNULÉE' },
     };
 
     // Flow depends on order type
-    const FLOW_PICKUP    = ['pending', 'preparing', 'completed'];
-    const FLOW_DELIVERY  = ['pending', 'preparing', 'delivering', 'completed'];
+    const FLOW_PICKUP    = ['pending', 'preparing', 'ready', 'completed'];
+    const FLOW_DELIVERY  = ['pending', 'preparing', 'ready', 'delivering', 'completed'];
     const flow = isDelivery ? FLOW_DELIVERY : FLOW_PICKUP;
 
     const currentIdx = flow.indexOf(order.status);
@@ -29,6 +31,7 @@ export default function OrderCard({ order, onClick, onStatusChange }: OrderCardP
 
     const nextBtnConfig: Record<string, { label: string; classes: string; icon: any }> = {
         preparing:  { label: 'Accepter & Préparer',   classes: 'bg-emerald-600 hover:bg-emerald-700 text-white',     icon: Package },
+        ready:      { label: 'Marquer Prête',         classes: 'bg-emerald-600 hover:bg-emerald-700 text-white',     icon: ShoppingBag },
         delivering: { label: 'Mettre en Livraison',   classes: 'bg-violet-600 hover:bg-violet-700 text-white',       icon: Truck },
         completed:  { label: 'Marquer Terminée',       classes: 'bg-emerald-600 hover:bg-emerald-700 text-white',     icon: CheckCircle },
     };
@@ -68,9 +71,15 @@ export default function OrderCard({ order, onClick, onStatusChange }: OrderCardP
                         <span className="text-lg font-black text-slate-900 tracking-tight">
                             #{order._id.slice(-6).toUpperCase()}
                         </span>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${isDelivery ? 'bg-violet-100 text-violet-700' : 'bg-orange-100 text-orange-700'}`}>
-                            {isDelivery ? <Truck className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
-                            {isDelivery ? 'Livraison' : 'Emporter'}
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
+                            isDelivery 
+                                ? 'bg-violet-100 text-violet-700' 
+                                : isDineIn
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-orange-100 text-orange-700'
+                        }`}>
+                            {isDelivery ? <Truck className="w-3 h-3" /> : isDineIn ? <Utensils className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+                            {isDelivery ? 'Livraison' : isDineIn ? 'Sur Place' : 'Emporter'}
                         </span>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${order.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
                             {order.paymentMethod === 'cash' ? <Banknote className="w-3 h-3" /> : <CreditCard className="w-3 h-3" />}
@@ -113,6 +122,14 @@ export default function OrderCard({ order, onClick, onStatusChange }: OrderCardP
                             <Clock className="w-3 h-3" />
                             {timeSince()}
                         </span>
+                        {isActive && order.prepTimeMinutes != null && (
+                            <>
+                                <span className="text-slate-300">•</span>
+                                <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-md px-1.5 py-0.5 shrink-0">
+                                    ~{order.prepTimeMinutes + (isDelivery ? (order.deliveryTimeMinutes ?? 0) : 0)} min
+                                </span>
+                            </>
+                        )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black rounded-lg uppercase tracking-wider ${config.bg} ${config.text}`}>
@@ -131,9 +148,17 @@ export default function OrderCard({ order, onClick, onStatusChange }: OrderCardP
                     {nextStatus && nextBtnConfig[nextStatus] && (() => {
                         const btn = nextBtnConfig[nextStatus];
                         const BtnIcon = btn.icon;
+                        const isAcceptStep = isPending && nextStatus === 'preparing';
                         return (
                             <button
-                                onClick={(e) => { e.stopPropagation(); onStatusChange(order._id, nextStatus); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isAcceptStep) {
+                                        onClick(order._id);
+                                    } else {
+                                        onStatusChange(order._id, nextStatus);
+                                    }
+                                }}
                                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold transition-colors ${btn.classes}`}
                             >
                                 <BtnIcon className="w-3.5 h-3.5" />

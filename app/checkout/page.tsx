@@ -32,7 +32,7 @@ export default function CheckoutPage() {
 
     // State
     const [step, setStep] = useState<Step>('details');
-    const [orderType, setOrderType] = useState<'pickup' | 'delivery' | null>(null);
+    const [orderType, setOrderType] = useState<'pickup' | 'delivery' | 'dine_in' | null>(null);
     const [scheduledTime] = useState<string>('asap');
     const [customer, setCustomer] = useState({ firstName: '', lastName: '', email: '', phone: '' });
     const [address, setAddress] = useState({ street: '', city: '', zipCode: '', instructions: '' });
@@ -191,9 +191,28 @@ export default function CheckoutPage() {
         }
     }, [user]);
 
+    // Auto-select active order type if there's only one, or reset if selected is disabled
+    useEffect(() => {
+        if (!restaurantInfo) return;
+        const pickupEnabled = restaurantInfo.pickupEnabled ?? true;
+        const deliveryEnabled = restaurantInfo.deliveryEnabled ?? true;
+        const dineInEnabled = restaurantInfo.dineInEnabled ?? true;
+
+        const enabledTypes: ('pickup' | 'delivery' | 'dine_in')[] = [];
+        if (pickupEnabled) enabledTypes.push('pickup');
+        if (deliveryEnabled) enabledTypes.push('delivery');
+        if (dineInEnabled) enabledTypes.push('dine_in');
+
+        if (orderType && !enabledTypes.includes(orderType)) {
+            setOrderType(enabledTypes.length === 1 ? enabledTypes[0] : null);
+        } else if (!orderType && enabledTypes.length === 1) {
+            setOrderType(enabledTypes[0]);
+        }
+    }, [restaurantInfo, orderType]);
+
     // Reset promo when order type changes (free_delivery promo only valid for delivery)
     useEffect(() => {
-        if (orderType === 'pickup' && freeDeliveryFromPromo) {
+        if (orderType !== 'delivery' && freeDeliveryFromPromo) {
             setAppliedPromoCode(undefined);
             setDiscountAmount(0);
             setFreeDeliveryFromPromo(false);

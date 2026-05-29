@@ -147,6 +147,7 @@ export const createTopping = mutation({
     active: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
+    tvaPercent: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -159,6 +160,7 @@ export const createTopping = mutation({
       active: args.active ?? true,
       menuItemId: args.menuItemId,
       specialPrice: args.specialPrice,
+      tvaPercent: args.tvaPercent,
     });
     return id;
   },
@@ -176,6 +178,7 @@ export const updateTopping = mutation({
     active: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
+    tvaPercent: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -188,6 +191,7 @@ export const updateTopping = mutation({
       active: args.active,
       menuItemId: args.menuItemId,
       specialPrice: args.specialPrice,
+      tvaPercent: args.tvaPercent,
     });
     return args.id;
   },

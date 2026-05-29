@@ -12,6 +12,7 @@ export interface ToppingFormData {
   active: boolean;
   menuItemId?: Id<'menuItems'>;
   specialPrice?: number;
+  tvaPercent?: number;
 }
 
 interface ToppingFormModalProps {
@@ -55,6 +56,17 @@ export default function ToppingFormModal({ isOpen, isEditing, formData, setFormD
               placeholder="Laisser vide pour prix par défaut"
             />
             <p className="text-xs text-blue-600 mt-1">Si rempli, ce prix remplace le prix de l'article lié.</p>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">TVA (%)</label>
+            <input
+              type="number" step="0.1" min="0" max="100"
+              value={formData.tvaPercent ?? ''}
+              onChange={(e) => setFormData({ ...formData, tvaPercent: e.target.value ? parseFloat(e.target.value) : undefined })}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="10"
+            />
+            <p className="text-xs text-slate-500 mt-1">Par défaut : 10%. Prix affiché TTC.</p>
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Lier à un article du menu (Optionnel)</label>

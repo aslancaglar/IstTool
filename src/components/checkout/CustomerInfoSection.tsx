@@ -18,7 +18,7 @@ interface CustomerInfoSectionProps {
         instructions: string;
     };
     setAddress: (address: any) => void;
-    orderType: 'pickup' | 'delivery' | null;
+    orderType: 'pickup' | 'delivery' | 'dine_in' | null;
     isEditingInfo: boolean;
     setIsEditingInfo: (isEditing: boolean) => void;
     isDeliverySupported: boolean;
@@ -71,7 +71,7 @@ export default function CustomerInfoSection({
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`grid grid-cols-1 ${orderType === 'dine_in' ? '' : 'md:grid-cols-2'} gap-4`}>
                     <div className="p-5 bg-white rounded-2xl border border-violet-100 hover:border-violet-200 transition-colors">
                         <p className="text-[10px] text-violet-400 font-black uppercase tracking-[0.2em] mb-3">Contact</p>
                         <p className="font-bold text-gray-900 text-base">{customer.firstName} {customer.lastName}</p>
@@ -87,30 +87,32 @@ export default function CustomerInfoSection({
                         </div>
                     </div>
 
-                    <div className="p-5 bg-white rounded-2xl border border-teal-100 hover:border-teal-200 transition-colors">
-                        <p className="text-[10px] text-teal-500 font-black uppercase tracking-[0.2em] mb-3">
-                            {orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse'}
-                        </p>
-                        {address.street ? (
-                            <div className="space-y-1">
-                                <p className="font-bold text-gray-900 text-base">{address.street}</p>
-                                <p className="text-sm text-gray-500">{address.zipCode} {address.city}</p>
-                                {address.instructions && (
-                                    <div className="mt-3 p-2.5 bg-white/70 rounded-xl border border-dashed border-teal-200">
-                                        <p className="text-[10px] text-teal-500 font-bold uppercase mb-1">Note pour le livreur:</p>
-                                        <p className="text-xs text-gray-600 italic leading-relaxed">"{address.instructions}"</p>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-4">
-                                <MapPin className="w-7 h-7 text-teal-300 mb-2" />
-                                <p className="text-sm text-teal-600 font-bold uppercase tracking-wider">
-                                    {orderType === 'delivery' ? 'Adresse manquante' : 'Non renseignée'}
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                    {orderType !== 'dine_in' && (
+                        <div className="p-5 bg-white rounded-2xl border border-teal-100 hover:border-teal-200 transition-colors">
+                            <p className="text-[10px] text-teal-500 font-black uppercase tracking-[0.2em] mb-3">
+                                {orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse'}
+                            </p>
+                            {address.street ? (
+                                <div className="space-y-1">
+                                    <p className="font-bold text-gray-900 text-base">{address.street}</p>
+                                    <p className="text-sm text-gray-500">{address.zipCode} {address.city}</p>
+                                    {address.instructions && (
+                                        <div className="mt-3 p-2.5 bg-white/70 rounded-xl border border-dashed border-teal-200">
+                                            <p className="text-[10px] text-teal-500 font-bold uppercase mb-1">Note pour le livreur:</p>
+                                            <p className="text-xs text-gray-600 italic leading-relaxed">"{address.instructions}"</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-4">
+                                    <MapPin className="w-7 h-7 text-teal-300 mb-2" />
+                                    <p className="text-sm text-teal-600 font-bold uppercase tracking-wider">
+                                        {orderType === 'delivery' ? 'Adresse manquante' : 'Non renseignée'}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -175,65 +177,67 @@ export default function CustomerInfoSection({
                 </div>
             </div>
 
-            <div className="space-y-4 pt-2">
-                <SectionTitle
-                    icon={MapPin}
-                    label={orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse (Optionnelle)'}
-                    color="bg-gradient-to-br from-teal-400 to-cyan-500"
-                />
-                <div className="p-5 bg-white rounded-2xl border border-teal-100 space-y-4">
-                    <InputField label="Rue et Numéro" color="text-teal-600">
-                        <input
-                            type="text"
-                            value={address.street}
-                            onChange={e => setAddress({ ...address, street: e.target.value })}
-                            className={inputClass}
-                            placeholder="Numéro et nom de rue"
-                        />
-                    </InputField>
-                    <div className="grid grid-cols-2 gap-4">
-                        <InputField label="Ville" color="text-teal-600">
+            {orderType !== 'dine_in' && (
+                <div className="space-y-4 pt-2">
+                    <SectionTitle
+                        icon={MapPin}
+                        label={orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse (Optionnelle)'}
+                        color="bg-gradient-to-br from-teal-400 to-cyan-500"
+                    />
+                    <div className="p-5 bg-white rounded-2xl border border-teal-100 space-y-4">
+                        <InputField label="Rue et Numéro" color="text-teal-600">
                             <input
                                 type="text"
-                                value={address.city}
-                                onChange={e => setAddress({ ...address, city: e.target.value })}
+                                value={address.street}
+                                onChange={e => setAddress({ ...address, street: e.target.value })}
                                 className={inputClass}
-                                placeholder="Ville"
+                                placeholder="Numéro et nom de rue"
                             />
                         </InputField>
-                        <InputField label="Code Postal" color="text-teal-600">
-                            <input
-                                type="text"
-                                value={address.zipCode}
-                                onChange={e => setAddress({ ...address, zipCode: e.target.value })}
-                                className={`${inputClass} ${!isDeliverySupported && address.zipCode ? 'border-red-200 focus:ring-red-400 bg-red-50' : ''}`}
-                                placeholder="Ex: 57100"
+                        <div className="grid grid-cols-2 gap-4">
+                            <InputField label="Ville" color="text-teal-600">
+                                <input
+                                    type="text"
+                                    value={address.city}
+                                    onChange={e => setAddress({ ...address, city: e.target.value })}
+                                    className={inputClass}
+                                    placeholder="Ville"
+                                />
+                            </InputField>
+                            <InputField label="Code Postal" color="text-teal-600">
+                                <input
+                                    type="text"
+                                    value={address.zipCode}
+                                    onChange={e => setAddress({ ...address, zipCode: e.target.value })}
+                                    className={`${inputClass} ${!isDeliverySupported && address.zipCode ? 'border-red-200 focus:ring-red-400 bg-red-50' : ''}`}
+                                    placeholder="Ex: 57100"
+                                />
+                            </InputField>
+                        </div>
+
+                        {!isDeliverySupported && address.zipCode && (
+                            <div className="p-4 bg-red-50 rounded-xl border border-red-200 flex gap-3">
+                                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-red-700 font-bold text-xs uppercase tracking-wider mb-0.5">Zone non desservie</p>
+                                    <p className="text-red-600 text-[11px] leading-relaxed">
+                                        Désolé, nous ne livrons pas encore à <span className="font-bold underline">{address.zipCode}</span>. Choisissez "À emporter" ou une autre adresse.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        <InputField label="Instructions (Optionnel)" color="text-teal-600">
+                            <textarea
+                                value={address.instructions}
+                                onChange={e => setAddress({ ...address, instructions: e.target.value })}
+                                className={`${inputClass} min-h-[90px] resize-none`}
+                                placeholder="Digicode, bâtiment, étage..."
                             />
                         </InputField>
                     </div>
-
-                    {!isDeliverySupported && address.zipCode && (
-                        <div className="p-4 bg-red-50 rounded-xl border border-red-200 flex gap-3">
-                            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-red-700 font-bold text-xs uppercase tracking-wider mb-0.5">Zone non desservie</p>
-                                <p className="text-red-600 text-[11px] leading-relaxed">
-                                    Désolé, nous ne livrons pas encore à <span className="font-bold underline">{address.zipCode}</span>. Choisissez "À emporter" ou une autre adresse.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    <InputField label="Instructions (Optionnel)" color="text-teal-600">
-                        <textarea
-                            value={address.instructions}
-                            onChange={e => setAddress({ ...address, instructions: e.target.value })}
-                            className={`${inputClass} min-h-[90px] resize-none`}
-                            placeholder="Digicode, bâtiment, étage..."
-                        />
-                    </InputField>
                 </div>
-            </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 {user && (

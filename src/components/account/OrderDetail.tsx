@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, ChevronDown, MapPin, Star, Store, Truck, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ChevronDown, MapPin, Star, Store, Truck, User as UserIcon, Utensils } from 'lucide-react';
 import { CancelledX, CompletedCheck, CookingPot, DeliveryScooter, PulsingClock } from './StatusIcons';
 
 interface OrderDetailProps {
@@ -26,6 +26,7 @@ const STATUS_CONF: Record<string, { icon: React.FC; title: string; subtitle: str
 
 export default function OrderDetail({ order, user, detailsOpen, onToggleDetails, onBack, onLeaveReview }: OrderDetailProps) {
   const isDelivery = order.type === 'delivery';
+  const isDineIn = order.type === 'dine_in';
   const isCancelled = order.status === 'cancelled';
   const flow = isDelivery ? FLOW_DELIVERY : FLOW_PICKUP;
   const currentIdx = flow.indexOf(order.status);
@@ -194,11 +195,13 @@ export default function OrderDetail({ order, user, detailsOpen, onToggleDetails,
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isDelivery ? 'bg-violet-100' : 'bg-orange-100'}`}>
-            {isDelivery ? <Truck className="w-4 h-4 text-violet-600" /> : <Store className="w-4 h-4 text-orange-600" />}
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+            isDelivery ? 'bg-violet-100' : isDineIn ? 'bg-blue-100' : 'bg-orange-100'
+          }`}>
+            {isDelivery ? <Truck className="w-4 h-4 text-violet-600" /> : isDineIn ? <Utensils className="w-4 h-4 text-blue-600" /> : <Store className="w-4 h-4 text-orange-600" />}
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-900">{isDelivery ? 'Livraison' : 'À emporter'}</p>
+            <p className="text-sm font-bold text-slate-900">{isDelivery ? 'Livraison' : isDineIn ? 'Sur place' : 'À emporter'}</p>
             <p className="text-xs text-slate-400">
               {order.scheduledTime === 'asap' || !order.scheduledTime ? 'Dès que possible' : order.scheduledTime}
             </p>

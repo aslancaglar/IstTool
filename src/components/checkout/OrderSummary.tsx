@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ShoppingBag, Tag, Truck, Percent, CheckCircle2, X, Loader2, Sparkles, Gift } from 'lucide-react';
+import { ShoppingBag, Tag, Truck, Percent, CheckCircle2, X, Loader2, Sparkles, Gift, Calculator } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import FreeDeliveryBar from '../FreeDeliveryBar';
 
@@ -39,7 +39,7 @@ interface OrderSummaryProps {
     deliveryFee: number;
     effectiveDeliveryFee?: number;
     totalWithDelivery: number;
-    orderType: 'pickup' | 'delivery' | null;
+    orderType: 'pickup' | 'delivery' | 'dine_in' | null;
     isDeliverySupported: boolean;
     freeDeliveryThreshold?: number;
     onPromoApplied?: (code: string, discount: number, isFreeDelivery?: boolean) => void;
@@ -306,6 +306,75 @@ export default function OrderSummary({
                         </span>
                     </div>
                 )}
+
+                {/* TVA Breakdown */}
+                {(() => {
+                    const DEFAULT_TVA = 10;
+                    // Group TTC amounts by TVA rate
+                    const tvaBuckets: Record<number, number> = {};
+                    for (const item of orderItems) {
+                        const rate = item.tvaPercent ?? DEFAULT_TVA;
+                        tvaBuckets[rate] = (tvaBuckets[rate] || 0) + item.basePrice;
+                        for (const t of item.selectedToppings) {
+                            const tRate = t.tvaPercent ?? rate;
+                            tvaBuckets[tRate] = (tvaBuckets[tRate] || 0) + (t.price ?? 0);
+                        }
+                    }
+                    // Add bogo free items
+                    for (const item of bogoFreeItems) {
+                        if (item.finalPrice > 0) {
+                            tvaBuckets[DEFAULT_TVA] = (tvaBuckets[DEFAULT_TVA] || 0) + item.finalPrice;
+                        }
+                    }
+
+                    const rates = Object.keys(tvaBuckets).map(Number).sort((a, b) => a - b);
+                    let totalHT = 0;
+                    let totalTVA = 0;
+                    const lines = rates.map(rate => {
+                        const ttc = tvaBuckets[rate];
+                        const ht = ttc / (1 + rate / 100);
+                        const tva = ttc - ht;
+                        totalHT += ht;
+                        totalTVA += tva;
+                        return { rate, ht, tva };
+                    });
+
+                    if (lines.length === 0) return null;
+
+                    return (
+                        <div className="pt-2 mt-1 border-t border-gray-100">
+                            <div className="bg-slate-50/70 border border-slate-200/40 rounded-xl p-3.5 space-y-2.5">
+                                <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <div className="flex items-center gap-1.5">
+                                        <Calculator className="w-3.5 h-3.5 text-slate-400/80" />
+                                        <span>Taxes Incluses (TVA)</span>
+                                    </div>
+                                    <span className="text-[9px] bg-slate-200/50 text-slate-500 px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-tight">Détail</span>
+                                </div>
+                                
+                                <div className="space-y-2 pt-0.5">
+                                    {lines.map(({ rate, ht, tva }) => (
+                                        <div key={rate} className="flex items-center justify-between text-xs">
+                                            <span className="font-medium text-slate-500 bg-white border border-slate-200/60 rounded px-1.5 py-0.5 text-[10px]">
+                                                Taux {rate}%
+                                            </span>
+                                            <div className="flex items-center gap-3 text-slate-500 font-mono">
+                                                <span>HT <strong className="font-semibold text-slate-700">{formatPrice(ht)}</strong></span>
+                                                <span className="text-slate-200">|</span>
+                                                <span>TVA <strong className="font-semibold text-orange-600">{formatPrice(tva)}</strong></span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <div className="pt-2 border-t border-slate-200/60 flex justify-between text-xs font-semibold text-slate-500">
+                                    <span className="text-slate-400">Total Hors Taxes (HT)</span>
+                                    <span className="font-mono text-slate-700">{formatPrice(totalHT)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 <div className="pt-4 mt-2 border-t border-orange-100 flex items-end justify-between">
                     <div>

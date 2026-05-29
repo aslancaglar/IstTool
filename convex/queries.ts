@@ -52,7 +52,8 @@ export const getToppingsForMenuItem = query({
               name: t.name || menuItem.name,
               price: t.specialPrice !== undefined ? t.specialPrice : menuItem.price, // Final price for website
               specialPrice: t.specialPrice,
-              displayOrder: t.displayOrder || 0
+              displayOrder: t.displayOrder || 0,
+              tvaPercent: t.tvaPercent ?? menuItem.tvaPercent,
             };
           }
           
@@ -61,7 +62,8 @@ export const getToppingsForMenuItem = query({
             name: t.name,
             price: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0), // Final price for website
             specialPrice: t.specialPrice,
-            displayOrder: t.displayOrder || 0
+            displayOrder: t.displayOrder || 0,
+            tvaPercent: t.tvaPercent,
           };
         }));
 
@@ -183,6 +185,9 @@ export const getOrder = query({
         lastName: enrichedOrder.customer.lastName,
       },
       createdAt: enrichedOrder.createdAt,
+      prepTimeMinutes: enrichedOrder.prepTimeMinutes,
+      deliveryTimeMinutes: enrichedOrder.deliveryTimeMinutes,
+      acceptedAt: enrichedOrder.acceptedAt,
     };
   },
 });
@@ -270,32 +275,52 @@ export const getEnrichedOrderInternal = internalQuery({
     if (!order) return null;
 
     const enrichedItems = await Promise.all(order.items.map(async (item) => {
-      if (!item.selectedToppings) return item;
+      let menuItem = await ctx.db
+        .query("menuItems")
+        .filter((q) => q.eq(q.field("_id"), item.menuItemId as any))
+        .first();
+
+      if (!menuItem) {
+        menuItem = await ctx.db
+          .query("menuItems")
+          .filter((q) => q.eq(q.field("name"), item.name))
+          .first();
+      }
+
+      const itemTva = menuItem?.tvaPercent ?? 10;
+
+      if (!item.selectedToppings) {
+        return { ...item, tvaPercent: itemTva };
+      }
+
       const enrichedToppings = await Promise.all(item.selectedToppings.map(async (group) => {
         const details = await Promise.all(group.toppingIds.map(async (id) => {
           const t = await ctx.db.query("toppings").filter(q => q.eq(q.field("toppingId"), id)).first();
-          if (!t) return { name: id, price: 0 };
+          if (!t) return { name: id, price: 0, tvaPercent: itemTva };
           if (t.menuItemId) {
             const linked = await ctx.db.get(t.menuItemId);
             if (linked) {
               return {
                 name: t.name || linked.name,
                 price: t.specialPrice !== undefined ? t.specialPrice : linked.price,
+                tvaPercent: t.tvaPercent ?? linked.tvaPercent ?? itemTva,
               };
             }
           }
           return {
             name: t.name,
             price: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0),
+            tvaPercent: t.tvaPercent ?? itemTva,
           };
         }));
         return {
           ...group,
           toppingNames: details.map(d => d.name),
           toppingPrices: details.map(d => d.price),
+          toppingTvaPercents: details.map(d => d.tvaPercent),
         };
       }));
-      return { ...item, selectedToppings: enrichedToppings };
+      return { ...item, tvaPercent: itemTva, selectedToppings: enrichedToppings };
     }));
 
     return { ...order, items: enrichedItems };

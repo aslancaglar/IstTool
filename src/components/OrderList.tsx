@@ -291,7 +291,7 @@ export default function OrderList({ isOpen, onClose }: OrderListProps) {
               </span>
             </div>
 
-            {restaurantInfo && !restaurantInfo.pickupEnabled && !restaurantInfo.deliveryEnabled ? (
+            {restaurantInfo && !restaurantInfo.pickupEnabled && !restaurantInfo.deliveryEnabled && !restaurantInfo.dineInEnabled ? (
               <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-center">
                 <p className="text-amber-800 font-medium">
                   Les commandes sont temporairement indisponibles

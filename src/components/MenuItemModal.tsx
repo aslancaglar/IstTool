@@ -21,6 +21,7 @@ interface MenuItemModalProps {
     image: string;
     categories?: string[];
     popular?: boolean;
+    tvaPercent?: number;
   };
   isOpen: boolean;
   onClose: () => void;
@@ -70,7 +71,7 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
         }
         return {
           ...prev,
-          [categoryId]: [...categoryToppings, { toppingId, name, price, categoryName: category?.name, freeForBogo: category?.freeForBogo ?? false }],
+          [categoryId]: [...categoryToppings, { toppingId, name, price, categoryName: category?.name, freeForBogo: category?.freeForBogo ?? false, tvaPercent: category?.toppings?.find((t: any) => t.id === toppingId)?.tvaPercent }],
         };
       }
     });
@@ -111,6 +112,7 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
       basePrice: currentPrice,
       selectedToppings: allSelectedToppings,
       totalPrice: totalPrice,
+      tvaPercent: (item as any).tvaPercent,
     };
 
     addToOrder(orderItem);

@@ -4,7 +4,7 @@
 const ESC = 0x1B;
 const GS = 0x1D;
 const LF = 0x0A;
-const WIDTH = 42; // 80mm @ 12cpi
+const WIDTH = 48; // 80mm thermal printer – 48 cols (Font A, 12×24)
 
 // CP858 (default on most modern thermal printers, includes €).
 // Mapping for the French diacritics this app actually emits.
@@ -45,6 +45,14 @@ function pad(left: string, right: string): string {
   return left + ' '.repeat(WIDTH - total) + right;
 }
 
+function padCol(text: string, width: number, align: 'left' | 'right' = 'left'): string {
+  if (text.length >= width) {
+    return align === 'left' ? text.slice(0, width) : text.slice(-width);
+  }
+  const space = ' '.repeat(width - text.length);
+  return align === 'left' ? text + space : space + text;
+}
+
 function fmtEur(n: number): string {
   return `${n.toFixed(2)}€`;
 }
@@ -58,19 +66,23 @@ function bytesToBase64(bytes: number[]): string {
 export interface EnrichedTopping {
   toppingNames?: string[];
   toppingPrices?: number[];
+  toppingTvaPercents?: number[];
 }
 
 export interface EnrichedItem {
+  menuItemId?: string;
   name: string;
+  price?: number;
   finalPrice: number;
   isFree?: boolean;
   selectedToppings?: EnrichedTopping[];
+  tvaPercent?: number;
 }
 
 export interface OrderForReceipt {
   _id: string;
   customer: { firstName: string; lastName: string; phone: string };
-  type: 'pickup' | 'delivery';
+  type: 'pickup' | 'delivery' | 'dine_in';
   address?: { street: string; city: string; zipCode: string; instructions?: string };
   scheduledTime: string;
   paymentMethod: 'stripe' | 'cash';
@@ -116,13 +128,13 @@ export function buildOrderReceipt(
   // Order block
   dblLine();
   push(ESC, 0x45, 0x01);
-  line(`COMMANDE #${order._id.slice(-8).toUpperCase()}`);
+  line(`COMMANDE #${order._id.slice(-6).toUpperCase()}`);
   push(ESC, 0x45, 0x00);
   const created = new Date(order.createdAt).toLocaleString('fr-FR', {
     dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Paris',
   });
   line(`Date:  ${created}`);
-  line(`Type:  ${order.type === 'pickup' ? 'À EMPORTER' : 'LIVRAISON'}`);
+  line(`Type:  ${order.type === 'dine_in' ? 'SUR PLACE' : order.type === 'pickup' ? 'À EMPORTER' : 'LIVRAISON'}`);
   const sched = !order.scheduledTime || order.scheduledTime === 'asap'
     ? 'Dès que possible'
     : new Date(order.scheduledTime).toLocaleTimeString('fr-FR', {
@@ -187,11 +199,56 @@ export function buildOrderReceipt(
   push(GS, 0x21, 0x00);
   line();
 
-  // Payment
-  const payLabel = order.paymentMethod === 'cash' ? 'ESPÈCES' : 'CARTE';
-  const payStatus = order.paymentStatus === 'paid' ? ' — PAYÉ' : ' — À RÉGLER';
-  line(`Paiement: ${payLabel}${payStatus}`);
-  line();
+
+
+  // TVA Breakdown
+  const DEFAULT_TVA = 10;
+  const tvaBuckets: Record<number, number> = {};
+  for (const item of order.items) {
+    const rate = item.tvaPercent ?? DEFAULT_TVA;
+    const basePrice = item.isFree ? 0 : (item.price ?? item.finalPrice);
+    tvaBuckets[rate] = (tvaBuckets[rate] || 0) + basePrice;
+
+    for (const group of item.selectedToppings ?? []) {
+      const prices = group.toppingPrices ?? [];
+      const rates = group.toppingTvaPercents ?? [];
+      for (let i = 0; i < prices.length; i++) {
+        const pPrice = prices[i] ?? 0;
+        const pRate = rates[i] ?? rate;
+        tvaBuckets[pRate] = (tvaBuckets[pRate] || 0) + pPrice;
+      }
+    }
+  }
+
+  const rates = Object.keys(tvaBuckets).map(Number).sort((a, b) => a - b);
+  if (rates.length > 0) {
+    dashLine();
+    line('DÉTAIL TVA (TTC inclus)');
+    line(
+      padCol('Taux', 8, 'left') +
+      padCol('HT', 13, 'right') +
+      padCol('TVA', 13, 'right') +
+      padCol('TTC', 14, 'right')
+    );
+    let totalHT = 0;
+    let totalTVA = 0;
+    for (const rate of rates) {
+      const ttc = tvaBuckets[rate];
+      const ht = ttc / (1 + rate / 100);
+      const tva = ttc - ht;
+      totalHT += ht;
+      totalTVA += tva;
+      line(
+        padCol(`${rate}%`, 8, 'left') +
+        padCol(fmtEur(ht), 13, 'right') +
+        padCol(fmtEur(tva), 13, 'right') +
+        padCol(fmtEur(ttc), 14, 'right')
+      );
+    }
+    dashLine();
+    line(pad(`Total HT: ${fmtEur(totalHT)}`, `Total TVA: ${fmtEur(totalTVA)}`));
+    line();
+  }
 
   // Footer
   push(ESC, 0x61, 0x01);

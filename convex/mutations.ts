@@ -15,26 +15,30 @@ function matchesPostalCode(pattern: string, zipCode: string): boolean {
   return p === zipCode;
 }
 
-async function computeDeliveryFee(ctx: any, zipCode: string, subtotal: number): Promise<number> {
+async function computeDeliveryInfo(
+  ctx: any,
+  zipCode: string,
+  subtotal: number,
+): Promise<{ fee: number; deliveryTimeMinutes: number | undefined }> {
   const info = await ctx.db
     .query("restaurantInfo")
     .withIndex("by_key", (q: any) => q.eq("key", "main"))
     .first();
-  if (!info) return 0;
+  if (!info) return { fee: 0, deliveryTimeMinutes: undefined };
 
   const zones = info.deliveryFees ?? [];
   const match = zones.find((z: any) => matchesPostalCode(z.postalCode, zipCode));
 
   if (match) {
     const threshold = match.freeDeliveryThreshold ?? info.freeDeliveryThreshold ?? 0;
-    if (threshold > 0 && subtotal >= threshold) return 0;
-    return match.price;
+    const fee = threshold > 0 && subtotal >= threshold ? 0 : match.price;
+    return { fee, deliveryTimeMinutes: match.deliveryTimeMinutes };
   }
 
   const defaultFee = info.defaultDeliveryFee ?? 0;
   const globalThreshold = info.freeDeliveryThreshold ?? 0;
-  if (globalThreshold > 0 && subtotal >= globalThreshold) return 0;
-  return defaultFee;
+  const fee = globalThreshold > 0 && subtotal >= globalThreshold ? 0 : defaultFee;
+  return { fee, deliveryTimeMinutes: undefined };
 }
 
 export const createOrder = mutation({
@@ -46,7 +50,7 @@ export const createOrder = mutation({
       email: v.string(),
       phone: v.string(),
     }),
-    type: v.union(v.literal("pickup"), v.literal("delivery")),
+    type: v.union(v.literal("pickup"), v.literal("delivery"), v.literal("dine_in")),
     address: v.optional(v.object({
       street: v.string(),
       city: v.string(),
@@ -209,10 +213,11 @@ export const createOrder = mutation({
       });
     }
 
-    // ── Server-side delivery fee ──────────────────────────────────
-    const serverDeliveryFee = args.type === "delivery" && args.address?.zipCode
-      ? await computeDeliveryFee(ctx, args.address.zipCode, computedTotal)
-      : 0;
+    // ── Server-side delivery fee + delivery time ──────────────────
+    const deliveryInfo = args.type === "delivery" && args.address?.zipCode
+      ? await computeDeliveryInfo(ctx, args.address.zipCode, computedTotal)
+      : { fee: 0, deliveryTimeMinutes: undefined as number | undefined };
+    const serverDeliveryFee = deliveryInfo.fee;
 
     // ── Campaign (automatic) validation ──────────────────────────
     let campaignDiscount = 0;
@@ -369,6 +374,16 @@ export const createOrder = mutation({
       ? Math.max(0, computedTotal - totalDiscountAmount)
       : Math.max(0, computedTotal + effectiveDeliveryFee - totalDiscountAmount);
 
+    // ── Preparation + delivery time ───────────────────────────────
+    const restaurantInfoDoc = await ctx.db
+      .query("restaurantInfo")
+      .withIndex("by_key", (q) => q.eq("key", "main"))
+      .first();
+    const defaultPrepTime = restaurantInfoDoc?.defaultPrepTimeMinutes ?? 25;
+    const orderDeliveryTime = args.type === "delivery"
+      ? (deliveryInfo.deliveryTimeMinutes ?? 20)
+      : undefined;
+
     const orderId = await ctx.db.insert("orders", {
       userId: sessionUser?.user._id,
       customer: args.customer,
@@ -385,6 +400,8 @@ export const createOrder = mutation({
       discountAmount: totalDiscountAmount > 0 ? totalDiscountAmount : undefined,
       appliedCampaignIds: effectiveCampaignIds.length > 0 ? effectiveCampaignIds : undefined,
       status: args.paymentMethod === "stripe" ? "awaiting_payment" : "pending",
+      prepTimeMinutes: defaultPrepTime,
+      deliveryTimeMinutes: orderDeliveryTime,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -500,10 +517,12 @@ export const updateOrderStatus = mutation({
       v.literal("completed"),
       v.literal("cancelled")
     ),
+    prepTimeMinutes: v.optional(v.number()),
+    deliveryTimeMinutes: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
-    
+
     const order = await ctx.db.get(args.orderId);
     if (!order) {
       throw new Error("Order not found");
@@ -514,9 +533,40 @@ export const updateOrderStatus = mutation({
       updatedAt: Date.now(),
     };
 
+    if (args.prepTimeMinutes !== undefined) updates.prepTimeMinutes = args.prepTimeMinutes;
+    if (args.deliveryTimeMinutes !== undefined) updates.deliveryTimeMinutes = args.deliveryTimeMinutes;
+
+    if (args.status === "preparing" && !order.acceptedAt) {
+      updates.acceptedAt = Date.now();
+    }
+
     if (args.status === "completed" && order.paymentMethod === "cash") {
       updates.paymentStatus = "paid";
     }
+
+    await ctx.db.patch(args.orderId, updates);
+    return args.orderId;
+  },
+});
+
+export const updateOrderTimes = mutation({
+  args: {
+    orderId: v.id("orders"),
+    adminToken: v.string(),
+    prepTimeMinutes: v.optional(v.number()),
+    deliveryTimeMinutes: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    const updates: any = { updatedAt: Date.now() };
+    if (args.prepTimeMinutes !== undefined) updates.prepTimeMinutes = args.prepTimeMinutes;
+    if (args.deliveryTimeMinutes !== undefined) updates.deliveryTimeMinutes = args.deliveryTimeMinutes;
 
     await ctx.db.patch(args.orderId, updates);
     return args.orderId;

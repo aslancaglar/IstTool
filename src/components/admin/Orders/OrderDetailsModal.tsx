@@ -5,7 +5,7 @@ import {
     X, Clock, Package, CheckCircle, XCircle,
     User, Phone, Mail, MapPin, Trash2,
     Truck, ShoppingBag, CreditCard, Banknote,
-    ChevronDown, ChevronUp, Copy, ExternalLink, Gift, Printer
+    ChevronDown, ChevronUp, Copy, ExternalLink, Gift, Printer, Utensils
 } from 'lucide-react';
 import { Id } from '../../../../convex/_generated/dataModel';
 
@@ -13,22 +13,28 @@ interface OrderDetailsModalProps {
     order: any;
     isOpen: boolean;
     onClose: () => void;
-    onStatusChange: (orderId: Id<'orders'>, newStatus: string) => Promise<void>;
+    onStatusChange: (
+        orderId: Id<'orders'>,
+        newStatus: string,
+        options?: { prepTimeMinutes?: number; deliveryTimeMinutes?: number }
+    ) => Promise<void>;
     onPaymentStatusChange?: (orderId: Id<'orders'>, paymentStatus: 'paid' | 'unpaid') => Promise<void>;
     onDeleteOrder: (orderId: Id<'orders'>) => Promise<void>;
     onReprint?: (orderId: Id<'orders'>) => Promise<void>;
+    onUpdateTimes?: (orderId: Id<'orders'>, prepTimeMinutes: number, deliveryTimeMinutes?: number) => Promise<void>;
     toppings: any[] | undefined;
     toppingCategories: any[] | undefined;
     promoCodes?: any[] | undefined;
     campaigns?: any[] | undefined;
 }
 
-const STATUS_FLOW_PICKUP = ['pending', 'preparing', 'completed'] as const;
-const STATUS_FLOW_DELIVERY = ['pending', 'preparing', 'delivering', 'completed'] as const;
+const STATUS_FLOW_PICKUP = ['pending', 'preparing', 'ready', 'completed'] as const;
+const STATUS_FLOW_DELIVERY = ['pending', 'preparing', 'ready', 'delivering', 'completed'] as const;
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; border: string; icon: any; label: string }> = {
     pending: { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-200', icon: Clock, label: 'En attente' },
     preparing: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200', icon: Package, label: 'En préparation' },
+    ready: { bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200', icon: ShoppingBag, label: 'Prête' },
     delivering: { bg: 'bg-violet-100', text: 'text-violet-800', border: 'border-violet-200', icon: Truck, label: 'En livraison' },
     completed: { bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200', icon: CheckCircle, label: 'Terminée' },
     cancelled: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200', icon: XCircle, label: 'Annulée' },
@@ -42,6 +48,7 @@ export default function OrderDetailsModal({
     onPaymentStatusChange,
     onDeleteOrder,
     onReprint,
+    onUpdateTimes,
     toppings,
     toppingCategories,
     promoCodes,
@@ -50,14 +57,24 @@ export default function OrderDetailsModal({
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
     const [copied, setCopied] = useState(false);
     const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(false);
+    const [timePickerOpen, setTimePickerOpen] = useState(false);
+    const [pickedPrep, setPickedPrep] = useState<number>(25);
+    const [savingTimes, setSavingTimes] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setIsConfirmingDelete(false);
             setCopied(false);
             setIsCustomerDetailsOpen(false);
+            setTimePickerOpen(false);
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (order) {
+            setPickedPrep(order.prepTimeMinutes ?? 25);
+        }
+    }, [order?._id, order?.prepTimeMinutes]);
 
     // Close on Escape
     useEffect(() => {
@@ -73,6 +90,7 @@ export default function OrderDetailsModal({
     const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
     const StatusIcon = config.icon;
     const isDelivery = order.type === 'delivery';
+    const isDineIn = order.type === 'dine_in';
     const isPending = order.status === 'pending';
     const activeFlow = isDelivery ? STATUS_FLOW_DELIVERY : STATUS_FLOW_PICKUP;
     const currentIdx = activeFlow.indexOf(order.status as any);
@@ -106,22 +124,115 @@ export default function OrderDetailsModal({
 
                 {/* ── HEADER ────────────────────────── */}
                 <div className="relative px-5 pt-5 pb-4 border-b border-slate-100">
-                    {/* Close button */}
-                    <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-10"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                    {/* Top-right actions */}
+                    <div className="absolute top-4 right-4 flex items-center gap-1 z-30">
+                        {onUpdateTimes && order.status !== 'completed' && order.status !== 'cancelled' && order.status !== 'ready' && (
+                            <button
+                                onClick={() => setTimePickerOpen((v) => !v)}
+                                className={`relative p-2 rounded-full transition-colors ${
+                                    timePickerOpen
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : 'text-slate-500 hover:text-emerald-700 hover:bg-emerald-50'
+                                }`}
+                                title="Modifier le temps de préparation"
+                            >
+                                <Clock className="w-5 h-5" />
+                                {isPending && (
+                                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
+                                )}
+                            </button>
+                        )}
+                        <button
+                            onClick={onClose}
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Time picker popover */}
+                    {timePickerOpen && onUpdateTimes && (
+                        <>
+                            <div
+                                className="fixed inset-0 z-20"
+                                onClick={() => setTimePickerOpen(false)}
+                            />
+                            <div className="absolute top-14 right-4 z-40 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                                <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                                        {isPending ? 'Accepter en' : 'Temps de préparation'}
+                                    </p>
+                                    <p className="text-2xl font-black text-emerald-700 tabular-nums mt-0.5">
+                                        {pickedPrep} min
+                                    </p>
+                                </div>
+                                <div className="p-3 grid grid-cols-4 gap-1.5">
+                                    {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60].map((m) => (
+                                        <button
+                                            key={m}
+                                            onClick={() => setPickedPrep(m)}
+                                            className={`px-2 py-2 rounded-lg text-xs font-bold transition-colors ${
+                                                pickedPrep === m
+                                                    ? 'bg-emerald-600 text-white shadow-sm'
+                                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            {m}m
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="p-3 border-t border-slate-100 bg-slate-50 flex gap-2">
+                                    <button
+                                        onClick={() => setTimePickerOpen(false)}
+                                        className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-100"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            setSavingTimes(true);
+                                            try {
+                                                if (isPending) {
+                                                    await onStatusChange(order._id, 'preparing', {
+                                                        prepTimeMinutes: pickedPrep,
+                                                    });
+                                                } else {
+                                                    await onUpdateTimes(order._id, pickedPrep);
+                                                }
+                                                setTimePickerOpen(false);
+                                            } finally {
+                                                setSavingTimes(false);
+                                            }
+                                        }}
+                                        disabled={savingTimes}
+                                        className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
+                                    >
+                                        {savingTimes ? '...' : isPending ? 'Accepter' : 'Mettre à jour'}
+                                    </button>
+                                </div>
+                                {order.acceptedAt && (
+                                    <p className="px-4 pb-3 text-[11px] text-slate-400">
+                                        Acceptée à {new Date(order.acceptedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                )}
+                            </div>
+                        </>
+                    )}
 
                     {/* Order ID + badges */}
                     <div className="flex items-center gap-2 flex-wrap pr-10 mb-2">
                         <h2 className="text-2xl font-black text-slate-900 tracking-tight">
                             #{order._id.slice(-6).toUpperCase()}
                         </h2>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${isDelivery ? 'bg-violet-100 text-violet-700' : 'bg-orange-100 text-orange-700'}`}>
-                            {isDelivery ? <Truck className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
-                            {isDelivery ? 'Livraison' : 'Emporter'}
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
+                            isDelivery 
+                                ? 'bg-violet-100 text-violet-700' 
+                                : isDineIn
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-orange-100 text-orange-700'
+                        }`}>
+                            {isDelivery ? <Truck className="w-3 h-3" /> : isDineIn ? <Utensils className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+                            {isDelivery ? 'Livraison' : isDineIn ? 'Sur Place' : 'Emporter'}
                         </span>
                         <div className="flex items-center gap-2">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${order.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
@@ -462,6 +573,7 @@ export default function OrderDetailsModal({
 
                 {/* ── FOOTER ────────────────────────── */}
                 <div className="border-t border-slate-200 bg-white">
+
                     {/* Total */}
                     <div className="px-5 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -513,7 +625,13 @@ export default function OrderDetailsModal({
                     {nextStatus && nextConfig && (
                         <div className="px-5 pb-5 pt-1">
                             <button
-                                onClick={() => onStatusChange(order._id, nextStatus)}
+                                onClick={() => {
+                                    if (isPending && nextStatus === 'preparing') {
+                                        setTimePickerOpen(true);
+                                    } else {
+                                        onStatusChange(order._id, nextStatus);
+                                    }
+                                }}
                                 className={`w-full py-4 rounded-xl text-sm font-black uppercase tracking-wider transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 ${
                                     isPending
                                         ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'
@@ -524,7 +642,13 @@ export default function OrderDetailsModal({
                                     const NextIcon = nextConfig.icon;
                                     return <NextIcon className="w-5 h-5" />;
                                 })()}
-                                {nextStatus === 'preparing' ? 'Accepter & Préparer' : nextStatus === 'delivering' ? 'Mettre en Livraison' : 'Marquer Terminée'}
+                                {nextStatus === 'preparing'
+                                    ? 'Accepter & Préparer'
+                                    : nextStatus === 'ready'
+                                        ? 'Marquer Prête'
+                                        : nextStatus === 'delivering'
+                                            ? 'Mettre en Livraison'
+                                            : 'Marquer Terminée'}
                             </button>
                             {isPending && (
                                 <button
