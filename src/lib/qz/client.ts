@@ -45,42 +45,44 @@ async function loadQz(): Promise<QzApi> {
     return qzModule!;
 }
 
+// Signed mode: browser sends our public cert during connect; each call is
+// signed by our Convex action with the matching private key. With override.crt
+// installed on the local QZ Tray (`/Applications/QZ Tray.app/Contents/Resources/`
+// on macOS), this gives silent printing from any origin that signs with the
+// matching key — no QZ Tray dialogs.
 export async function initQz(signMessage: (msg: string) => Promise<string>): Promise<void> {
     if (initialized) return;
     const qz = await loadQz();
 
-    // Async-function form — qz-tray detects AsyncFunction and uses the
-    // returned promise directly (skipping its (resolve,reject) wrapper which
-    // can silently swallow errors).
-    const certHandler = async () => {
+    // Public cert — sent during the websocket connect handshake.
+    // Async-function form (qz-tray detects AsyncFunction via .constructor.name
+    // and uses the returned promise directly, avoiding the silent-failure mode
+    // of the (resolve, reject) => ... wrapper).
+    qz.security.setCertificatePromise(async () => {
         const res = await fetch("/qz-digital-certificate.txt", { cache: "no-store" });
         if (!res.ok) throw new Error(`Certificate fetch failed (${res.status})`);
         const text = await res.text();
         if (!text.includes("BEGIN CERTIFICATE")) {
             throw new Error("Certificate file does not contain a PEM certificate");
         }
-        console.log("[QZ] sending certificate to QZ Tray, length =", text.length);
         return text;
-    };
-    qz.security.setCertificatePromise(certHandler);
+    });
 
+    // Per-call signing — must match the Convex action's algorithm (RSA-SHA512).
     qz.security.setSignatureAlgorithm("SHA512");
-
-    const signFactory = async (toSign: string) => {
-        const signature = await signMessage(toSign);
-        console.log("[QZ] signed payload, signature length =", signature.length);
-        return signature;
-    };
-    qz.security.setSignaturePromise(signFactory);
+    qz.security.setSignaturePromise(async (toSign: string) => signMessage(toSign));
 
     initialized = true;
-    console.log("[QZ] initialized");
+    console.log("[QZ] initialized (signed mode)");
 }
 
 export async function connectQz(): Promise<void> {
     const qz = await loadQz();
     if (qz.websocket.isActive()) return;
-    await qz.websocket.connect();
+    // Force insecure WS (port 8182) — avoids the browser rejecting QZ Tray's
+    // self-signed TLS cert on the WSS handshake. Fine on http://localhost.
+    // For https:// production deploys we'll need to provision a proper WSS cert.
+    await qz.websocket.connect({ usingSecure: false });
 }
 
 export async function disconnectQz(): Promise<void> {

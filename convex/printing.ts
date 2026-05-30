@@ -216,7 +216,9 @@ export const getTestReceiptPayload = query({
     const bytes: number[] = [ESC, 0x40];
     for (const ch of text) bytes.push(ch.charCodeAt(0));
     bytes.push(LF, LF, LF, LF, GS, 0x56, 0x01);
-    const base64 = Buffer.from(Uint8Array.from(bytes)).toString("base64");
+    let bin = "";
+    for (const b of bytes) bin += String.fromCharCode(b);
+    const base64 = btoa(bin);
 
     return { printerName: printerName ?? null, base64 };
   },

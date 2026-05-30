@@ -97,12 +97,17 @@ function ProviderTile({
     <button
       type="button"
       onClick={onClick}
-      className={`p-4 rounded-xl border text-left transition ${
+      className={`relative p-4 rounded-xl border text-left transition ${
         active
           ? 'border-red-500 bg-red-50 ring-2 ring-red-200'
-          : 'border-slate-200 bg-white hover:border-slate-300'
+          : 'border-slate-200 bg-white hover:border-slate-300 opacity-60'
       }`}
     >
+      {active && (
+        <span className="absolute top-2 right-2 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white rounded">
+          Actif
+        </span>
+      )}
       <div className="flex items-center gap-2 font-semibold text-slate-900 text-sm">
         {icon}
         {title}

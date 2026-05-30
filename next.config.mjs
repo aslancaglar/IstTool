@@ -53,7 +53,7 @@ const nextConfig = {
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                             "font-src 'self' https://fonts.gstatic.com",
                             "img-src 'self' data: blob: https:",
-                            "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://api.stripe.com",
+                            "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://api.stripe.com ws://localhost:* wss://localhost:* ws://127.0.0.1:* wss://127.0.0.1:*",
                             "frame-src https://js.stripe.com https://hooks.stripe.com https://maps.google.com https://www.google.com",
                             "worker-src 'self' blob:",
                         ].join('; '),
