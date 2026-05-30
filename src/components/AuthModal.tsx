@@ -312,6 +312,8 @@ export default function AuthModal() {
               </div>
 
               <div className="space-y-3">
+                {/* Hidden field to help password managers associate the email with the password */}
+                <input type="email" name="username" autoComplete="username" value={signupForm.email} readOnly className="hidden" />
                 <div className="space-y-2">
                   <label htmlFor="signup-password" className="text-sm font-bold text-gray-700">Mot de passe</label>
                   <div className="relative">
