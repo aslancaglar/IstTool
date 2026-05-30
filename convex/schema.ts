@@ -117,9 +117,12 @@ export default defineSchema({
     cashEnabled: v.optional(v.boolean()),
     stripeEnabled: v.optional(v.boolean()),
     printingEnabled: v.optional(v.boolean()),
+    printingProvider: v.optional(v.union(v.literal("printnode"), v.literal("qz"))),
     printNodeApiKey: v.optional(v.string()),
     printerPickupId: v.optional(v.number()),
     printerDeliveryId: v.optional(v.number()),
+    qzPrinterPickupName: v.optional(v.string()),
+    qzPrinterDeliveryName: v.optional(v.string()),
   }).index("by_key", ["key"]),
 
   users: defineTable({
@@ -189,6 +192,7 @@ export default defineSchema({
     prepTimeMinutes: v.optional(v.number()),
     deliveryTimeMinutes: v.optional(v.number()),
     acceptedAt: v.optional(v.number()),
+    printedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_status", ["status"])

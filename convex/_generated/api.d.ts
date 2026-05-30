@@ -23,6 +23,7 @@ import type * as mutations from "../mutations.js";
 import type * as printing from "../printing.js";
 import type * as promoCodes from "../promoCodes.js";
 import type * as queries from "../queries.js";
+import type * as qz from "../qz.js";
 import type * as restaurantInfo from "../restaurantInfo.js";
 import type * as reviews from "../reviews.js";
 import type * as seed from "../seed.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   printing: typeof printing;
   promoCodes: typeof promoCodes;
   queries: typeof queries;
+  qz: typeof qz;
   restaurantInfo: typeof restaurantInfo;
   reviews: typeof reviews;
   seed: typeof seed;

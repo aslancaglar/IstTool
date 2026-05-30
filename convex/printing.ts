@@ -1,4 +1,4 @@
-import { mutation, action, internalAction, internalQuery } from "./_generated/server";
+import { mutation, action, query, internalAction, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { requireAdminSession } from "./lib/auth";
@@ -88,13 +88,20 @@ export const reprintOrder = mutation({
 
 // Internal: render a receipt and ship it to PrintNode.
 // Fire-and-forget — never throws (orders must succeed even if printing fails).
+// When the provider is "qz", this is a no-op; the admin browser handles printing
+// via the QZ Tray websocket on the local machine.
 export const printOrderReceipt = internalAction({
   args: { orderId: v.id("orders"), manual: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
     const info = await ctx.runQuery(internal.queries.getRestaurantInfoInternal, {});
-    if (!info?.printNodeApiKey) return;
+    if (!info) return;
     // printingEnabled only gates automatic prints — manual reprints always go through
     if (!args.manual && !info.printingEnabled) return;
+
+    // QZ Tray is browser-side; the admin dashboard auto-print loop handles it.
+    if (info.printingProvider === "qz") return;
+
+    if (!info.printNodeApiKey) return;
 
     const order = await ctx.runQuery(internal.queries.getEnrichedOrderInternal, {
       orderId: args.orderId,
@@ -135,3 +142,134 @@ export const printOrderReceipt = internalAction({
     }
   },
 });
+
+// QZ Tray support — browser-driven printing.
+
+// Atomic claim: returns { claimed: true } once per order. Used by the auto-print
+// loop in /admin/orders so two open tabs don't both send the same receipt.
+export const markOrderPrinted = mutation({
+  args: { orderId: v.id("orders"), adminToken: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+    const order = await ctx.db.get(args.orderId);
+    if (!order) return { claimed: false };
+    if (order.printedAt) return { claimed: false };
+    await ctx.db.patch(args.orderId, { printedAt: Date.now() });
+    return { claimed: true };
+  },
+});
+
+// Returns the ESC/POS base64 payload + chosen QZ printer name for one order.
+// The admin browser fetches this then sends to QZ Tray over the local websocket.
+export const getReceiptPayload = query({
+  args: { orderId: v.id("orders"), adminToken: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+
+    const info = await ctx.db
+      .query("restaurantInfo")
+      .withIndex("by_key", (q) => q.eq("key", "main"))
+      .first();
+    if (!info) return null;
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order) return null;
+
+    // Reuse the same enrichment that the PrintNode action uses.
+    const enriched = await enrichOrderForReceipt(ctx, order);
+
+    const printerName = order.type === "delivery"
+      ? info.qzPrinterDeliveryName
+      : info.qzPrinterPickupName;
+
+    const base64 = buildOrderReceipt(
+      enriched as unknown as OrderForReceipt,
+      { address: info.address, phone: info.phone },
+    );
+
+    return {
+      orderId: args.orderId,
+      printerName: printerName ?? null,
+      base64,
+    };
+  },
+});
+
+// A short test receipt admins can fire from the settings page.
+export const getTestReceiptPayload = query({
+  args: { adminToken: v.string(), target: v.union(v.literal("pickup"), v.literal("delivery")) },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+    const info = await ctx.db
+      .query("restaurantInfo")
+      .withIndex("by_key", (q) => q.eq("key", "main"))
+      .first();
+    if (!info) return null;
+
+    const printerName = args.target === "delivery"
+      ? info.qzPrinterDeliveryName
+      : info.qzPrinterPickupName;
+
+    // ESC @ (init) + a few lines + ESC d 4 (feed) + GS V 1 (partial cut)
+    const ESC = 0x1b, GS = 0x1d, LF = 0x0a;
+    const text = `Test d'impression\n${info.address ?? ""}\n${info.phone ?? ""}\nOK !\n`;
+    const bytes: number[] = [ESC, 0x40];
+    for (const ch of text) bytes.push(ch.charCodeAt(0));
+    bytes.push(LF, LF, LF, LF, GS, 0x56, 0x01);
+    const base64 = Buffer.from(Uint8Array.from(bytes)).toString("base64");
+
+    return { printerName: printerName ?? null, base64 };
+  },
+});
+
+// Local helper that mirrors getEnrichedOrderInternal but inside this file's
+// query context (since query handlers can't ctx.runQuery internal queries).
+async function enrichOrderForReceipt(ctx: any, order: any) {
+  const enrichedItems = await Promise.all(order.items.map(async (item: any) => {
+    let menuItem = await ctx.db
+      .query("menuItems")
+      .filter((q: any) => q.eq(q.field("_id"), item.menuItemId))
+      .first();
+    if (!menuItem) {
+      menuItem = await ctx.db
+        .query("menuItems")
+        .filter((q: any) => q.eq(q.field("name"), item.name))
+        .first();
+    }
+    const itemTva = menuItem?.tvaPercent ?? 10;
+
+    if (!item.selectedToppings) return { ...item, tvaPercent: itemTva };
+
+    const enrichedToppings = await Promise.all(item.selectedToppings.map(async (group: any) => {
+      const details = await Promise.all(group.toppingIds.map(async (id: string) => {
+        const t = await ctx.db.query("toppings").filter((q: any) => q.eq(q.field("toppingId"), id)).first();
+        if (!t) return { name: id, price: 0, tvaPercent: itemTva };
+        if (t.menuItemId) {
+          const linked = await ctx.db.get(t.menuItemId);
+          if (linked) {
+            return {
+              name: t.name || linked.name,
+              price: t.specialPrice !== undefined ? t.specialPrice : linked.price,
+              tvaPercent: t.tvaPercent ?? linked.tvaPercent ?? itemTva,
+            };
+          }
+        }
+        return {
+          name: t.name,
+          price: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0),
+          tvaPercent: t.tvaPercent ?? itemTva,
+        };
+      }));
+      return {
+        ...group,
+        toppingNames: details.map((d) => d.name),
+        toppingPrices: details.map((d) => d.price),
+        toppingTvas: details.map((d) => d.tvaPercent),
+      };
+    }));
+
+    return { ...item, tvaPercent: itemTva, selectedToppings: enrichedToppings };
+  }));
+
+  return { ...order, items: enrichedItems };
+}

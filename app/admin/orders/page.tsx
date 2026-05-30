@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation, useConvex } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Package, Bell, BellOff, Power } from 'lucide-react';
 import OrderCard from '../../../src/components/admin/Orders/OrderCard';
@@ -9,6 +9,8 @@ import OrderDetailsModal from '../../../src/components/admin/Orders/OrderDetails
 import StopOrderingModal from '../../../src/components/admin/Orders/StopOrderingModal';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { useAdminAuth } from '../../../src/context/AdminAuthContext';
+import { useQzPrinter } from '../../../src/hooks/useQzPrinter';
+import { useAutoPrint } from '../../../src/hooks/useAutoPrint';
 
 export default function OrdersPage() {
   const { adminToken } = useAdminAuth();
@@ -24,6 +26,17 @@ export default function OrdersPage() {
   const reprintOrderMutation = useMutation(api.printing.reprintOrder);
   const toggleOrderingMutation = useMutation(api.restaurantInfo.toggleOrderingAvailability);
   const restaurantInfo = useQuery(api.restaurantInfo.get);
+  const convex = useConvex();
+
+  // QZ Tray printing — only active when the admin selected QZ in settings.
+  const qzEnabled = restaurantInfo?.printingProvider === 'qz';
+  const qz = useQzPrinter(qzEnabled);
+  useAutoPrint({
+    enabled: qzEnabled && (restaurantInfo?.printingEnabled ?? false),
+    adminToken,
+    orders,
+    print: qz.print,
+  });
 
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -195,11 +208,20 @@ export default function OrdersPage() {
   const handleReprint = useCallback(async (orderId: Id<'orders'>) => {
     if (!adminToken) return;
     try {
-      await reprintOrderMutation({ orderId, adminToken });
+      if (qzEnabled) {
+        const payload = await convex.query(api.printing.getReceiptPayload, { orderId, adminToken });
+        if (!payload?.printerName) {
+          console.warn('QZ reprint skipped: no printer configured for this order type');
+          return;
+        }
+        await qz.print(payload.printerName, payload.base64);
+      } else {
+        await reprintOrderMutation({ orderId, adminToken });
+      }
     } catch (error) {
       console.error('Error reprinting order:', error);
     }
-  }, [reprintOrderMutation, adminToken]);
+  }, [reprintOrderMutation, adminToken, qzEnabled, convex, qz]);
 
   const handleUpdateTimes = useCallback(async (orderId: Id<'orders'>, prepTimeMinutes: number, deliveryTimeMinutes?: number) => {
     if (!adminToken) return;
@@ -365,7 +387,7 @@ export default function OrdersPage() {
         onStatusChange={handleStatusChange}
         onPaymentStatusChange={handlePaymentStatusChange}
         onDeleteOrder={handleDeleteOrder}
-        onReprint={restaurantInfo?.printNodeApiKey ? handleReprint : undefined}
+        onReprint={(restaurantInfo?.printNodeApiKey || restaurantInfo?.qzPrinterPickupName || restaurantInfo?.qzPrinterDeliveryName) ? handleReprint : undefined}
         onUpdateTimes={handleUpdateTimes}
         toppings={toppings}
         toppingCategories={toppingCategories}

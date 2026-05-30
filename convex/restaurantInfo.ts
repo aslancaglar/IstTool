@@ -53,9 +53,12 @@ export const upsert = mutation({
     cashEnabled: v.optional(v.boolean()),
     stripeEnabled: v.optional(v.boolean()),
     printingEnabled: v.optional(v.boolean()),
+    printingProvider: v.optional(v.union(v.literal("printnode"), v.literal("qz"))),
     printNodeApiKey: v.optional(v.string()),
     printerPickupId: v.optional(v.number()),
     printerDeliveryId: v.optional(v.number()),
+    qzPrinterPickupName: v.optional(v.string()),
+    qzPrinterDeliveryName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -86,9 +89,12 @@ export const upsert = mutation({
         cashEnabled: args.cashEnabled,
         stripeEnabled: args.stripeEnabled,
         printingEnabled: args.printingEnabled,
+        printingProvider: args.printingProvider,
         printNodeApiKey: args.printNodeApiKey,
         printerPickupId: args.printerPickupId,
         printerDeliveryId: args.printerDeliveryId,
+        qzPrinterPickupName: args.qzPrinterPickupName,
+        qzPrinterDeliveryName: args.qzPrinterDeliveryName,
       });
       return existing._id;
     } else {
@@ -113,9 +119,12 @@ export const upsert = mutation({
         cashEnabled: args.cashEnabled ?? true,
         stripeEnabled: args.stripeEnabled ?? true,
         printingEnabled: args.printingEnabled,
+        printingProvider: args.printingProvider,
         printNodeApiKey: args.printNodeApiKey,
         printerPickupId: args.printerPickupId,
         printerDeliveryId: args.printerDeliveryId,
+        qzPrinterPickupName: args.qzPrinterPickupName,
+        qzPrinterDeliveryName: args.qzPrinterDeliveryName,
       });
       return id;
     }

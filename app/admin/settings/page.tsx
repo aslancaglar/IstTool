@@ -47,9 +47,12 @@ export default function SettingsPage() {
     cashEnabled: true,
     stripeEnabled: true,
     printingEnabled: false,
+    printingProvider: 'printnode' as 'printnode' | 'qz',
     printNodeApiKey: '',
     printerPickupId: undefined as number | undefined,
     printerDeliveryId: undefined as number | undefined,
+    qzPrinterPickupName: undefined as string | undefined,
+    qzPrinterDeliveryName: undefined as string | undefined,
   });
 
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
@@ -95,9 +98,12 @@ export default function SettingsPage() {
       cashEnabled: restaurantInfo.cashEnabled ?? true,
       stripeEnabled: restaurantInfo.stripeEnabled ?? true,
       printingEnabled: restaurantInfo.printingEnabled ?? false,
+      printingProvider: restaurantInfo.printingProvider ?? 'printnode',
       printNodeApiKey: restaurantInfo.printNodeApiKey ?? '',
       printerPickupId: restaurantInfo.printerPickupId,
       printerDeliveryId: restaurantInfo.printerDeliveryId,
+      qzPrinterPickupName: restaurantInfo.qzPrinterPickupName,
+      qzPrinterDeliveryName: restaurantInfo.qzPrinterDeliveryName,
     });
 
     setHolidays(restaurantInfo.holidays || []);
@@ -152,9 +158,12 @@ export default function SettingsPage() {
         cashEnabled: formData.cashEnabled,
         stripeEnabled: formData.stripeEnabled,
         printingEnabled: formData.printingEnabled,
+        printingProvider: formData.printingProvider,
         printNodeApiKey: formData.printNodeApiKey || undefined,
         printerPickupId: formData.printerPickupId,
         printerDeliveryId: formData.printerDeliveryId,
+        qzPrinterPickupName: formData.qzPrinterPickupName,
+        qzPrinterDeliveryName: formData.qzPrinterDeliveryName,
       });
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
@@ -374,13 +383,19 @@ export default function SettingsPage() {
           <PrintingSection
             adminToken={adminToken}
             printingEnabled={formData.printingEnabled}
+            printingProvider={formData.printingProvider}
             printNodeApiKey={formData.printNodeApiKey}
             printerPickupId={formData.printerPickupId}
             printerDeliveryId={formData.printerDeliveryId}
+            qzPrinterPickupName={formData.qzPrinterPickupName}
+            qzPrinterDeliveryName={formData.qzPrinterDeliveryName}
             onPrintingEnabledChange={(v) => setFormData({ ...formData, printingEnabled: v })}
+            onProviderChange={(p) => setFormData({ ...formData, printingProvider: p })}
             onApiKeyChange={(v) => setFormData({ ...formData, printNodeApiKey: v })}
             onPickupPrinterChange={(id) => setFormData({ ...formData, printerPickupId: id })}
             onDeliveryPrinterChange={(id) => setFormData({ ...formData, printerDeliveryId: id })}
+            onQzPickupPrinterChange={(name) => setFormData({ ...formData, qzPrinterPickupName: name })}
+            onQzDeliveryPrinterChange={(name) => setFormData({ ...formData, qzPrinterDeliveryName: name })}
           />
         </SettingsAccordion>
 
