@@ -370,9 +370,24 @@ export default function CheckoutPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    if (!isInitialized || isRedirecting) return (
+    if (!isInitialized || isRedirecting || authLoading) return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20">
             <div className="w-12 h-12 border-4 border-orange-400 border-t-transparent rounded-full animate-spin" />
+        </div>
+    );
+
+    if (!user) return (
+        <div className="flex flex-col min-h-screen bg-gray-50 pt-32 items-center justify-center p-4">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-100 to-fuchsia-100 flex items-center justify-center mb-5 shadow-sm">
+                <svg className="w-10 h-10 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Connexion requise</h2>
+            <p className="text-gray-400 text-sm mb-6 text-center max-w-sm">Vous devez être connecté pour valider votre commande.</p>
+            <button onClick={() => openLoginModal('/checkout')} className="bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white font-bold px-8 py-3 rounded-xl hover:from-violet-600 hover:to-fuchsia-700 transition-all shadow-lg shadow-violet-500/25">
+                Se connecter / Créer un compte
+            </button>
         </div>
     );
 
