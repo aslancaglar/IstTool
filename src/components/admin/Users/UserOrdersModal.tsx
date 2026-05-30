@@ -1,6 +1,8 @@
 "use client";
 
-import { Calendar, ChevronRight, Clock, MapPin, ShoppingBag, X } from 'lucide-react';
+import { Calendar, ChevronRight, Clock, FileDown, MapPin, ShoppingBag, X } from 'lucide-react';
+import { useInvoiceDownload } from '../../../hooks/useInvoiceDownload';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 
 interface UserOrdersModalProps {
   isOpen: boolean;
@@ -120,8 +122,32 @@ function OrderListView({ orders, onSelect }: { orders: any[] | undefined; onSele
 }
 
 function OrderDetailView({ order }: { order: any }) {
+  const { adminToken } = useAdminAuth();
+  const { download, downloadingId } = useInvoiceDownload();
+  const isDownloading = downloadingId === order._id;
+
+  const handleDownload = async () => {
+    if (!adminToken) return;
+    try {
+      await download({ orderId: order._id, adminToken });
+    } catch (e: any) {
+      alert(e?.message ?? "Erreur lors de la génération de la facture");
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+      <div className="flex justify-end">
+        <button
+          onClick={handleDownload}
+          disabled={!adminToken || isDownloading}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 hover:border-blue-300 hover:text-blue-700 rounded-xl border border-slate-200 transition-colors disabled:opacity-50"
+        >
+          <FileDown className="w-4 h-4" />
+          {isDownloading ? 'Génération…' : 'Télécharger la facture'}
+        </button>
+      </div>
+
       <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-red-50 rounded-full text-red-500">

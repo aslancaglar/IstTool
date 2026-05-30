@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  macOS launchd service for the MondoPizza print-agent.
+  Install:
+    1. Edit the four <string> placeholders below (paths + env vars).
+    2. Copy this file to ~/Library/LaunchAgents/
+    3. Run:
+         launchctl load -w ~/Library/LaunchAgents/com.mondopizza.printagent.plist
+       The agent starts immediately AND on every login.
+    4. Watch the logs:
+         tail -F /tmp/mondopizza-print-agent.{out,err}.log
+    5. To stop:
+         launchctl unload -w ~/Library/LaunchAgents/com.mondopizza.printagent.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.mondopizza.printagent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/node</string>
+        <string>/ABSOLUTE/PATH/TO/MondoPizza/print-agent/index.mjs</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/ABSOLUTE/PATH/TO/MondoPizza</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>CONVEX_URL</key>
+        <string>https://YOUR-DEPLOYMENT.convex.cloud</string>
+        <key>PRINT_AGENT_TOKEN</key>
+        <string>YOUR_SHARED_SECRET_HERE</string>
+        <key>QZ_PRIVATE_KEY_PATH</key>
+        <string>/Users/YOU/qz-cert/private-key.pem</string>
+        <key>QZ_CERT_PATH</key>
+        <string>/Users/YOU/qz-cert/digital-certificate.txt</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/mondopizza-print-agent.out.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/mondopizza-print-agent.err.log</string>
+</dict>
+</plist>

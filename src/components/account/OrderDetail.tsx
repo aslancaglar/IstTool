@@ -1,11 +1,13 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, ChevronDown, MapPin, Star, Store, Truck, User as UserIcon, Utensils } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ChevronDown, FileDown, MapPin, Star, Store, Truck, User as UserIcon, Utensils } from 'lucide-react';
 import { CancelledX, CompletedCheck, CookingPot, DeliveryScooter, PulsingClock } from './StatusIcons';
+import { useInvoiceDownload } from '../../hooks/useInvoiceDownload';
 
 interface OrderDetailProps {
   order: any;
   user: { firstName?: string; lastName?: string; phone?: string; email?: string };
+  sessionToken: string | null;
   detailsOpen: boolean;
   onToggleDetails: () => void;
   onBack: () => void;
@@ -24,7 +26,7 @@ const STATUS_CONF: Record<string, { icon: React.FC; title: string; subtitle: str
   cancelled:  { icon: CancelledX,      title: 'Annulée',         subtitle: 'Cette commande a été annulée.',                   bg: 'from-red-50 to-rose-50',      accent: 'text-red-700',     text: 'text-red-600',     dot: 'bg-red-500',     progressBg: 'bg-red-500' },
 };
 
-export default function OrderDetail({ order, user, detailsOpen, onToggleDetails, onBack, onLeaveReview }: OrderDetailProps) {
+export default function OrderDetail({ order, user, sessionToken, detailsOpen, onToggleDetails, onBack, onLeaveReview }: OrderDetailProps) {
   const isDelivery = order.type === 'delivery';
   const isDineIn = order.type === 'dine_in';
   const isCancelled = order.status === 'cancelled';
@@ -32,6 +34,17 @@ export default function OrderDetail({ order, user, detailsOpen, onToggleDetails,
   const currentIdx = flow.indexOf(order.status);
   const progressPercent = isCancelled ? 0 : (currentIdx / (flow.length - 1)) * 100;
   const conf = STATUS_CONF[order.status] || STATUS_CONF.pending;
+  const { download, downloadingId } = useInvoiceDownload();
+  const isDownloading = downloadingId === order._id;
+
+  const handleDownloadInvoice = async () => {
+    if (!sessionToken) return;
+    try {
+      await download({ orderId: order._id, userToken: sessionToken });
+    } catch (e: any) {
+      alert(e?.message ?? "Erreur lors de la génération de la facture");
+    }
+  };
 
   const subtotal = order.items.reduce((sum: number, item: any) => sum + item.finalPrice, 0);
   const deliveryFee = isDelivery ? Math.max(0, order.totalPrice - subtotal) : 0;
@@ -227,6 +240,15 @@ export default function OrderDetail({ order, user, detailsOpen, onToggleDetails,
           Laisser un avis
         </button>
       )}
+
+      <button
+        onClick={handleDownloadInvoice}
+        disabled={isDownloading || !sessionToken}
+        className="w-full py-3 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <FileDown className="w-4 h-4" />
+        {isDownloading ? 'Génération…' : 'Télécharger la facture'}
+      </button>
     </div>
   );
 }

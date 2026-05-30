@@ -154,6 +154,7 @@ export default function AccountPage() {
                 <OrderDetail
                   order={selectedOrder}
                   user={user}
+                  sessionToken={sessionToken}
                   detailsOpen={detailsOpen}
                   onToggleDetails={() => setDetailsOpen(!detailsOpen)}
                   onBack={() => setSelectedOrderId(null)}

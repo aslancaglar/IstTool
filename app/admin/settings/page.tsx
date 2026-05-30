@@ -10,8 +10,9 @@ import HoursSection, { type DaySchedule, type TimeSlot } from '../../../src/comp
 import HolidaysSection, { type Holiday } from '../../../src/components/admin/Settings/HolidaysSection';
 import DeliveryZonesSection, { type DeliveryZone } from '../../../src/components/admin/Settings/DeliveryZonesSection';
 import PrintingSection from '../../../src/components/admin/Settings/PrintingSection';
+import LegalInfoSection, { type LegalInfoData } from '../../../src/components/admin/Settings/LegalInfoSection';
 
-type SectionId = 'contact' | 'ordering' | 'hours' | 'holidays' | 'social' | 'delivery' | 'sections' | 'printing';
+type SectionId = 'contact' | 'ordering' | 'hours' | 'holidays' | 'social' | 'delivery' | 'sections' | 'printing' | 'legal';
 
 export default function SettingsPage() {
   const { adminToken } = useAdminAuth();
@@ -20,7 +21,7 @@ export default function SettingsPage() {
 
   const [expandedSections, setExpandedSections] = useState<Record<SectionId, boolean>>({
     contact: false, ordering: false, hours: false, holidays: false,
-    social: false, delivery: false, sections: false, printing: false,
+    social: false, delivery: false, sections: false, printing: false, legal: false,
   });
 
   const toggleSection = (id: SectionId) => {
@@ -53,6 +54,18 @@ export default function SettingsPage() {
     printerDeliveryId: undefined as number | undefined,
     qzPrinterPickupName: undefined as string | undefined,
     qzPrinterDeliveryName: undefined as string | undefined,
+  });
+
+  const [legalInfo, setLegalInfo] = useState<LegalInfoData>({
+    legalName: '',
+    legalForm: '',
+    siret: '',
+    rcsCity: '',
+    rcsNumber: '',
+    shareCapital: undefined,
+    tvaIntraNumber: '',
+    legalAddress: '',
+    invoicePrefix: 'F{YYYY}-',
   });
 
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
@@ -104,6 +117,18 @@ export default function SettingsPage() {
       printerDeliveryId: restaurantInfo.printerDeliveryId,
       qzPrinterPickupName: restaurantInfo.qzPrinterPickupName,
       qzPrinterDeliveryName: restaurantInfo.qzPrinterDeliveryName,
+    });
+
+    setLegalInfo({
+      legalName: restaurantInfo.legalName ?? '',
+      legalForm: restaurantInfo.legalForm ?? '',
+      siret: restaurantInfo.siret ?? '',
+      rcsCity: restaurantInfo.rcsCity ?? '',
+      rcsNumber: restaurantInfo.rcsNumber ?? '',
+      shareCapital: restaurantInfo.shareCapital,
+      tvaIntraNumber: restaurantInfo.tvaIntraNumber ?? '',
+      legalAddress: restaurantInfo.legalAddress ?? '',
+      invoicePrefix: restaurantInfo.invoicePrefix ?? 'F{YYYY}-',
     });
 
     setHolidays(restaurantInfo.holidays || []);
@@ -164,6 +189,15 @@ export default function SettingsPage() {
         printerDeliveryId: formData.printerDeliveryId,
         qzPrinterPickupName: formData.qzPrinterPickupName,
         qzPrinterDeliveryName: formData.qzPrinterDeliveryName,
+        legalName: legalInfo.legalName || undefined,
+        legalForm: legalInfo.legalForm || undefined,
+        siret: legalInfo.siret || undefined,
+        rcsCity: legalInfo.rcsCity || undefined,
+        rcsNumber: legalInfo.rcsNumber || undefined,
+        shareCapital: legalInfo.shareCapital,
+        tvaIntraNumber: legalInfo.tvaIntraNumber || undefined,
+        legalAddress: legalInfo.legalAddress || undefined,
+        invoicePrefix: legalInfo.invoicePrefix || undefined,
       });
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
@@ -397,6 +431,10 @@ export default function SettingsPage() {
             onQzPickupPrinterChange={(name) => setFormData({ ...formData, qzPrinterPickupName: name })}
             onQzDeliveryPrinterChange={(name) => setFormData({ ...formData, qzPrinterDeliveryName: name })}
           />
+        </SettingsAccordion>
+
+        <SettingsAccordion title="Mentions légales (factures)" isOpen={expandedSections.legal} onToggle={() => toggleSection('legal')}>
+          <LegalInfoSection data={legalInfo} onChange={setLegalInfo} />
         </SettingsAccordion>
 
         <SettingsAccordion title="Sections du Site" isOpen={expandedSections.sections} onToggle={() => toggleSection('sections')}>

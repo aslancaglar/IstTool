@@ -59,6 +59,15 @@ export const upsert = mutation({
     printerDeliveryId: v.optional(v.number()),
     qzPrinterPickupName: v.optional(v.string()),
     qzPrinterDeliveryName: v.optional(v.string()),
+    legalName: v.optional(v.string()),
+    legalForm: v.optional(v.string()),
+    siret: v.optional(v.string()),
+    rcsCity: v.optional(v.string()),
+    rcsNumber: v.optional(v.string()),
+    shareCapital: v.optional(v.number()),
+    tvaIntraNumber: v.optional(v.string()),
+    legalAddress: v.optional(v.string()),
+    invoicePrefix: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -95,6 +104,15 @@ export const upsert = mutation({
         printerDeliveryId: args.printerDeliveryId,
         qzPrinterPickupName: args.qzPrinterPickupName,
         qzPrinterDeliveryName: args.qzPrinterDeliveryName,
+        legalName: args.legalName,
+        legalForm: args.legalForm,
+        siret: args.siret,
+        rcsCity: args.rcsCity,
+        rcsNumber: args.rcsNumber,
+        shareCapital: args.shareCapital,
+        tvaIntraNumber: args.tvaIntraNumber,
+        legalAddress: args.legalAddress,
+        invoicePrefix: args.invoicePrefix,
       });
       return existing._id;
     } else {
@@ -125,6 +143,15 @@ export const upsert = mutation({
         printerDeliveryId: args.printerDeliveryId,
         qzPrinterPickupName: args.qzPrinterPickupName,
         qzPrinterDeliveryName: args.qzPrinterDeliveryName,
+        legalName: args.legalName,
+        legalForm: args.legalForm,
+        siret: args.siret,
+        rcsCity: args.rcsCity,
+        rcsNumber: args.rcsNumber,
+        shareCapital: args.shareCapital,
+        tvaIntraNumber: args.tvaIntraNumber,
+        legalAddress: args.legalAddress,
+        invoicePrefix: args.invoicePrefix ?? "F{YYYY}-",
       });
       return id;
     }

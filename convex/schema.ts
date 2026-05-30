@@ -123,6 +123,18 @@ export default defineSchema({
     printerDeliveryId: v.optional(v.number()),
     qzPrinterPickupName: v.optional(v.string()),
     qzPrinterDeliveryName: v.optional(v.string()),
+    // Legal information for French invoice generation
+    legalName: v.optional(v.string()),
+    legalForm: v.optional(v.string()), // SARL, SAS, EURL, EI, ...
+    siret: v.optional(v.string()),
+    rcsCity: v.optional(v.string()),
+    rcsNumber: v.optional(v.string()),
+    shareCapital: v.optional(v.number()), // euros
+    tvaIntraNumber: v.optional(v.string()),
+    legalAddress: v.optional(v.string()), // siège social — falls back to `address`
+    invoicePrefix: v.optional(v.string()), // e.g. "F{YYYY}-" — supports {YYYY} placeholder
+    invoiceCounter: v.optional(v.number()), // last invoice number issued
+    invoiceCounterYear: v.optional(v.number()), // year tied to the counter (for yearly reset)
   }).index("by_key", ["key"]),
 
   users: defineTable({
@@ -193,6 +205,8 @@ export default defineSchema({
     deliveryTimeMinutes: v.optional(v.number()),
     acceptedAt: v.optional(v.number()),
     printedAt: v.optional(v.number()),
+    invoiceNumber: v.optional(v.string()),
+    invoicedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_status", ["status"])

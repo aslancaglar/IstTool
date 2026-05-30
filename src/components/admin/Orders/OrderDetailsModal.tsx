@@ -5,9 +5,11 @@ import {
     X, Clock, Package, CheckCircle, XCircle,
     User, Phone, Mail, MapPin, Trash2,
     Truck, ShoppingBag, CreditCard, Banknote,
-    ChevronDown, ChevronUp, Copy, ExternalLink, Gift, Printer, Utensils
+    ChevronDown, ChevronUp, Copy, ExternalLink, Gift, Printer, Utensils, FileDown
 } from 'lucide-react';
 import { Id } from '../../../../convex/_generated/dataModel';
+import { useInvoiceDownload } from '../../../hooks/useInvoiceDownload';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 
 interface OrderDetailsModalProps {
     order: any;
@@ -60,6 +62,8 @@ export default function OrderDetailsModal({
     const [timePickerOpen, setTimePickerOpen] = useState(false);
     const [pickedPrep, setPickedPrep] = useState<number>(25);
     const [savingTimes, setSavingTimes] = useState(false);
+    const { adminToken } = useAdminAuth();
+    const { download: downloadInvoice, downloadingId } = useInvoiceDownload();
 
     useEffect(() => {
         if (!isOpen) {
@@ -612,6 +616,22 @@ export default function OrderDetailsModal({
                                             Imprimer
                                         </button>
                                     )}
+                                    <button
+                                        onClick={async () => {
+                                            if (!adminToken) return;
+                                            try {
+                                                await downloadInvoice({ orderId: order._id, adminToken });
+                                            } catch (e: any) {
+                                                alert(e?.message ?? "Erreur lors de la génération de la facture");
+                                            }
+                                        }}
+                                        disabled={!adminToken || downloadingId === order._id}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors border border-slate-200 disabled:opacity-50"
+                                        title="Télécharger la facture PDF"
+                                    >
+                                        <FileDown className="w-3.5 h-3.5" />
+                                        {downloadingId === order._id ? '…' : 'Facture'}
+                                    </button>
                                 </>
                             )}
                         </div>
