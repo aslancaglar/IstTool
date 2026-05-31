@@ -63,8 +63,8 @@ export default function AuthModal() {
     closeAuthModal();
   };
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLoginSubmit = async (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
     setError("");
     setIsLoading(true);
 
@@ -85,8 +85,8 @@ export default function AuthModal() {
     }
   };
 
-  const handleSignupSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignupSubmit = async (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
     setError("");
     setIsLoading(true);
 
@@ -149,7 +149,16 @@ export default function AuthModal() {
 
         <div className="p-6 max-h-[80vh] overflow-y-auto">
           {mode === "login" ? (
-            <form onSubmit={handleLoginSubmit} autoComplete="on" className="space-y-4">
+            <form 
+              autoComplete="on" 
+              className="space-y-4"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (e.currentTarget.reportValidity()) handleLoginSubmit(e);
+                }
+              }}
+            >
               <div className="space-y-2">
                 <label htmlFor="login-email" className="text-sm font-bold text-gray-700">Email</label>
                 <div className="relative">
@@ -187,7 +196,11 @@ export default function AuthModal() {
               </div>
 
               <button
-                type="submit"
+                type="button"
+                onClick={(e) => {
+                  const form = e.currentTarget.closest('form');
+                  if (form && form.reportValidity()) handleLoginSubmit(e);
+                }}
                 disabled={isLoading}
                 className="w-full bg-red-500 text-white font-bold py-4 rounded-2xl hover:bg-red-600 transition-all shadow-lg hover:shadow-red-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
@@ -196,7 +209,16 @@ export default function AuthModal() {
               </button>
             </form>
           ) : (
-            <form onSubmit={handleSignupSubmit} autoComplete="on" className="space-y-3">
+            <form 
+              autoComplete="on" 
+              className="space-y-3"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (e.currentTarget.reportValidity()) handleSignupSubmit(e);
+                }
+              }}
+            >
               {/* Hidden field at the top to ensure password managers correctly anchor the username, preventing them from hijacking the First Name field */}
               <input type="email" name="username" autoComplete="username" value={signupForm.email} readOnly className="sr-only" aria-hidden="true" tabIndex={-1} />
               <div className="space-y-2">
@@ -356,7 +378,11 @@ export default function AuthModal() {
               </div>
 
               <button
-                type="submit"
+                type="button"
+                onClick={(e) => {
+                  const form = e.currentTarget.closest('form');
+                  if (form && form.reportValidity()) handleSignupSubmit(e);
+                }}
                 disabled={isLoading}
                 className="w-full bg-red-500 text-white font-bold py-4 rounded-2xl hover:bg-red-600 transition-all shadow-lg hover:shadow-red-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
