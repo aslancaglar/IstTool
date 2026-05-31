@@ -7,6 +7,17 @@ import { useAuth } from "../context/AuthContext";
 import { useAuthModal } from "../context/AuthModalContext";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
+/**
+ * Convex wraps thrown server errors as
+ * "[CONVEX M(...)] [Request ID: ...] Server Error\nUncaught Error: <message>\n  at handler ...".
+ * Pull out the clean, user-facing message the server threw.
+ */
+function extractServerErrorMessage(err: unknown): string {
+  const raw = (err as { message?: string })?.message ?? "";
+  const match = raw.match(/Uncaught Error:\s*([^\n]+)/);
+  return (match?.[1] ?? "").trim();
+}
+
 export default function AuthModal() {
   const router = useRouter();
   const { login, signup } = useAuth();
@@ -66,8 +77,9 @@ export default function AuthModal() {
 
       close();
       router.push(redirectPath);
-    } catch {
-      setError("Une erreur est survenue lors de la connexion");
+    } catch (err: unknown) {
+      // Surface real server errors (e.g. rate limiting); fall back to generic.
+      setError(extractServerErrorMessage(err) || "Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
     }
@@ -89,14 +101,15 @@ export default function AuthModal() {
       await signup(signupData);
       close();
       router.push(redirectPath);
-    } catch (err: any) {
-      const raw: string = err?.message ?? "";
-      if (raw.toLowerCase().includes("already exists") || raw.toLowerCase().includes("email already")) {
+    } catch (err: unknown) {
+      const serverMsg = extractServerErrorMessage(err);
+      const lower = serverMsg.toLowerCase();
+      if (lower.includes("already exists") || lower.includes("email already") || lower.includes("existe déjà")) {
         setError("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.");
-      } else if (raw.toLowerCase().includes("password")) {
-        setError("Le mot de passe ne respecte pas les exigences de sécurité.");
-      } else if (raw.toLowerCase().includes("invalid email")) {
-        setError("L'adresse email n'est pas valide.");
+      } else if (serverMsg) {
+        // Server validation messages are already user-facing French
+        // (e.g. "Le mot de passe doit contenir au moins 8 caractères.").
+        setError(serverMsg);
       } else {
         setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
       }
