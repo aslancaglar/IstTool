@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import Skeleton from './Skeleton';
 
@@ -28,7 +28,10 @@ export default function ReviewsCarousel({ reviewsData }: ReviewsCarouselProps) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    const extendedReviews = isMobile ? [...reviews, ...reviews] : [...reviews, ...reviews, ...reviews];
+    const extendedReviews = useMemo(
+        () => (isMobile ? [...reviews, ...reviews] : [...reviews, ...reviews, ...reviews]),
+        [reviewsData, isMobile]
+    );
 
     const startAutoSlide = () => {
         if (intervalRef.current) {

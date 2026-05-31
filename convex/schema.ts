@@ -17,6 +17,14 @@ export default defineSchema({
   }).index("by_admin", ["adminId"])
     .index("by_token_hash", ["tokenHash"]),
 
+  // Fixed-window counters for throttling auth endpoints (login/signup).
+  // Keyed per identifier (e.g. "login:admin:<username>").
+  authRateLimits: defineTable({
+    key: v.string(),
+    count: v.number(),
+    windowStart: v.number(),
+  }).index("by_key", ["key"]),
+
   menuCategories: defineTable({
     name: v.string(),
     slug: v.string(),

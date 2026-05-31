@@ -12,6 +12,13 @@ import {
   revokeUserSession,
   verifyPassword,
 } from "./lib/auth";
+import { enforceRateLimit, clearRateLimit } from "./lib/rateLimit";
+
+// Auth throttling: max attempts per identifier within the window.
+const LOGIN_MAX_ATTEMPTS = 10;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const SIGNUP_MAX_ATTEMPTS = 5;
+const SIGNUP_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -50,11 +57,14 @@ export const createAdmin = mutation({
     bootstrapSecret: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Fail closed: the bootstrap secret must be configured AND match. Without
+    // this, an unset env var would let anyone create the first admin.
     const requiredSecret = process.env.ADMIN_BOOTSTRAP_SECRET;
-    if (requiredSecret) {
-      if (args.bootstrapSecret !== requiredSecret) {
-        throw new Error("Unauthorized");
-      }
+    if (!requiredSecret) {
+      throw new Error("ADMIN_BOOTSTRAP_SECRET non configuré sur le serveur.");
+    }
+    if (args.bootstrapSecret !== requiredSecret) {
+      throw new Error("Unauthorized");
     }
 
     const existingAdmins = await ctx.db.query("adminUsers").collect();
@@ -80,6 +90,9 @@ export const verifyAdmin = mutation({
     password: v.string(),
   },
   handler: async (ctx, args) => {
+    const rateKey = `login:admin:${args.username.toLowerCase()}`;
+    await enforceRateLimit(ctx, rateKey, LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_MS);
+
     const admin = await ctx.db
       .query("adminUsers")
       .withIndex("by_username", (q) => q.eq("username", args.username))
@@ -100,6 +113,7 @@ export const verifyAdmin = mutation({
       });
     }
 
+    await clearRateLimit(ctx, rateKey);
     const sessionToken = await createAdminSession(ctx, admin._id);
 
     return {
@@ -257,6 +271,8 @@ export const signupUser = mutation({
       throw new Error("Adresse email invalide.");
     }
 
+    await enforceRateLimit(ctx, `signup:${email}`, SIGNUP_MAX_ATTEMPTS, SIGNUP_WINDOW_MS);
+
     const existing = await findUserByEmail(ctx, email);
 
     if (existing) {
@@ -301,6 +317,9 @@ export const verifyUser = mutation({
   handler: async (ctx, args) => {
     const email = normalizeEmail(args.email);
 
+    const rateKey = `login:user:${email}`;
+    await enforceRateLimit(ctx, rateKey, LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_MS);
+
     const user = await findUserByEmail(ctx, email);
 
     if (!user) {
@@ -318,6 +337,7 @@ export const verifyUser = mutation({
       });
     }
 
+    await clearRateLimit(ctx, rateKey);
     const sessionToken = await createUserSession(ctx, user._id);
 
     return {

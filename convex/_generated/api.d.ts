@@ -19,6 +19,8 @@ import type * as invoicesInternal from "../invoicesInternal.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_constants from "../lib/constants.js";
 import type * as lib_escpos from "../lib/escpos.js";
+import type * as lib_postalCode from "../lib/postalCode.js";
+import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as menuItems from "../menuItems.js";
 import type * as mutations from "../mutations.js";
@@ -51,6 +53,8 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/constants": typeof lib_constants;
   "lib/escpos": typeof lib_escpos;
+  "lib/postalCode": typeof lib_postalCode;
+  "lib/rateLimit": typeof lib_rateLimit;
   "lib/storage": typeof lib_storage;
   menuItems: typeof menuItems;
   mutations: typeof mutations;

@@ -1,3 +1,5 @@
+import { matchesPostalCode } from '../../convex/lib/postalCode';
+
 interface DeliveryFee {
   postalCode: string;
   price: number;
@@ -28,49 +30,12 @@ export function calculateDeliveryFee(
   const cleanPostalCode = postalCode.trim();
 
   for (const fee of deliveryFees) {
-    const pattern = fee.postalCode.trim();
-    
-    // Check for range pattern (e.g., "57190-57199")
-    const rangeMatch = pattern.match(/^(\d+)-(\d+)$/);
-    if (rangeMatch) {
-      const [, start, end] = rangeMatch;
-      const postalNum = parseInt(cleanPostalCode, 10);
-      const startNum = parseInt(start, 10);
-      const endNum = parseInt(end, 10);
-      
-      if (!isNaN(postalNum) && postalNum >= startNum && postalNum <= endNum) {
-        return { 
-          price: fee.price, 
-          zoneName: fee.name, 
-          matched: true,
-          freeDeliveryThreshold: fee.freeDeliveryThreshold 
-        };
-      }
-      continue;
-    }
-    
-    // Check for wildcard pattern (e.g., "57*")
-    if (pattern.includes('*')) {
-      const regexPattern = pattern.replace(/\*/g, '.*');
-      const regex = new RegExp(`^${regexPattern}$`);
-      if (regex.test(cleanPostalCode)) {
-        return { 
-          price: fee.price, 
-          zoneName: fee.name, 
-          matched: true,
-          freeDeliveryThreshold: fee.freeDeliveryThreshold 
-        };
-      }
-      continue;
-    }
-    
-    // Exact match
-    if (pattern === cleanPostalCode) {
-      return { 
-        price: fee.price, 
-        zoneName: fee.name, 
+    if (matchesPostalCode(fee.postalCode, cleanPostalCode)) {
+      return {
+        price: fee.price,
+        zoneName: fee.name,
         matched: true,
-        freeDeliveryThreshold: fee.freeDeliveryThreshold 
+        freeDeliveryThreshold: fee.freeDeliveryThreshold,
       };
     }
   }

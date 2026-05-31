@@ -118,12 +118,15 @@ http.route({
   path: "/api/vapi/order",
   method: "POST",
   handler: httpAction(async (ctx, req) => {
+    // Fail closed: refuse if no key is configured, then require a match. An
+    // unset key must not leave order creation open to the public (CORS is *).
     const requiredKey = process.env.VAPI_API_KEY;
-    if (requiredKey) {
-      const provided = req.headers.get("X-Api-Key");
-      if (provided !== requiredKey) {
-        return json({ error: "Unauthorized" }, 401);
-      }
+    if (!requiredKey) {
+      return json({ error: "Endpoint non configuré" }, 503);
+    }
+    const provided = req.headers.get("X-Api-Key");
+    if (provided !== requiredKey) {
+      return json({ error: "Unauthorized" }, 401);
     }
 
     let body: any;

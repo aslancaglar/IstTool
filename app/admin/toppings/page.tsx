@@ -1,12 +1,23 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import ConfirmModal from '../../../src/components/admin/ConfirmModal';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import CrudFormModal from '../../../src/components/admin/CrudFormModal';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { useAdminAuth } from '../../../src/context/AdminAuthContext';
+import { useCrudResource } from '../../../src/hooks/useCrudResource';
+
+interface ToppingFormData {
+  toppingId: string;
+  name: string;
+  price: number;
+  categoryId: string;
+  displayOrder: number;
+  active: boolean;
+}
 
 export default function ToppingsPage() {
   const { adminToken } = useAdminAuth();
@@ -16,21 +27,31 @@ export default function ToppingsPage() {
   const updateTopping = useMutation(api.toppingsAdmin.updateTopping);
   const deleteTopping = useMutation(api.toppingsAdmin.removeTopping);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<Id<'toppings'> | null>(null);
-  const [formData, setFormData] = useState({
-    toppingId: '',
-    name: '',
-    price: 0,
-    categoryId: '',
-    displayOrder: 0,
-    active: true,
+  const crud = useCrudResource<ToppingFormData, any, Id<'toppings'>>({
+    adminToken,
+    emptyForm: () => ({
+      toppingId: `topping-${Date.now()}`,
+      name: '',
+      price: 0,
+      categoryId: toppingCategories?.[0]?.categoryId || '',
+      displayOrder: allToppings?.length || 0,
+      active: true,
+    }),
+    toForm: (topping) => ({
+      toppingId: topping.toppingId,
+      name: topping.name,
+      price: topping.price || 0,
+      categoryId: topping.categoryId,
+      displayOrder: topping.displayOrder || 0,
+      active: topping.active !== false,
+    }),
+    getId: (topping) => topping._id,
+    createMutation: createTopping,
+    updateMutation: updateTopping,
+    deleteMutation: deleteTopping,
   });
 
-  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppings'> | null }>({
-    isOpen: false,
-    id: null
-  });
+  const { formData, setFormData } = crud;
 
   const toppingsByCategory = useMemo(() => {
     const grouped: Record<string, any[]> = {};
@@ -39,59 +60,6 @@ export default function ToppingsPage() {
     });
     return grouped;
   }, [toppingCategories, allToppings]);
-
-  const handleCreate = () => {
-    setEditingId(null);
-    setFormData({
-      toppingId: `topping-${Date.now()}`,
-      name: '',
-      price: 0,
-      categoryId: toppingCategories?.[0]?.categoryId || '',
-      displayOrder: allToppings?.length || 0,
-      active: true,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleEdit = (topping: any) => {
-    setEditingId(topping._id);
-    setFormData({
-      toppingId: topping.toppingId,
-      name: topping.name,
-      price: topping.price || 0,
-      categoryId: topping.categoryId,
-      displayOrder: topping.displayOrder || 0,
-      active: topping.active !== false,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!adminToken) return;
-      if (editingId) {
-        await updateTopping({ id: editingId, ...formData, adminToken });
-      } else {
-        await createTopping({ ...formData, adminToken });
-      }
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error('Error saving topping:', error);
-    }
-  };
-
-  const handleDeleteClick = (id: Id<'toppings'>) => {
-    setConfirmModal({ isOpen: true, id });
-  };
-
-  const handleConfirmDelete = async () => {
-    if (confirmModal.id) {
-      if (!adminToken) return;
-      await deleteTopping({ id: confirmModal.id, adminToken });
-      setConfirmModal({ isOpen: false, id: null });
-    }
-  };
 
   return (
     <>
@@ -102,7 +70,7 @@ export default function ToppingsPage() {
             <p className="text-sm text-slate-500 mt-1">Gérez les garnitures et leurs catégories</p>
           </div>
           <button
-            onClick={handleCreate}
+            onClick={crud.openCreate}
             className="flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-xl hover:bg-red-700 transition font-semibold text-sm"
           >
             <Plus className="w-4 h-4" />
@@ -139,13 +107,13 @@ export default function ToppingsPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <button
-                              onClick={() => handleEdit(topping)}
+                              onClick={() => crud.openEdit(topping)}
                               className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDeleteClick(topping._id)}
+                              onClick={() => crud.requestDelete(topping._id)}
                               className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -164,108 +132,79 @@ export default function ToppingsPage() {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-slate-900">
-                {editingId ? 'Modifier la Garniture' : 'Ajouter une Garniture'}
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prix</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Catégorie</label>
-                <select
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                >
-                  {toppingCategories?.map((cat) => (
-                    <option key={cat._id} value={cat.categoryId}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Ordre d'affichage</label>
-                <input
-                  type="number"
-                  value={formData.displayOrder}
-                  onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) })}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="active"
-                  checked={formData.active}
-                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                  className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500"
-                />
-                <label htmlFor="active" className="text-sm font-medium text-slate-700">Actif</label>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold text-sm"
-                >
-                  {editingId ? 'Mettre à jour' : 'Créer'}
-                </button>
-              </div>
-            </form>
-          </div>
+      <CrudFormModal
+        isOpen={crud.isModalOpen}
+        onClose={crud.closeModal}
+        onSubmit={crud.submit}
+        title={crud.editingId ? 'Modifier la Garniture' : 'Ajouter une Garniture'}
+        submitLabel={crud.editingId ? 'Mettre à jour' : 'Créer'}
+      >
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nom</label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            required
+          />
         </div>
-      )}
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Prix</label>
+          <input
+            type="number"
+            step="0.01"
+            value={formData.price}
+            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Catégorie</label>
+          <select
+            value={formData.categoryId}
+            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            required
+          >
+            {toppingCategories?.map((cat) => (
+              <option key={cat._id} value={cat.categoryId}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Ordre d'affichage</label>
+          <input
+            type="number"
+            value={formData.displayOrder}
+            onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) })}
+            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            required
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="active"
+            checked={formData.active}
+            onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+            className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500"
+          />
+          <label htmlFor="active" className="text-sm font-medium text-slate-700">Actif</label>
+        </div>
+      </CrudFormModal>
 
       <ConfirmModal
-        isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-        onConfirm={handleConfirmDelete}
+        isOpen={crud.confirmModal.isOpen}
+        onClose={crud.cancelDelete}
+        onConfirm={crud.confirmDelete}
         title="Supprimer la Garniture"
         message="Êtes-vous sûr de vouloir supprimer cette garniture ? Cette action est irréversible."
       />

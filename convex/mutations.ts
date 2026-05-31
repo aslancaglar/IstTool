@@ -2,18 +2,7 @@ import { mutation, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { requireAdminSession, requireUserSession } from "./lib/auth";
-
-function matchesPostalCode(pattern: string, zipCode: string): boolean {
-  const p = pattern.trim();
-  if (p.includes("-")) {
-    const [start, end] = p.split("-").map((s) => s.trim());
-    return zipCode >= start && zipCode <= end;
-  }
-  if (p.endsWith("*")) {
-    return zipCode.startsWith(p.slice(0, -1));
-  }
-  return p === zipCode;
-}
+import { matchesPostalCode } from "./lib/postalCode";
 
 async function computeDeliveryInfo(
   ctx: any,

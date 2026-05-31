@@ -36,6 +36,15 @@ const nextConfig = {
         })),
     },
     async headers() {
+        // 'unsafe-eval' is only needed by Next.js HMR in development. Drop it in
+        // production to harden against XSS. ('unsafe-inline' is still required by
+        // Next's inline bootstrap on statically-prerendered pages.)
+        const isDev = process.env.NODE_ENV !== 'production';
+        const scriptSrc = [
+            "script-src 'self' 'unsafe-inline'",
+            ...(isDev ? ["'unsafe-eval'"] : []),
+            'https://js.stripe.com',
+        ].join(' ');
         return [
             {
                 source: '/(.*)',
@@ -49,7 +58,7 @@ const nextConfig = {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",
-                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+                            scriptSrc,
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                             "font-src 'self' https://fonts.gstatic.com",
                             "img-src 'self' data: blob: https:",

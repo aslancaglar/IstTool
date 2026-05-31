@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useAdminAuth } from "../context/AdminAuthContext";
 import {
     initQz,
     connectQz,
@@ -27,6 +28,7 @@ export interface UseQzPrinter {
 // Pass `enabled=false` to leave QZ dormant (e.g. when the admin chose PrintNode).
 export function useQzPrinter(enabled: boolean): UseQzPrinter {
     const signMessage = useAction(api.qz.signMessage);
+    const { adminToken } = useAdminAuth();
     const [status, setStatus] = useState<QzStatus>("idle");
     const [error, setError] = useState<string | null>(null);
     const [printers, setPrinters] = useState<string[]>([]);
@@ -37,7 +39,8 @@ export function useQzPrinter(enabled: boolean): UseQzPrinter {
         setError(null);
         try {
             if (!initRef.current) {
-                await initQz((msg) => signMessage({ message: msg }));
+                if (!adminToken) throw new Error("Authentification admin requise pour l'impression.");
+                await initQz((msg) => signMessage({ message: msg, adminToken }));
                 initRef.current = true;
             }
             await connectQz();
@@ -49,7 +52,7 @@ export function useQzPrinter(enabled: boolean): UseQzPrinter {
             setError(e?.message ?? String(e));
             setStatus("error");
         }
-    }, [signMessage]);
+    }, [signMessage, adminToken]);
 
     useEffect(() => {
         if (!enabled) {
