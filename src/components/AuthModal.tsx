@@ -391,6 +391,7 @@ export default function AuthModal() {
           </div>
         </div>
       </div>
+    </div>
 
       {error && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
