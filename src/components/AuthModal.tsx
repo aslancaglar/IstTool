@@ -262,7 +262,7 @@ export default function AuthModal() {
                     id="signup-email"
                     type="email"
                     name="email"
-                    autoComplete="email"
+                    autoComplete="username"
                     required
                     value={signupForm.email}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, email: e.target.value }))}
@@ -339,8 +339,6 @@ export default function AuthModal() {
               </div>
 
               <div className="space-y-3">
-                {/* Hidden username field so password manager doesn't grab the Zip Code as the username */}
-                <input type="email" name="username" autoComplete="username" value={signupForm.email} readOnly className="sr-only" aria-hidden="true" tabIndex={-1} />
                 <div className="space-y-2">
                   <label htmlFor="signup-password" className="text-sm font-bold text-gray-700">Mot de passe</label>
                   <div className="relative">
