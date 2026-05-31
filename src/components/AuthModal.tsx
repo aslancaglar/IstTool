@@ -197,6 +197,8 @@ export default function AuthModal() {
             </form>
           ) : (
             <form onSubmit={handleSignupSubmit} autoComplete="on" className="space-y-3">
+              {/* Hidden field at the top to ensure password managers correctly anchor the username, preventing them from hijacking the First Name field */}
+              <input type="email" name="username" autoComplete="username" value={signupForm.email} readOnly className="sr-only" aria-hidden="true" tabIndex={-1} />
               <div className="space-y-2">
                 <label htmlFor="signup-firstName" className="text-sm font-bold text-gray-700">Prénom</label>
                 <div className="relative">
@@ -317,8 +319,6 @@ export default function AuthModal() {
               </div>
 
               <div className="space-y-3">
-                {/* Hidden field to help password managers associate the email with the password */}
-                <input type="email" name="username" autoComplete="username" value={signupForm.email} readOnly className="hidden" />
                 <div className="space-y-2">
                   <label htmlFor="signup-password" className="text-sm font-bold text-gray-700">Mot de passe</label>
                   <div className="relative">
