@@ -4,16 +4,19 @@ import { createPortal } from 'react-dom';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Clock, X, Calendar } from 'lucide-react';
-import { isRestaurantOpen, getStatusMessage } from '../utils/isRestaurantOpen';
+import { isRestaurantOpen, getStatusMessage, formatOpensIn, type RestaurantStatus } from '../utils/isRestaurantOpen';
 
 interface OpenStatusProps {
     isScrolled?: boolean;
     variant?: 'desktop' | 'mobile';
 }
 
+// Show an "Ouvre dans …" countdown instead of "Fermé" when opening within this window.
+const OPENING_SOON_MINUTES = 120;
+
 export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
     const restaurantInfo = useQuery(api.restaurantInfo.get);
-    const [currentStatus, setCurrentStatus] = useState({ isOpen: false });
+    const [currentStatus, setCurrentStatus] = useState<RestaurantStatus>({ isOpen: false });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -38,6 +41,16 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
     }
 
     const statusMessage = getStatusMessage(currentStatus);
+    const openingSoon =
+        !currentStatus.isOpen &&
+        currentStatus.minutesUntilOpen != null &&
+        currentStatus.minutesUntilOpen <= OPENING_SOON_MINUTES;
+    const label = openingSoon ? formatOpensIn(currentStatus.minutesUntilOpen!) : statusMessage;
+    const clockColor = currentStatus.isOpen
+        ? 'text-green-400'
+        : openingSoon
+            ? 'text-amber-400'
+            : 'text-red-400';
 
     const Modal = () => {
         if (!isMounted) return null;
@@ -94,9 +107,9 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
                     onClick={() => setIsModalOpen(true)}
                     className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-black/20 hover:bg-black/30 transition-colors rounded-full backdrop-blur-md border border-white/20 shadow-sm active:scale-95"
                 >
-                    <Clock className={`w-4 h-4 ${currentStatus.isOpen ? 'text-green-400' : 'text-red-400'}`} />
+                    <Clock className={`w-4 h-4 ${clockColor}`} />
                     <span className="text-white font-bold uppercase tracking-wider text-xs">
-                        {statusMessage}
+                        {label}
                     </span>
                 </button>
                 <Modal />
@@ -111,9 +124,9 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
                 onClick={() => setIsModalOpen(true)}
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/10 hover:bg-black/20 transition-all active:scale-95"
             >
-                <Clock className={`w-3.5 h-3.5 ${currentStatus.isOpen ? 'text-green-400' : 'text-red-400'}`} />
+                <Clock className={`w-3.5 h-3.5 ${clockColor}`} />
                 <span className="text-white font-black uppercase tracking-widest text-[10px]">
-                    {statusMessage}
+                    {label}
                 </span>
             </button>
             <Modal />
