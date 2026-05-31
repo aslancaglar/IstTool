@@ -219,8 +219,6 @@ export default function AuthModal() {
                 }
               }}
             >
-              {/* Hidden field at the top to ensure password managers correctly anchor the username, preventing them from hijacking the First Name field */}
-              <input type="email" name="username" autoComplete="username" value={signupForm.email} readOnly className="sr-only" aria-hidden="true" tabIndex={-1} />
               <div className="space-y-2">
                 <label htmlFor="signup-firstName" className="text-sm font-bold text-gray-700">Prénom</label>
                 <div className="relative">
@@ -228,7 +226,7 @@ export default function AuthModal() {
                   <input
                     id="signup-firstName"
                     type="text"
-                    name="fname"
+                    name="firstName"
                     autoComplete="given-name"
                     required
                     value={signupForm.firstName}
@@ -245,7 +243,7 @@ export default function AuthModal() {
                   <input
                     id="signup-lastName"
                     type="text"
-                    name="lname"
+                    name="lastName"
                     autoComplete="family-name"
                     required
                     value={signupForm.lastName}
@@ -264,7 +262,7 @@ export default function AuthModal() {
                     id="signup-email"
                     type="email"
                     name="email"
-                    autoComplete="username email"
+                    autoComplete="email"
                     required
                     value={signupForm.email}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, email: e.target.value }))}
