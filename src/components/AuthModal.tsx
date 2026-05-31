@@ -204,7 +204,7 @@ export default function AuthModal() {
                   <input
                     id="signup-firstName"
                     type="text"
-                    name="given-name"
+                    name="fname"
                     autoComplete="given-name"
                     required
                     value={signupForm.firstName}
@@ -221,7 +221,7 @@ export default function AuthModal() {
                   <input
                     id="signup-lastName"
                     type="text"
-                    name="family-name"
+                    name="lname"
                     autoComplete="family-name"
                     required
                     value={signupForm.lastName}
@@ -240,7 +240,7 @@ export default function AuthModal() {
                     id="signup-email"
                     type="email"
                     name="email"
-                    autoComplete="email"
+                    autoComplete="username email"
                     required
                     value={signupForm.email}
                     onChange={(e) => setSignupForm((prev) => ({ ...prev, email: e.target.value }))}
