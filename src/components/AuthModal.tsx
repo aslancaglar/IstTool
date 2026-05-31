@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Mail, Lock, UserPlus, LogIn, User, Phone, MapPin, ArrowRight } from "lucide-react";
+import { X, Mail, Lock, UserPlus, LogIn, User, Phone, MapPin, ArrowRight, AlertCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useAuthModal } from "../context/AuthModalContext";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
@@ -122,7 +122,8 @@ export default function AuthModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+    <>
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <button
         type="button"
         aria-label="Fermer la fenêtre d'authentification"
@@ -185,13 +186,6 @@ export default function AuthModal() {
                 </div>
               </div>
 
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm font-medium flex items-start gap-2">
-                  <span className="mt-0.5 text-red-500 flex-shrink-0">⚠</span>
-                  <span className="break-words min-w-0">{error}</span>
-                </div>
-              )}
-
               <button
                 type="submit"
                 disabled={isLoading}
@@ -203,40 +197,38 @@ export default function AuthModal() {
             </form>
           ) : (
             <form onSubmit={handleSignupSubmit} autoComplete="on" className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <label htmlFor="signup-firstName" className="text-sm font-bold text-gray-700">Prénom</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      id="signup-firstName"
-                      type="text"
-                      name="given-name"
-                      autoComplete="given-name"
-                      required
-                      value={signupForm.firstName}
-                      onChange={(e) => setSignupForm((prev) => ({ ...prev, firstName: e.target.value }))}
-                      className="w-full bg-gray-50 border-none rounded-2xl p-3 pl-10 focus:ring-2 focus:ring-red-500 text-gray-900 text-sm"
-                      placeholder="Jean"
-                    />
-                  </div>
+              <div className="space-y-2">
+                <label htmlFor="signup-firstName" className="text-sm font-bold text-gray-700">Prénom</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    id="signup-firstName"
+                    type="text"
+                    name="given-name"
+                    autoComplete="given-name"
+                    required
+                    value={signupForm.firstName}
+                    onChange={(e) => setSignupForm((prev) => ({ ...prev, firstName: e.target.value }))}
+                    className="w-full bg-gray-50 border-none rounded-2xl p-3 pl-10 focus:ring-2 focus:ring-red-500 text-gray-900 text-sm"
+                    placeholder="Jean"
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="signup-lastName" className="text-sm font-bold text-gray-700">Nom</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      id="signup-lastName"
-                      type="text"
-                      name="family-name"
-                      autoComplete="family-name"
-                      required
-                      value={signupForm.lastName}
-                      onChange={(e) => setSignupForm((prev) => ({ ...prev, lastName: e.target.value }))}
-                      className="w-full bg-gray-50 border-none rounded-2xl p-3 pl-10 focus:ring-2 focus:ring-red-500 text-gray-900 text-sm"
-                      placeholder="Dupont"
-                    />
-                  </div>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="signup-lastName" className="text-sm font-bold text-gray-700">Nom</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    id="signup-lastName"
+                    type="text"
+                    name="family-name"
+                    autoComplete="family-name"
+                    required
+                    value={signupForm.lastName}
+                    onChange={(e) => setSignupForm((prev) => ({ ...prev, lastName: e.target.value }))}
+                    className="w-full bg-gray-50 border-none rounded-2xl p-3 pl-10 focus:ring-2 focus:ring-red-500 text-gray-900 text-sm"
+                    placeholder="Dupont"
+                  />
                 </div>
               </div>
 
@@ -363,14 +355,6 @@ export default function AuthModal() {
                 </div>
               </div>
 
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm font-medium flex items-start gap-2">
-                  <span className="mt-0.5 text-red-500 flex-shrink-0">⚠</span>
-                  <span className="break-words min-w-0">{error}</span>
-                </div>
-              )}
-
-
               <button
                 type="submit"
                 disabled={isLoading}
@@ -407,6 +391,31 @@ export default function AuthModal() {
           </div>
         </div>
       </div>
-    </div>
+
+      {error && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Fermer le message d'erreur"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setError("")}
+          />
+          <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 flex flex-col items-center text-center border border-gray-100">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+              <AlertCircle className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="font-display text-lg font-bold text-gray-900 mb-2">Erreur</h3>
+            <p className="text-sm text-gray-600 mb-6 break-words leading-relaxed">{error}</p>
+            <button
+              type="button"
+              onClick={() => setError("")}
+              className="w-full bg-red-500 text-white font-bold py-3 rounded-2xl hover:bg-red-600 transition-colors shadow-md active:scale-95"
+            >
+              D'accord
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
