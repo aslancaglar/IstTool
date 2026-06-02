@@ -8,8 +8,8 @@ import Contact from '../src/components/Contact';
 import AppLoaderWrapper from '../src/components/AppLoaderWrapper';
 
 export const metadata: Metadata = {
-    title: 'Mondo Pizza Metz | Pizzas Authentiques, Burgers & Livraison à Metz',
-    description: 'Mondo Pizza, la meilleure pizzeria de Metz ! Pizzas savoureuses à pâte fraîche, burgers, tacos, livraison rapide et click & collect. Commandez en ligne maintenant.',
+    title: 'Resto Istanbul Metz | Kebab, Pizzas Authentiques & Livraison à Metz',
+    description: 'Resto Istanbul, le meilleur restaurant de kebab et de pizza à Metz ! Plats savoureux, burgers, tacos, livraison rapide et click & collect. Commandez en ligne maintenant.',
     alternates: {
         canonical: 'https://mondopizza.fr',
     },

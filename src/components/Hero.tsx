@@ -11,8 +11,8 @@ export default function Hero() {
     >
       <div className="absolute inset-0">
         <Image
-          src="/MondoHeroImage-min.jpg"
-          alt="Mondo Pizza Background"
+          src="/cover33.jpg"
+          alt="Resto Istanbul Background"
           fill
           priority
           sizes="100vw"
@@ -24,13 +24,20 @@ export default function Hero() {
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <FadeIn delay={200} className="max-w-2xl text-left">
-            <h1 className="sr-only">Mondo Pizza, votre pizzeria authentique à Metz</h1>
-            <h2 style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-6xl md:text-7xl lg:text-[86px] tracking-wide leading-tight mb-3 text-white uppercase text-stroke-title">
-              Une bonne pizza,<br />
-              <span className="text-secondary-400">ça te dit ?</span>
+            <h1 className="sr-only">Resto Istanbul, votre restaurant de kebabs et de pizzas authentiques à Metz</h1>
+            <h2 
+              style={{ 
+                fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', 
+                fontWeight: 900, 
+                textShadow: '3px 3px 0px #000, 0 4px 10px rgba(0,0,0,0.5)'
+              }} 
+              className="text-6xl md:text-7xl lg:text-[86px] tracking-wide leading-tight mb-3 text-white uppercase"
+            >
+              Bienvenue chez<br />
+              Resto Istanbul !
             </h2>
-            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-lg leading-relaxed">
-              La pizzeria incontournable de Metz. Pizzas authentiques faites maison, livrées ou à emporter. On ne peut pas acheter le bonheur, mais nos pizzas, c'est à peu près la même chose.
+            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-xl leading-relaxed">
+              Installez-vous ou prenez votre repas à emporter et profitez de notre large choix de saveurs : kebabs traditionnels, tacos gourmands, assiettes copieuses et bien plus encore. Le point de rendez-vous des vrais gourmands.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -41,11 +48,11 @@ export default function Hero() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <a
-                href="tel:0387380945"
+                href="tel:0782814656"
                 className="font-display text-xl tracking-wide inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white text-white rounded-full hover:bg-white hover:text-dark-900 transition-all"
               >
                 <Phone className="w-5 h-5" />
-                03 87 38 09 45
+                07 82 81 46 56
               </a>
             </div>
           </FadeIn>

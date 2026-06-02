@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { OrderItem } from '../types/order';
 
-const STORAGE_KEY = 'mondo_pizza_order_items';
+const STORAGE_KEY = 'resto_istanbul_order_items';
 
 interface OrderContextType {
   orderItems: OrderItem[];

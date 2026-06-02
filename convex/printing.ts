@@ -131,7 +131,7 @@ export const printOrderReceipt = internalAction({
           title: `Order #${order._id.toString().slice(-6).toUpperCase()}`,
           contentType: "raw_base64",
           content,
-          source: "MondoPizza",
+          source: "RestoIstanbul",
         }),
       });
       if (!res.ok) {

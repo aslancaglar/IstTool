@@ -23,16 +23,16 @@ export default function Footer() {
               {/* Replaced img with next/image component */}
               <div className="relative w-[72px] h-[72px]">
                 <Image
-                  src="/LogoMondo.png"
-                  alt="Mondo Pizza Logo"
+                  src="/logo-istanbul-kebab.png"
+                  alt="Resto Istanbul Logo"
                   fill
                   className="object-contain"
                 />
               </div>
-              <span style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-3xl tracking-wider text-white">MONDO PIZZA</span>
+              <span style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-3xl tracking-wider text-white">RESTO ISTANBUL</span>
             </a>
             <p className="text-gray-400 mb-6 leading-relaxed">
-              Le vrai goût de la pizza authentique. Des saveurs exceptionnelles préparées avec passion depuis plus de 25 ans.
+              Le vrai goût de la cuisine authentique. Des saveurs exceptionnelles préparées avec passion depuis plus de 25 ans.
             </p>
             <div className="flex gap-3">
               {socialLinks.facebook && (
@@ -141,7 +141,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-700 pt-8">
           <p className="text-center text-gray-400">
-            &copy; {new Date().getFullYear()} <span style={{ fontFamily: '"Titan One", cursive' }}>Mondo Pizza</span>. Tous droits réservés.
+            &copy; {new Date().getFullYear()} <span style={{ fontFamily: '"Titan One", cursive' }}>Resto Istanbul</span>. Tous droits réservés.
           </p>
         </div>
       </div>

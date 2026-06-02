@@ -7,15 +7,15 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     title: {
-        default: 'Administration — Mondo Pizza',
-        template: '%s | Admin Mondo Pizza',
+        default: 'Administration — Resto Istanbul',
+        template: '%s | Admin Resto Istanbul',
     },
-    description: "Tableau de bord d'administration Mondo Pizza",
+    description: "Tableau de bord d'administration Resto Istanbul",
     manifest: '/admin-manifest.json',
     appleWebApp: {
         capable: true,
         statusBarStyle: 'black-translucent',
-        title: 'MondoAdmin',
+        title: 'IstanbulAdmin',
     },
     icons: {
         icon: '/pwaicon2.png',

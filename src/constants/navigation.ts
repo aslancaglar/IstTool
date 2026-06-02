@@ -8,6 +8,8 @@ export const MENU_CATEGORIES = [
   { id: 'enfants', label: 'Enfants', href: '#enfants' },
   { id: 'accompagnements', label: 'Accompagnements', href: '#accompagnements' },
   { id: 'boissons', label: 'Boissons', href: '#boissons' },
+  { id: 'bieres', label: 'Bières', href: '#bieres' },
+  { id: 'vins', label: 'Vins', href: '#vins' },
   { id: 'desserts', label: 'Desserts', href: '#desserts' },
 ] as const;
 
@@ -21,8 +23,8 @@ export const NAV_LINKS = [
 ] as const;
 
 export const CONTACT_INFO = {
-  phone: '03 87 38 09 45',
-  phoneHref: 'tel:0387380945',
+  phone: '07 82 81 46 56',
+  phoneHref: 'tel:0782814656',
   address: {
     street: '123 Rue Principale',
     city: 'Thionville',

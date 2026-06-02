@@ -24,8 +24,8 @@ export default function MenuPage() {
 
 
                         <Image
-                            src="/MondoHeroImage-min.jpg"
-                            alt="Mondo Pizza Background"
+                            src="/cover33.jpg"
+                            alt="Resto Istanbul Background"
                             fill
                             priority
                             sizes="100vw"

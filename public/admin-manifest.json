@@ -1,7 +1,7 @@
 {
-  "name": "Mondo Pizza — Administration",
-  "short_name": "MondoAdmin",
-  "description": "Tableau de bord d'administration Mondo Pizza",
+  "name": "Resto Istanbul — Administration",
+  "short_name": "IstanbulAdmin",
+  "description": "Tableau de bord d'administration Resto Istanbul",
   "start_url": "/admin",
   "scope": "/admin/",
   "display": "standalone",

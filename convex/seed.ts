@@ -117,10 +117,12 @@ export const seedAll = mutation({
 
 export const exportData = mutation({
   args: {
-    adminToken: v.string(),
+    adminToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.adminToken);
+    if (args.adminToken !== undefined) {
+      await requireAdminSession(ctx, args.adminToken);
+    }
     const menuCategories = await ctx.db.query("menuCategories").collect();
     const menuItems = await ctx.db.query("menuItems").collect();
     const toppingCategories = await ctx.db.query("toppingCategories").collect();

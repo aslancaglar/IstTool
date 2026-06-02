@@ -118,7 +118,7 @@ export function buildOrderReceipt(
   // Header — centered, double size
   push(ESC, 0x61, 0x01);
   push(GS, 0x21, 0x11);
-  line('MONDO PIZZA');
+  line('RESTO ISTANBUL');
   push(GS, 0x21, 0x00);
   if (info?.address) line(info.address);
   if (info?.phone) line(info.phone);

@@ -13,16 +13,16 @@ export default function About() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <FadeIn delay={100} direction="up">
             <p className="text-primary-600 font-extrabold mb-2">À Propos</p>
-            <h2 style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-4xl md:text-5xl lg:text-6xl text-gray-900 mb-6 leading-none tracking-wide uppercase">
-              L'Incontournable<br />
-              de la Pizza à Metz
+            <h2 style={{ fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl lg:text-6xl text-gray-900 mb-6 leading-none tracking-wide uppercase">
+              Resto Istanbul,<br />
+              votre Fast-Food à Toul
             </h2>
             <div className="text-lg text-gray-700 mb-8 leading-relaxed space-y-4">
-              <p>Bienvenue chez Mondo Pizza, l'adresse incontournable des amateurs de vraies pizzas à Metz !</p>
-              <p>Passionnés par l'artisanat et le goût, nous préparons chaque jour notre pâte à la main et sélectionnons des ingrédients frais et de qualité pour vous offrir des recettes authentiques et généreuses. De l'incontournable Margherita à nos créations maison exclusives, chaque bouchée est une véritable invitation à la gourmandise.</p>
-              <p>Savourez nos pizzas où vous le souhaitez :</p>
-              <p>🍕 À emporter : Passez votre commande et venez nous rendre visite. Votre pizza vous attendra toute chaude, prête à être dévorée !</p>
-              <p>🛵 En livraison : Vous préférez rester confortablement chez vous ? Profitez de notre service de livraison rapide pour déguster vos plats préférés directement à votre porte, partout dans Metz.</p>
+              <p>Bienvenue chez Resto Istanbul, l'adresse incontournable des amateurs de kebabs et de street food à Toul !</p>
+              <p>Passionnés par le goût et la qualité, nous préparons chaque jour nos viandes et sélectionnons des crudités fraîches pour vous offrir des recettes authentiques et généreuses. De l'incontournable kebab traditionnel à nos tacos, dürüms, paninis, burgers et assiettes complètes, chaque bouchée est une véritable invitation à la gourmandise.</p>
+              <p>Savourez nos spécialités comme il vous plaît :</p>
+              <p>🍽️ Sur place : Installez-vous confortablement dans notre salle et profitez d'un repas convivial, servi rapidement et avec le sourire.</p>
+              <p>🥡 À emporter : Vous préférez manger chez vous ou au bureau ? Passez votre commande et venez nous rendre visite. Votre repas vous attendra tout chaud, prêt à être dévoré !</p>
             </div>
 
 
@@ -31,7 +31,7 @@ export default function About() {
           <FadeIn delay={300} direction="up" className="relative flex justify-center lg:justify-end">
             <div className="relative w-full max-w-md aspect-[4/5] min-h-[360px]">
               <Image
-                src="/13692768-min.jpg"
+                src="/about-us.jpg"
                 alt="Notre cuisine"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"

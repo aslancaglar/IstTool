@@ -670,8 +670,8 @@ export default function OrderSuccessPage({ params }: { params: { orderId: string
                 <div className="text-center">
                     <p className="text-xs text-slate-400">
                         Un souci ? Appelez-nous au{' '}
-                        <a href="tel:0387380945" className="font-bold text-slate-600 hover:underline">
-                            03 87 38 09 45
+                        <a href="tel:0782814656" className="font-bold text-slate-600 hover:underline">
+                            07 82 81 46 56
                         </a>
                     </p>
                 </div>

@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -11,12 +11,20 @@ const OUTPUT_FILE_TS = join(PROJECT_ROOT, 'convex/data/snapshot.ts');
 console.log('🚀 Exporting current database state from Convex...');
 
 try {
-    // Call the exportData query using Convex CLI
-    const resultString = execSync('npx convex run seed:exportData', {
-        encoding: 'utf-8',
+    const tempFile = join(PROJECT_ROOT, 'temp_export.json');
+    
+    // Call the exportData query using Convex CLI and redirect output to file
+    execSync(`npx convex run seed:exportData > "${tempFile}"`, {
         cwd: PROJECT_ROOT,
-        maxBuffer: 1024 * 1024 * 10, // 10MB
     });
+
+    const resultString = readFileSync(tempFile, 'utf-8');
+    
+    try {
+        unlinkSync(tempFile);
+    } catch (e) {
+        // Ignore
+    }
 
     // Function to strip ANSI escape codes
     const stripAnsi = (str) => str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
@@ -37,7 +45,6 @@ try {
         }
     } catch (e) {
         console.error('Debug: Cleaned raw output starting with:', cleanResult.substring(0, 500));
-        // Try to find the largest valid JSON block if simple extraction fails
         throw new Error('Failed to parse JSON from Convex output. ' + e.message);
     }
 

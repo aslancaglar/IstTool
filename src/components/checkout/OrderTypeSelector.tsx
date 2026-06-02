@@ -31,7 +31,7 @@ export default function OrderTypeSelector({
                     Commandes temporairement indisponibles
                 </p>
                 <p className="text-amber-600 text-sm">
-                    Veuillez nous appeler au <a href="tel:0387380945" className="font-bold underline">03 87 38 09 45</a> pour passer commande.
+                    Veuillez nous appeler au <a href="tel:0782814656" className="font-bold underline">07 82 81 46 56</a> pour passer commande.
                 </p>
             </div>
         );

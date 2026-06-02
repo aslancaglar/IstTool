@@ -68,8 +68,8 @@ export default function Header() {
           <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
             <div className="flex-shrink-0 flex items-center relative w-[180px] sm:w-[195px] h-[75px]">
               <Image
-                src="/LogoMondo.png"
-                alt="Mondo Pizza"
+                src="/logo-istanbul-kebab.png"
+                alt="Resto Istanbul"
                 fill
                 priority
                 className="object-contain object-left drop-shadow-xl"
@@ -159,11 +159,11 @@ export default function Header() {
             </div>
 
             <a
-              href="tel:0387380945"
+              href="tel:0782814656"
               className="inline-flex items-center gap-3 px-6 py-2.5 bg-white text-primary-700 font-display text-lg tracking-widest rounded-full transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 uppercase"
             >
               <Phone className="w-4 h-4 text-primary-600" />
-              03 87 38 09 45
+              07 82 81 46 56
             </a>
           </div>
 
@@ -291,12 +291,12 @@ export default function Header() {
             )}
 
             <a
-              href="tel:0387380945"
+              href="tel:0782814656"
               onClick={() => setIsMenuOpen(false)}
               className="mt-2 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-primary-600 font-display text-lg tracking-wide rounded-full hover:bg-gray-100 transition-colors uppercase"
             >
               <Phone className="w-5 h-5" />
-              03 87 38 09 45
+              07 82 81 46 56
             </a>
           </nav>
         </div>

@@ -37,8 +37,8 @@ export default function Loader({ onFinished }: { onFinished: () => void }) {
                 <div className={`loader-logo ${progress > 0 ? 'loader-logo-visible' : ''}`}>
                     <div className="relative w-32 md:w-40 h-32 md:h-40 mb-8 animate-pulse">
                         <Image
-                            src="/LogoMondo.png"
-                            alt="Mondo Pizza"
+                            src="/logo-istanbul-kebab.png"
+                            alt="Resto Istanbul"
                             fill
                             priority
                             className="object-contain"
@@ -48,7 +48,7 @@ export default function Loader({ onFinished }: { onFinished: () => void }) {
 
                 {/* Tagline */}
                 <p className={`loader-tagline ${progress > 30 ? 'loader-tagline-visible' : ''}`}>
-                    Le vrai goût de la pizza authentique
+                    Le vrai goût de la cuisine authentique
                 </p>
 
                 {/* Progress Bar */}

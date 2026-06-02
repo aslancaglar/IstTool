@@ -23,7 +23,7 @@ export default function Contact() {
         <FadeIn>
           <div className="text-center mb-16">
             <p className="text-primary-700 font-semibold mb-2">Contactez-nous</p>
-            <h2 style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-4xl md:text-5xl text-gray-900 mb-6 tracking-wide uppercase">
+            <h2 style={{ fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl text-gray-900 mb-6 tracking-wide uppercase">
               Nous Trouver
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -91,14 +91,14 @@ export default function Contact() {
           <FadeIn delay={400} className="relative w-full h-[400px] lg:h-[500px]">
             <div className="absolute inset-0 bg-gray-200 rounded-3xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
               <iframe
-                src={`https://maps.google.com/maps?width=100%25&height=600&hl=fr&q=${encodeURIComponent(restaurantInfo.address + ' Mondo Pizza')}&t=&z=15&ie=UTF8&iwloc=B&output=embed`}
+                src={`https://maps.google.com/maps?width=100%25&height=600&hl=fr&q=${encodeURIComponent(restaurantInfo.address + ' Resto Istanbul')}&t=&z=15&ie=UTF8&iwloc=B&output=embed`}
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Mondo Pizza Restaurant Location"
+                title="Resto Istanbul Restaurant Location"
               />
             </div>
           </FadeIn>
