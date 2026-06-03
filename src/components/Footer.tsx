@@ -29,7 +29,7 @@ export default function Footer() {
                   className="object-contain"
                 />
               </div>
-              <span style={{ fontFamily: '"Titan One", cursive' }} className="font-normal text-3xl tracking-wider text-white">RESTO ISTANBUL</span>
+              <span className="font-display text-3xl tracking-wider text-white">RESTO ISTANBUL</span>
             </a>
             <p className="text-gray-400 mb-6 leading-relaxed">
               Le vrai goût de la cuisine authentique. Des saveurs exceptionnelles préparées avec passion depuis plus de 25 ans.
