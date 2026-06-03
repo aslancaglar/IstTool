@@ -62,8 +62,8 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 sm:py-3 px-2 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto pl-3 pr-2 sm:px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 sm:py-3 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto pl-4 pr-3 sm:px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
         <div className="flex items-center justify-between h-16 relative">
           <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
             <div className="flex-shrink-0 flex items-center relative w-[155px] sm:w-[195px] h-[60px] sm:h-[75px]">
