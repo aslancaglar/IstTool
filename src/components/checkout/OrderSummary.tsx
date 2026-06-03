@@ -109,14 +109,14 @@ export default function OrderSummary({
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
             {/* Header */}
-            <div className="p-5 bg-gradient-to-r from-orange-50 to-rose-50 border-b border-orange-100 flex items-center justify-between">
+            <div className="p-5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center shadow">
+                    <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center shadow-sm">
                         <ShoppingBag className="w-3.5 h-3.5 text-white" />
                     </div>
                     Mon Panier
                 </h2>
-                <span className="bg-white px-2.5 py-1 rounded-full text-xs font-bold text-orange-500 border border-orange-100 shadow-sm">
+                <span className="bg-white px-2.5 py-1 rounded-full text-xs font-bold text-primary-600 border border-gray-200 shadow-sm">
                     {orderItems.length} article{orderItems.length > 1 ? 's' : ''}
                 </span>
             </div>
@@ -124,19 +124,19 @@ export default function OrderSummary({
             {/* Items */}
             <div className="p-5 space-y-3 max-h-[38vh] overflow-y-auto no-scrollbar">
                 {orderItems.map((item) => (
-                    <div key={item.id} className="flex gap-3 group p-2 rounded-xl hover:bg-orange-50/50 transition-colors">
-                        <div className="w-12 h-12 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100 group-hover:border-orange-200 transition-colors shadow-sm">
+                    <div key={item.id} className="flex gap-3 group p-2 rounded-xl hover:bg-gray-50 transition-colors">
+                        <div className="w-12 h-12 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200 group-hover:border-primary-200 transition-colors shadow-sm">
                             {item.image ? (
                                 <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.name} />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                    <ShoppingBag className="w-5 h-5 text-gray-200" />
+                                    <ShoppingBag className="w-5 h-5 text-gray-300" />
                                 </div>
                             )}
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col justify-center">
                             <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-bold text-gray-800 truncate group-hover:text-orange-600 transition-colors">{item.name}</p>
+                                <p className="text-sm font-bold text-gray-800 truncate group-hover:text-primary-600 transition-colors">{item.name}</p>
                                 <p className="text-sm font-black text-gray-900 shrink-0">{formatPrice(item.totalPrice)}</p>
                             </div>
                             {item.selectedToppings && item.selectedToppings.length > 0 && (
@@ -145,7 +145,7 @@ export default function OrderSummary({
                                         <div key={`${topping.toppingId}-${idx}`} className="flex items-center justify-between gap-2">
                                             <span className="text-[10px] text-gray-400 truncate">+ {topping.name}</span>
                                             {typeof topping.price === 'number' && topping.price > 0 && (
-                                                <span className="text-[10px] text-orange-400 font-bold shrink-0">+{topping.price.toFixed(2)}€</span>
+                                                <span className="text-[10px] text-primary-500 font-bold shrink-0">+{topping.price.toFixed(2)}€</span>
                                             )}
                                         </div>
                                     ))}
@@ -261,7 +261,7 @@ export default function OrderSummary({
             )}
 
             {/* Totals */}
-            <div className="p-5 bg-gradient-to-b from-gray-50/50 to-orange-50/30 border-t border-gray-100 space-y-2.5">
+            <div className="p-5 bg-gray-50 border-t border-gray-100 space-y-2.5">
                 {orderType === 'delivery' && freeDeliveryThreshold && freeDeliveryThreshold > 0 && (
                     <div className="mb-2">
                         <FreeDeliveryBar currentTotal={subtotal} threshold={freeDeliveryThreshold} />
@@ -342,49 +342,49 @@ export default function OrderSummary({
                     if (lines.length === 0) return null;
 
                     return (
-                        <div className="pt-2 mt-1 border-t border-gray-100">
-                            <div className="bg-slate-50/70 border border-slate-200/40 rounded-xl p-3.5 space-y-2.5">
-                                <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <div className="pt-2 mt-1 border-t border-gray-200">
+                            <div className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-2.5 shadow-sm">
+                                <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                                     <div className="flex items-center gap-1.5">
-                                        <Calculator className="w-3.5 h-3.5 text-slate-400/80" />
+                                        <Calculator className="w-3.5 h-3.5 text-gray-400" />
                                         <span>Taxes Incluses (TVA)</span>
                                     </div>
-                                    <span className="text-[9px] bg-slate-200/50 text-slate-500 px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-tight">Détail</span>
+                                    <span className="text-[9px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-tight">Détail</span>
                                 </div>
                                 
                                 <div className="space-y-2 pt-0.5">
                                     {lines.map(({ rate, ht, tva }) => (
                                         <div key={rate} className="flex items-center justify-between text-xs">
-                                            <span className="font-medium text-slate-500 bg-white border border-slate-200/60 rounded px-1.5 py-0.5 text-[10px]">
+                                            <span className="font-medium text-gray-500 bg-gray-50 border border-gray-100 rounded px-1.5 py-0.5 text-[10px]">
                                                 Taux {rate}%
                                             </span>
-                                            <div className="flex items-center gap-3 text-slate-500 font-mono">
-                                                <span>HT <strong className="font-semibold text-slate-700">{formatPrice(ht)}</strong></span>
-                                                <span className="text-slate-200">|</span>
-                                                <span>TVA <strong className="font-semibold text-orange-600">{formatPrice(tva)}</strong></span>
+                                            <div className="flex items-center gap-3 text-gray-500 font-mono">
+                                                <span>HT <strong className="font-semibold text-gray-700">{formatPrice(ht)}</strong></span>
+                                                <span className="text-gray-300">|</span>
+                                                <span>TVA <strong className="font-semibold text-primary-600">{formatPrice(tva)}</strong></span>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                                 
-                                <div className="pt-2 border-t border-slate-200/60 flex justify-between text-xs font-semibold text-slate-500">
-                                    <span className="text-slate-400">Total Hors Taxes (HT)</span>
-                                    <span className="font-mono text-slate-700">{formatPrice(totalHT)}</span>
+                                <div className="pt-2 border-t border-gray-100 flex justify-between text-xs font-semibold text-gray-500">
+                                    <span className="text-gray-400">Total Hors Taxes (HT)</span>
+                                    <span className="font-mono text-gray-700">{formatPrice(totalHT)}</span>
                                 </div>
                             </div>
                         </div>
                     );
                 })()}
 
-                <div className="pt-4 mt-2 border-t border-orange-100 flex items-end justify-between">
+                <div className="pt-4 mt-2 border-t border-gray-200 flex items-end justify-between">
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 mb-0.5">Total à payer</p>
-                        <p className="text-3xl font-black bg-gradient-to-r from-orange-500 to-rose-600 bg-clip-text text-transparent tabular-nums">
+                        <p className="text-3xl font-black text-gray-900 tabular-nums">
                             {formatPrice(displayTotal)}
                         </p>
                     </div>
                     {orderType === 'delivery' && shownDeliveryFee === 0 && isDeliverySupported && (
-                        <span className="text-[10px] bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 px-2.5 py-1.5 rounded-full font-bold uppercase border border-emerald-200 mb-1">
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2.5 py-1.5 rounded-full font-bold uppercase border border-emerald-100 mb-1">
                             Livraison Offerte
                         </span>
                     )}

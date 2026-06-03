@@ -39,8 +39,8 @@ export default function OrderTypeSelector({
 
     return (
         <div>
-            <h3 className="font-bold text-gray-700 text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-                <span className="w-1 h-4 rounded-full bg-gradient-to-b from-orange-400 to-rose-500 inline-block" />
+            <h3 className="font-bold text-gray-800 text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-4 rounded-full bg-primary-500 inline-block" />
                 Mode de récupération
             </h3>
             <div className={`grid grid-cols-1 ${
@@ -49,30 +49,30 @@ export default function OrderTypeSelector({
                     : visibleCount === 2
                         ? 'sm:grid-cols-2'
                         : 'sm:grid-cols-1'
-            } gap-3`}>
+            } gap-4`}>
                 {pickupEnabled && (
                     <button
                         onClick={() => setOrderType('pickup')}
-                        className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 overflow-hidden bg-white ${
+                        className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 bg-white ${
                             orderType === 'pickup'
-                                ? 'border-orange-300 ring-4 ring-orange-500/10'
-                                : 'border-gray-100 hover:border-orange-200'
+                                ? 'border-primary-500 ring-4 ring-primary-500/10 shadow-md shadow-primary-500/10'
+                                : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
                         }`}
                     >
-                        <div className={`p-3 rounded-xl transition-all duration-300 ${
+                        <div className={`p-3 rounded-full transition-all duration-300 ${
                             orderType === 'pickup'
-                                ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-lg shadow-orange-500/25'
-                                : 'bg-gray-100 text-gray-400 group-hover:bg-orange-100 group-hover:text-orange-500'
+                                ? 'bg-primary-50 text-primary-600'
+                                : 'bg-gray-100 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-500'
                         }`}>
                             <Store className="w-6 h-6" />
                         </div>
                         <div className="text-center">
-                            <span className={`block font-bold text-sm uppercase tracking-wide ${orderType === 'pickup' ? 'text-orange-600' : 'text-gray-600'}`}>
+                            <span className={`block font-bold text-sm tracking-wide ${orderType === 'pickup' ? 'text-primary-700' : 'text-gray-700'}`}>
                                 À emporter
                             </span>
                         </div>
                         {orderType === 'pickup' && (
-                            <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-sm">
+                            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shadow-sm">
                                 <Check className="w-3 h-3 text-white" strokeWidth={3} />
                             </div>
                         )}
@@ -83,21 +83,21 @@ export default function OrderTypeSelector({
                     <button
                         onClick={() => setOrderType('delivery')}
                         disabled={isDefaultAddressOutsideZone}
-                        className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 overflow-hidden bg-white ${
+                        className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 bg-white ${
                             orderType === 'delivery'
-                                ? 'border-teal-300 ring-4 ring-teal-500/10'
-                                : 'border-gray-100 hover:border-teal-200'
+                                ? 'border-primary-500 ring-4 ring-primary-500/10 shadow-md shadow-primary-500/10'
+                                : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
                         } ${isDefaultAddressOutsideZone ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                     >
-                        <div className={`p-3 rounded-xl transition-all duration-300 ${
+                        <div className={`p-3 rounded-full transition-all duration-300 ${
                             orderType === 'delivery'
-                                ? 'bg-gradient-to-br from-teal-400 to-cyan-500 text-white shadow-lg shadow-teal-500/25'
-                                : 'bg-gray-100 text-gray-400 group-hover:bg-teal-100 group-hover:text-teal-500'
+                                ? 'bg-primary-50 text-primary-600'
+                                : 'bg-gray-100 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-500'
                         }`}>
                             <Truck className="w-6 h-6" />
                         </div>
                         <div className="text-center">
-                            <span className={`block font-bold text-sm uppercase tracking-wide ${orderType === 'delivery' ? 'text-teal-600' : 'text-gray-600'}`}>
+                            <span className={`block font-bold text-sm tracking-wide ${orderType === 'delivery' ? 'text-primary-700' : 'text-gray-700'}`}>
                                 Livraison
                             </span>
                             {isDefaultAddressOutsideZone && (
@@ -105,7 +105,7 @@ export default function OrderTypeSelector({
                             )}
                         </div>
                         {orderType === 'delivery' && (
-                            <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shadow-sm">
+                            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shadow-sm">
                                 <Check className="w-3 h-3 text-white" strokeWidth={3} />
                             </div>
                         )}
@@ -115,26 +115,26 @@ export default function OrderTypeSelector({
                 {dineInEnabled && (
                     <button
                         onClick={() => setOrderType('dine_in')}
-                        className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 overflow-hidden bg-white ${
+                        className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 bg-white ${
                             orderType === 'dine_in'
-                                ? 'border-blue-300 ring-4 ring-blue-500/10'
-                                : 'border-gray-100 hover:border-blue-200'
+                                ? 'border-primary-500 ring-4 ring-primary-500/10 shadow-md shadow-primary-500/10'
+                                : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
                         }`}
                     >
-                        <div className={`p-3 rounded-xl transition-all duration-300 ${
+                        <div className={`p-3 rounded-full transition-all duration-300 ${
                             orderType === 'dine_in'
-                                ? 'bg-gradient-to-br from-blue-400 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                                : 'bg-gray-100 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-500'
+                                ? 'bg-primary-50 text-primary-600'
+                                : 'bg-gray-100 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-500'
                         }`}>
                             <Utensils className="w-6 h-6" />
                         </div>
                         <div className="text-center">
-                            <span className={`block font-bold text-sm uppercase tracking-wide ${orderType === 'dine_in' ? 'text-blue-600' : 'text-gray-600'}`}>
+                            <span className={`block font-bold text-sm tracking-wide ${orderType === 'dine_in' ? 'text-primary-700' : 'text-gray-700'}`}>
                                 Sur Place
                             </span>
                         </div>
                         {orderType === 'dine_in' && (
-                            <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-sm">
+                            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shadow-sm">
                                 <Check className="w-3 h-3 text-white" strokeWidth={3} />
                             </div>
                         )}

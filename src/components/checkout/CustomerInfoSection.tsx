@@ -61,10 +61,10 @@ export default function CustomerInfoSection({
         return (
             <div className="space-y-5 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between">
-                    <SectionTitle icon={User} label="Mes informations" color="bg-gradient-to-br from-violet-400 to-purple-500" />
+                    <SectionTitle icon={User} label="Mes informations" color="bg-primary-500" />
                     <button
                         onClick={() => setIsEditingInfo(true)}
-                        className="flex items-center gap-1.5 text-xs font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-full transition-colors border border-violet-200"
+                        className="flex items-center gap-1.5 text-xs font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-full transition-colors border border-primary-200"
                     >
                         <Edit2 className="w-3 h-3" />
                         Modifier
@@ -72,24 +72,24 @@ export default function CustomerInfoSection({
                 </div>
 
                 <div className={`grid grid-cols-1 ${orderType === 'dine_in' ? '' : 'md:grid-cols-2'} gap-4`}>
-                    <div className="p-5 bg-white rounded-2xl border border-violet-100 hover:border-violet-200 transition-colors">
-                        <p className="text-[10px] text-violet-400 font-black uppercase tracking-[0.2em] mb-3">Contact</p>
+                    <div className="p-5 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors shadow-sm">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Contact</p>
                         <p className="font-bold text-gray-900 text-base">{customer.firstName} {customer.lastName}</p>
                         <div className="mt-2 space-y-1.5">
                             <p className="text-sm text-gray-500 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary-400 shrink-0" />
                                 {customer.email}
                             </p>
                             <p className="text-sm text-gray-500 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary-400 shrink-0" />
                                 {customer.phone}
                             </p>
                         </div>
                     </div>
 
                     {orderType !== 'dine_in' && (
-                        <div className="p-5 bg-white rounded-2xl border border-teal-100 hover:border-teal-200 transition-colors">
-                            <p className="text-[10px] text-teal-500 font-black uppercase tracking-[0.2em] mb-3">
+                        <div className="p-5 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors shadow-sm">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">
                                 {orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse'}
                             </p>
                             {address.street ? (
@@ -97,16 +97,16 @@ export default function CustomerInfoSection({
                                     <p className="font-bold text-gray-900 text-base">{address.street}</p>
                                     <p className="text-sm text-gray-500">{address.zipCode} {address.city}</p>
                                     {address.instructions && (
-                                        <div className="mt-3 p-2.5 bg-white/70 rounded-xl border border-dashed border-teal-200">
-                                            <p className="text-[10px] text-teal-500 font-bold uppercase mb-1">Note pour le livreur:</p>
+                                        <div className="mt-3 p-2.5 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Note pour le livreur:</p>
                                             <p className="text-xs text-gray-600 italic leading-relaxed">"{address.instructions}"</p>
                                         </div>
                                     )}
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-4">
-                                    <MapPin className="w-7 h-7 text-teal-300 mb-2" />
-                                    <p className="text-sm text-teal-600 font-bold uppercase tracking-wider">
+                                    <MapPin className="w-7 h-7 text-gray-300 mb-2" />
+                                    <p className="text-sm text-gray-400 font-bold uppercase tracking-wider">
                                         {orderType === 'delivery' ? 'Adresse manquante' : 'Non renseignée'}
                                     </p>
                                 </div>
@@ -118,12 +118,12 @@ export default function CustomerInfoSection({
         );
     }
 
-    const inputClass = "w-full bg-white border-2 border-gray-100 rounded-xl p-3.5 focus:ring-2 focus:ring-violet-400 focus:border-violet-300 outline-none transition-all font-medium text-sm placeholder:text-gray-300 text-gray-800";
+    const inputClass = "w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 outline-none transition-all font-medium text-sm placeholder:text-gray-400 text-gray-800";
 
     return (
         <div className="space-y-6 animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-center justify-between">
-                <SectionTitle icon={User} label="Édition des informations" color="bg-gradient-to-br from-violet-400 to-purple-500" />
+                <SectionTitle icon={User} label="Édition des informations" color="bg-primary-500" />
                 {user && (
                     <button
                         onClick={() => setIsEditingInfo(false)}
@@ -134,9 +134,9 @@ export default function CustomerInfoSection({
                 )}
             </div>
 
-            <div className="p-5 bg-white rounded-2xl border border-violet-100 space-y-4">
+            <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField label="Prénom" color="text-violet-500">
+                    <InputField label="Prénom" color="text-gray-600">
                         <input
                             type="text"
                             value={customer.firstName}
@@ -145,7 +145,7 @@ export default function CustomerInfoSection({
                             placeholder="Ex: Jean"
                         />
                     </InputField>
-                    <InputField label="Nom" color="text-violet-500">
+                    <InputField label="Nom" color="text-gray-600">
                         <input
                             type="text"
                             value={customer.lastName}
@@ -156,7 +156,7 @@ export default function CustomerInfoSection({
                     </InputField>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField label="Email" color="text-violet-500">
+                    <InputField label="Email" color="text-gray-600">
                         <input
                             type="email"
                             value={customer.email}
@@ -165,7 +165,7 @@ export default function CustomerInfoSection({
                             placeholder="votre@email.com"
                         />
                     </InputField>
-                    <InputField label="Téléphone" color="text-violet-500">
+                    <InputField label="Téléphone" color="text-gray-600">
                         <input
                             type="tel"
                             value={customer.phone}
@@ -182,10 +182,10 @@ export default function CustomerInfoSection({
                     <SectionTitle
                         icon={MapPin}
                         label={orderType === 'delivery' ? 'Adresse de livraison' : 'Adresse (Optionnelle)'}
-                        color="bg-gradient-to-br from-teal-400 to-cyan-500"
+                        color="bg-primary-500"
                     />
-                    <div className="p-5 bg-white rounded-2xl border border-teal-100 space-y-4">
-                        <InputField label="Rue et Numéro" color="text-teal-600">
+                    <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                        <InputField label="Rue et Numéro" color="text-gray-600">
                             <input
                                 type="text"
                                 value={address.street}
@@ -195,7 +195,7 @@ export default function CustomerInfoSection({
                             />
                         </InputField>
                         <div className="grid grid-cols-2 gap-4">
-                            <InputField label="Ville" color="text-teal-600">
+                            <InputField label="Ville" color="text-gray-600">
                                 <input
                                     type="text"
                                     value={address.city}
@@ -204,7 +204,7 @@ export default function CustomerInfoSection({
                                     placeholder="Ville"
                                 />
                             </InputField>
-                            <InputField label="Code Postal" color="text-teal-600">
+                            <InputField label="Code Postal" color="text-gray-600">
                                 <input
                                     type="text"
                                     value={address.zipCode}
@@ -227,7 +227,7 @@ export default function CustomerInfoSection({
                             </div>
                         )}
 
-                        <InputField label="Instructions (Optionnel)" color="text-teal-600">
+                        <InputField label="Instructions (Optionnel)" color="text-gray-600">
                             <textarea
                                 value={address.instructions}
                                 onChange={e => setAddress({ ...address, instructions: e.target.value })}
@@ -243,7 +243,7 @@ export default function CustomerInfoSection({
                 {user && (
                     <button
                         onClick={() => setIsEditingInfo(false)}
-                        className="flex-1 px-6 py-3.5 rounded-xl border-2 border-gray-100 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-all"
+                        className="flex-1 px-6 py-3.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 hover:text-gray-900 transition-all"
                     >
                         Annuler
                     </button>
@@ -251,7 +251,7 @@ export default function CustomerInfoSection({
                 <button
                     onClick={handleSaveUserInfo}
                     disabled={!customer.firstName || !customer.lastName || !customer.phone || (orderType === 'delivery' && (!address.street || !isDeliverySupported))}
-                    className="flex-[2] bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25 text-white font-bold py-3.5 rounded-xl hover:from-violet-600 hover:to-purple-700 hover:scale-[1.02] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2.5 text-sm"
+                    className="flex-[2] bg-primary-600 shadow-md shadow-primary-500/20 text-white font-bold py-3.5 rounded-xl hover:bg-primary-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2.5 text-sm"
                 >
                     <CheckCircle2 className="w-4.5 h-4.5" />
                     Enregistrer les informations

@@ -52,10 +52,10 @@ export default function PaymentSection({
         <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
                 <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-indigo-400 to-violet-500">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-primary-500">
                         <CreditCard className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <span className="font-bold text-gray-700 text-sm uppercase tracking-wider">Mode de paiement</span>
+                    <span className="font-bold text-gray-800 text-sm uppercase tracking-wider">Mode de paiement</span>
                 </div>
 
                 <div className={`grid gap-3 ${bothEnabled ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
@@ -66,27 +66,27 @@ export default function PaymentSection({
                                 setShowStripeForm(false);
                                 setStripeError(null);
                             }}
-                            className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-start gap-3 overflow-hidden ${
+                            className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-start gap-3 bg-white ${
                                 paymentMethod === 'cash'
-                                    ? 'border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 ring-4 ring-amber-500/10'
-                                    : 'border-gray-100 bg-white hover:border-amber-200 hover:bg-amber-50/30'
+                                    ? 'border-primary-500 ring-4 ring-primary-500/10 shadow-md shadow-primary-500/10'
+                                    : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
                             }`}
                         >
-                            <div className={`p-3 rounded-xl transition-all duration-300 ${
+                            <div className={`p-3 rounded-full transition-all duration-300 ${
                                 paymentMethod === 'cash'
-                                    ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-500/25'
-                                    : 'bg-gray-100 text-gray-400 group-hover:bg-amber-100 group-hover:text-amber-500'
+                                    ? 'bg-primary-50 text-primary-600'
+                                    : 'bg-gray-100 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-500'
                             }`}>
                                 <Wallet className="w-5 h-5" />
                             </div>
                             <div className="text-left">
-                                <p className={`font-bold text-sm uppercase tracking-wide ${paymentMethod === 'cash' ? 'text-amber-700' : 'text-gray-700'}`}>
+                                <p className={`font-bold text-sm tracking-wide ${paymentMethod === 'cash' ? 'text-primary-700' : 'text-gray-700'}`}>
                                     Espèces / Carte
                                 </p>
                                 <p className="text-[12px] font-medium text-gray-500 mt-0.5">Paiement à la récupération</p>
                             </div>
                             {paymentMethod === 'cash' && (
-                                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shadow-sm">
                                     <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                                 </div>
                             )}
@@ -100,27 +100,27 @@ export default function PaymentSection({
                                 setStripeError(null);
                                 if (!showStripeForm && !clientSecret) createPaymentIntent();
                             }}
-                            className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col items-start gap-3 overflow-hidden ${
+                            className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-start gap-3 bg-white ${
                                 paymentMethod === 'stripe'
-                                    ? 'border-indigo-300 bg-gradient-to-br from-indigo-50 to-violet-50 ring-4 ring-indigo-500/10'
-                                    : 'border-gray-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/30'
+                                    ? 'border-primary-500 ring-4 ring-primary-500/10 shadow-md shadow-primary-500/10'
+                                    : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
                             }`}
                         >
-                            <div className={`p-3 rounded-xl transition-all duration-300 ${
+                            <div className={`p-3 rounded-full transition-all duration-300 ${
                                 paymentMethod === 'stripe'
-                                    ? 'bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
-                                    : 'bg-gray-100 text-gray-400 group-hover:bg-indigo-100 group-hover:text-indigo-500'
+                                    ? 'bg-primary-50 text-primary-600'
+                                    : 'bg-gray-100 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-500'
                             }`}>
                                 <Lock className="w-5 h-5" />
                             </div>
                             <div className="text-left">
-                                <p className={`font-bold text-sm uppercase tracking-wide ${paymentMethod === 'stripe' ? 'text-indigo-700' : 'text-gray-700'}`}>
+                                <p className={`font-bold text-sm tracking-wide ${paymentMethod === 'stripe' ? 'text-primary-700' : 'text-gray-700'}`}>
                                     Carte Bancaire
                                 </p>
                                 <p className="text-[12px] font-medium text-gray-500 mt-0.5">Cryptage sécurisé par Stripe</p>
                             </div>
                             {paymentMethod === 'stripe' && (
-                                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shadow-sm">
                                     <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                                 </div>
                             )}
@@ -188,7 +188,7 @@ export default function PaymentSection({
                 <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || (paymentMethod === 'stripe' && !showStripeForm)}
-                    className={`w-full bg-gradient-to-r from-orange-500 to-rose-600 shadow-xl shadow-orange-500/25 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-3 text-base ${
+                    className={`w-full bg-primary-600 shadow-md shadow-primary-500/20 text-white font-bold py-4 rounded-2xl hover:bg-primary-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-3 text-base ${
                         isSubmitting ? 'animate-pulse' : ''
                     }`}
                 >

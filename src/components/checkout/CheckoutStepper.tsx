@@ -21,50 +21,52 @@ export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
     };
 
     return (
-        <div className="flex items-center bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-white overflow-x-auto no-scrollbar">
-            {steps.map((step, idx) => {
-                const active = currentStep === step.id;
-                const completed = isCompleted(step.id);
-                return (
-                    <React.Fragment key={step.id}>
-                        <div className="flex items-center gap-3 shrink-0">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                                completed
-                                    ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/25'
-                                    : active
-                                    ? 'bg-gradient-to-br from-orange-400 to-rose-500 shadow-lg shadow-orange-500/25 scale-110'
-                                    : 'bg-gray-100'
-                            }`}>
-                                {completed
-                                    ? <Check className="w-5 h-5 text-white" strokeWidth={3} />
-                                    : <step.icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-400'}`} />
-                                }
-                            </div>
-                            <div className="flex flex-col">
-                                <span className={`text-[10px] font-bold uppercase tracking-widest leading-none mb-0.5 ${
-                                    active ? 'text-orange-500' : completed ? 'text-emerald-500' : 'text-gray-400'
+        <div className="flex justify-center items-center py-4 mb-4">
+            <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar px-4">
+                {steps.map((step, idx) => {
+                    const active = currentStep === step.id;
+                    const completed = isCompleted(step.id);
+                    return (
+                        <React.Fragment key={step.id}>
+                            <div className="flex items-center gap-3 shrink-0">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
+                                    completed
+                                        ? 'bg-primary-600 border-primary-600 shadow-md shadow-primary-500/20 text-white'
+                                        : active
+                                        ? 'bg-white border-primary-500 shadow-lg shadow-primary-500/20 text-primary-600 scale-105'
+                                        : 'bg-white border-gray-200 text-gray-400'
                                 }`}>
-                                    Étape {step.number}
-                                </span>
-                                <span className={`text-sm font-bold whitespace-nowrap ${
-                                    active ? 'text-gray-900' : 'text-gray-400'
-                                }`}>
-                                    {step.label}
-                                </span>
+                                    {completed
+                                        ? <Check className="w-5 h-5" strokeWidth={3} />
+                                        : <step.icon className="w-4 h-4" strokeWidth={active ? 2.5 : 2} />
+                                    }
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className={`text-[10px] font-semibold uppercase tracking-widest leading-none mb-0.5 ${
+                                        active ? 'text-primary-600' : completed ? 'text-gray-500' : 'text-gray-400'
+                                    }`}>
+                                        Étape {step.number}
+                                    </span>
+                                    <span className={`text-sm font-bold whitespace-nowrap ${
+                                        active ? 'text-gray-900' : 'text-gray-500'
+                                    }`}>
+                                        {step.label}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        {idx < steps.length - 1 && (
-                            <div className="flex-1 mx-4 min-w-[20px] h-1 rounded-full overflow-hidden bg-gray-100">
-                                <div className={`h-full rounded-full transition-all duration-500 ${
-                                    currentStep === 'payment'
-                                        ? 'w-full bg-gradient-to-r from-emerald-400 to-teal-400'
-                                        : 'w-0'
-                                }`} />
-                            </div>
-                        )}
-                    </React.Fragment>
-                );
-            })}
+                            {idx < steps.length - 1 && (
+                                <div className="flex-1 w-12 sm:w-24 h-[2px] bg-gray-200 relative overflow-hidden rounded-full">
+                                    <div className={`absolute top-0 left-0 h-full transition-all duration-500 ${
+                                        currentStep === 'payment'
+                                            ? 'w-full bg-primary-500'
+                                            : 'w-0'
+                                    }`} />
+                                </div>
+                            )}
+                        </React.Fragment>
+                    );
+                })}
+            </div>
         </div>
     );
 }

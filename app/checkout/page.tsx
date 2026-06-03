@@ -446,7 +446,7 @@ export default function CheckoutPage() {
                         {/* Left column */}
                         <div className="w-full lg:flex-1 flex flex-col gap-4">
                             {/* 1. Mode de récupération */}
-                            <div className="bg-orange-50/70 rounded-2xl shadow-sm border border-orange-100 p-5 md:p-6">
+                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-8 relative overflow-hidden">
                                 <OrderTypeSelector
                                     orderType={orderType}
                                     setOrderType={setOrderType}
@@ -461,7 +461,7 @@ export default function CheckoutPage() {
                             </div>
 
                             {/* 3. Mes informations */}
-                            <div className="bg-violet-50/70 rounded-2xl shadow-sm border border-violet-100 p-5 md:p-6">
+                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-8 relative overflow-hidden">
                                 <CustomerInfoSection
                                     user={user}
                                     customer={customer}
@@ -480,7 +480,7 @@ export default function CheckoutPage() {
                             <button
                                 onClick={() => goToPayment()}
                                 disabled={continueDisabled}
-                                className="hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all shadow-xl shadow-orange-500/20 disabled:opacity-30 disabled:scale-100 items-center justify-center gap-3 text-base"
+                                className="hidden lg:flex w-full bg-primary-600 text-white font-bold py-4 rounded-2xl hover:bg-primary-700 hover:scale-[1.01] transition-all shadow-xl shadow-primary-500/20 disabled:opacity-30 disabled:scale-100 items-center justify-center gap-3 text-base"
                             >
                                 Continuer vers le paiement
                                 <ArrowLeft className="w-5 h-5 rotate-180" />
@@ -488,7 +488,7 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* Right sidebar — desktop only */}
-                        <aside className="hidden lg:block lg:w-[380px] shrink-0 lg:sticky lg:top-24">
+                        <aside className="hidden lg:block lg:w-[400px] shrink-0 lg:sticky lg:top-24">
                             <OrderSummary {...orderSummaryProps} />
                         </aside>
                     </div>
@@ -499,14 +499,14 @@ export default function CheckoutPage() {
                             {/* Back button — top, visible */}
                             <button
                                 onClick={goBackToDetails}
-                                className="flex items-center gap-2.5 self-start bg-white/80 backdrop-blur-sm border border-white shadow-sm text-gray-600 font-semibold text-sm px-4 py-2.5 rounded-xl hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all"
+                                className="flex items-center gap-2.5 self-start bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-full hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 transition-all"
                             >
                                 <ArrowLeft className="w-4 h-4" />
                                 Retour aux détails
                             </button>
 
                             {/* Payment method + conditional forms */}
-                            <div className="bg-emerald-50/60 rounded-2xl shadow-sm border border-emerald-100 p-5 md:p-6">
+                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-8 relative overflow-hidden">
                                 <PaymentSection
                                     paymentMethod={paymentMethod}
                                     setPaymentMethod={setPaymentMethod}
@@ -549,7 +549,7 @@ export default function CheckoutPage() {
                                         isStripeProcessing ||
                                         (paymentMethod === 'stripe' && !showStripeForm)
                                     }
-                                    className={`hidden lg:flex w-full bg-gradient-to-r from-orange-500 to-rose-600 shadow-xl shadow-orange-500/25 text-white font-bold py-4 rounded-2xl hover:from-orange-600 hover:to-rose-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${(isSubmitting || isStripeProcessing) ? 'animate-pulse' : ''}`}
+                                    className={`hidden lg:flex w-full bg-primary-600 shadow-xl shadow-primary-500/25 text-white font-bold py-4 rounded-2xl hover:bg-primary-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${(isSubmitting || isStripeProcessing) ? 'animate-pulse' : ''}`}
                                 >
                                     {(isSubmitting || isStripeProcessing)
                                         ? <><ShoppingBag className="w-5 h-5 animate-bounce" /> Traitement en cours...</>
@@ -562,7 +562,7 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* Sidebar — desktop only */}
-                        <aside className="hidden lg:block lg:w-[380px] shrink-0 lg:sticky lg:top-24">
+                        <aside className="hidden lg:block lg:w-[400px] shrink-0 lg:sticky lg:top-24">
                             <OrderSummary {...orderSummaryProps} />
                         </aside>
                     </div>
@@ -571,7 +571,7 @@ export default function CheckoutPage() {
 
             {/* Fixed bottom CTA — mobile only, step 2 */}
             {step === 'payment' && (
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3">
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-4 bg-white/80 backdrop-blur-md border-t border-gray-100">
                     {(() => {
                         const processing = isSubmitting || isStripeProcessing;
                         const stripeReady = paymentMethod === 'stripe' && showStripeForm;
@@ -587,9 +587,9 @@ export default function CheckoutPage() {
                                 onClick={onClick}
                                 className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
                                     processing
-                                        ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 animate-pulse'
+                                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 animate-pulse'
                                         : ready
-                                        ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 active:scale-[0.98]'
+                                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 active:scale-[0.98]'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             >
@@ -607,13 +607,13 @@ export default function CheckoutPage() {
 
             {/* Fixed bottom CTA — mobile only, step 1 */}
             {step === 'details' && (
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3">
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-4 bg-white/80 backdrop-blur-md border-t border-gray-100">
                     <button
                         onClick={() => !continueDisabled && goToPayment()}
                         className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
                             continueDisabled
                                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/25 active:scale-[0.98]'
+                                : 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 active:scale-[0.98]'
                         }`}
                     >
                         Continuer vers le paiement
@@ -624,7 +624,7 @@ export default function CheckoutPage() {
 
             {/* Toast Notifications */}
             {toast?.show && (
-                <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 ${toast.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white' : 'bg-gradient-to-r from-red-500 to-rose-600 text-white'}`}>
+                <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
                     <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
                         <ShoppingBag className="w-4 h-4" />
                     </div>
