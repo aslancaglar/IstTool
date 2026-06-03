@@ -52,6 +52,21 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
             ? 'text-amber-400'
             : 'text-red-400';
 
+    // Handle body scroll lock and escape key
+    useEffect(() => {
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsModalOpen(false);
+        };
+        if (isModalOpen) {
+            window.addEventListener('keydown', handleEscape);
+            document.body.style.overflow = 'hidden';
+        }
+        return () => {
+            window.removeEventListener('keydown', handleEscape);
+            document.body.style.overflow = '';
+        };
+    }, [isModalOpen]);
+
     const Modal = () => {
         if (!isMounted) return null;
         return createPortal(
@@ -66,7 +81,7 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
                             className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-200"
                         >
                             <div className="flex items-center justify-between p-5 border-b border-gray-100">
-                                <h3 className="text-xl font-display font-bold text-gray-900 flex items-center gap-2">
+                                <h3 className="text-xl font-display font-bold text-gray-900 flex items-center gap-2 uppercase tracking-wide">
                                     <Calendar className="w-5 h-5 text-primary-600" />
                                     Horaires d'ouverture
                                 </h3>
@@ -79,16 +94,32 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
                             </div>
                             <div className="p-5">
                                 <div className="space-y-3">
-                                    {restaurantInfo.hours?.map((schedule, i) => (
-                                        <div key={i} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0 last:pb-0">
-                                            <span className="font-medium text-gray-700 capitalize">
-                                                {schedule.day}
-                                            </span>
-                                            <span className="text-gray-600 font-mono text-sm">
-                                                {schedule.time || "Fermé"}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {restaurantInfo.hours?.map((schedule, i) => {
+                                        const timeParts = schedule.time 
+                                            ? schedule.time.split(/\s*(?:et|&|,)\s*/i) 
+                                            : ["Fermé"];
+                                        return (
+                                            <div key={i} className="flex justify-between items-start py-2.5 border-b border-gray-50 last:border-0 last:pb-0 gap-4">
+                                                <span className="font-medium text-gray-700 capitalize shrink-0 pt-0.5">
+                                                    {schedule.day}
+                                                </span>
+                                                <div className="flex flex-col items-end gap-1">
+                                                    {timeParts.map((part, index) => (
+                                                        <span 
+                                                            key={index} 
+                                                            className={`font-mono text-sm ${
+                                                                part.toLowerCase() === 'fermé' 
+                                                                    ? 'text-red-600 font-semibold' 
+                                                                    : 'text-gray-600'
+                                                            }`}
+                                                        >
+                                                            {part}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
