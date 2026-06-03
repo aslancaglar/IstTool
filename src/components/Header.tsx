@@ -78,7 +78,7 @@ export default function Header() {
           </Link>
           
           {/* Spacer to preserve layout flow since logo is now absolute */}
-          <div className="w-[155px] sm:w-[195px] shrink-0 h-full" />
+          <div className="w-[130px] sm:w-[195px] shrink-0 h-full" />
 
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
