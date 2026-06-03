@@ -176,7 +176,7 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
 
 
         {!allMenuItems ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-md">
                 <Skeleton className="h-48 w-full" />
@@ -196,7 +196,7 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
             <p className="text-gray-600">Aucun article dans cette catégorie</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
             {filteredItems.map((item, index) => {
               const promo = getItemPromo(item);
               return (

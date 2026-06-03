@@ -36,6 +36,21 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
         return () => clearInterval(interval);
     }, [restaurantInfo]);
 
+    // Handle body scroll lock and escape key
+    useEffect(() => {
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsModalOpen(false);
+        };
+        if (isModalOpen) {
+            window.addEventListener('keydown', handleEscape);
+            document.body.style.overflow = 'hidden';
+        }
+        return () => {
+            window.removeEventListener('keydown', handleEscape);
+            document.body.style.overflow = '';
+        };
+    }, [isModalOpen]);
+
     if (!restaurantInfo) {
         return null;
     }
@@ -51,21 +66,6 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
         : openingSoon
             ? 'text-amber-400'
             : 'text-red-400';
-
-    // Handle body scroll lock and escape key
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setIsModalOpen(false);
-        };
-        if (isModalOpen) {
-            window.addEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'hidden';
-        }
-        return () => {
-            window.removeEventListener('keydown', handleEscape);
-            document.body.style.overflow = '';
-        };
-    }, [isModalOpen]);
 
     const Modal = () => {
         if (!isMounted) return null;
