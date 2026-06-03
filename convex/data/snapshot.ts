@@ -940,6 +940,27 @@ export const snapshot: any = {
       "displayOrder": 1,
       "menuItemId": "jx7b8j8t3hrhg6g8n5zsm7t4d987w81f",
       "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1780435162866.9998,
+      "_id": "js7fhp4w7j05bbc666zgqgd05x87xvc8",
+      "displayOrder": 0,
+      "menuItemId": "jx7fyvkj08c5k9j3v042rxsr8h87xvbb",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1780435162867,
+      "_id": "js711ygtxd23kh8ne1jghemwb587x93v",
+      "displayOrder": 1,
+      "menuItemId": "jx7fyvkj08c5k9j3v042rxsr8h87xvbb",
+      "toppingCategoryId": "viandes"
+    },
+    {
+      "_creationTime": 1780469859231.077,
+      "_id": "js743rb93tnrx1ad4xks77agrn87yekw",
+      "displayOrder": 0,
+      "menuItemId": "jx7cbftmshhs6tzv8jkh11v4h587w8hm",
+      "toppingCategoryId": "sauces"
     }
   ],
   "menuItems": [
@@ -967,9 +988,10 @@ export const snapshot: any = {
       "categories": [
         "sandwichs"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 1,
-      "image": "",
+      "image": "/sandwich/maxiKebab.jpg",
       "inStock": true,
       "isUpsell": false,
       "name": "Maxi Kebab",
@@ -983,12 +1005,13 @@ export const snapshot: any = {
       "categories": [
         "sandwichs"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 2,
-      "image": "",
+      "image": "/sandwich/sandwichAmericain2.jpg",
       "inStock": true,
       "isUpsell": false,
-      "name": "Américain",
+      "name": "Sandwich Américain",
       "popular": false,
       "price": 8
     },
@@ -999,12 +1022,13 @@ export const snapshot: any = {
       "categories": [
         "sandwichs"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 3,
-      "image": "",
+      "image": "/sandwich/sandwichKofte.jpg",
       "inStock": true,
       "isUpsell": false,
-      "name": "Kofte",
+      "name": "Sandwich Kofte",
       "popular": false,
       "price": 7.5
     },
@@ -1015,12 +1039,13 @@ export const snapshot: any = {
       "categories": [
         "sandwichs"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 4,
-      "image": "",
+      "image": "/sandwich/sandwichPoulet.jpg",
       "inStock": true,
       "isUpsell": false,
-      "name": "Poulet",
+      "name": "Sandwich Poulet",
       "popular": false,
       "price": 7.5
     },
@@ -1031,12 +1056,13 @@ export const snapshot: any = {
       "categories": [
         "sandwichs"
       ],
+      "categoryOrders": [],
       "description": "",
       "displayOrder": 5,
-      "image": "",
+      "image": "/sandwich/sandwichSucuk.jpg",
       "inStock": true,
       "isUpsell": false,
-      "name": "Saucisse Turque",
+      "name": "Sandwich Saucisse Turque",
       "popular": false,
       "price": 7.5
     },
@@ -1063,12 +1089,13 @@ export const snapshot: any = {
       "categories": [
         "sandwichs"
       ],
+      "categoryOrders": [],
       "description": "1 Steak 100g + Cheddar",
       "displayOrder": 7,
       "image": "",
       "inStock": true,
       "isUpsell": false,
-      "name": "Istanbul",
+      "name": "Sandwich Istanbul",
       "popular": false,
       "price": 7.5
     },
@@ -1079,12 +1106,13 @@ export const snapshot: any = {
       "categories": [
         "sandwichs"
       ],
+      "categoryOrders": [],
       "description": "2 Steaks 100g + 2 Cheddars",
       "displayOrder": 8,
       "image": "",
       "inStock": true,
       "isUpsell": false,
-      "name": "Double Istanbul",
+      "name": "Sandwich Double Istanbul",
       "popular": false,
       "price": 9.5
     },

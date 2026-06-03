@@ -12,7 +12,7 @@ interface OpenStatusProps {
 }
 
 // Show an "Ouvre dans …" countdown instead of "Fermé" when opening within this window.
-const OPENING_SOON_MINUTES = 120;
+const OPENING_SOON_MINUTES = 30;
 
 export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
     const restaurantInfo = useQuery(api.restaurantInfo.get);

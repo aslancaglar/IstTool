@@ -14,6 +14,7 @@ export interface RestaurantStatus {
     isOpen: boolean;
     /** When closed: minutes until the next opening (if one is found within 7 days). */
     minutesUntilOpen?: number;
+    nextOpeningTime?: Date;
     isHoliday?: boolean;
     holidayName?: string;
 }
@@ -71,14 +72,14 @@ function activeHolidayOn(date: Date, holidays: Holiday[] | undefined): Holiday |
 }
 
 /**
- * Minutes from now until the next opening, scanning today's remaining ranges and
- * the next 7 days. Skips holidays and "Fermé" days. Returns undefined if none found.
+ * Scans today's remaining ranges and the next 7 days to find the next opening time.
+ * Skips holidays and "Fermé" days. Returns undefined if none found.
  */
-function computeMinutesUntilOpen(
+function computeNextOpening(
     hours: RestaurantHours[],
     holidays: Holiday[] | undefined,
     now: Date,
-): number | undefined {
+): { minutesUntilOpen: number; nextOpeningTime: Date } | undefined {
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
     for (let dayOffset = 0; dayOffset <= 7; dayOffset++) {
@@ -90,7 +91,12 @@ function computeMinutesUntilOpen(
         const ranges = parseTimeRanges(findDayHours(hours, date)?.time);
         for (const range of ranges) {
             const delta = dayOffset * MINUTES_PER_DAY + range.start - currentMinutes;
-            if (delta > 0) return delta; // first positive is the soonest (days & ranges ascending)
+            if (delta > 0) {
+                const nextOpeningTime = new Date(now);
+                nextOpeningTime.setDate(now.getDate() + dayOffset);
+                nextOpeningTime.setHours(Math.floor(range.start / 60), range.start % 60, 0, 0);
+                return { minutesUntilOpen: delta, nextOpeningTime };
+            }
         }
     }
     return undefined;
@@ -98,7 +104,7 @@ function computeMinutesUntilOpen(
 
 /**
  * Checks if the restaurant is currently open based on working hours and holidays.
- * When closed, also reports how many minutes remain until the next opening.
+ * When closed, also reports how many minutes and when the next opening is.
  */
 export function isRestaurantOpen(
     hours: RestaurantHours[] | undefined,
@@ -123,11 +129,12 @@ export function isRestaurantOpen(
         }
     }
 
-    const minutesUntilOpen = computeMinutesUntilOpen(hours, holidays, now);
+    const nextOpening = computeNextOpening(hours, holidays, now);
 
     return {
         isOpen: false,
-        minutesUntilOpen,
+        minutesUntilOpen: nextOpening?.minutesUntilOpen,
+        nextOpeningTime: nextOpening?.nextOpeningTime,
         isHoliday: !!todayHoliday,
         holidayName: todayHoliday?.name,
     };
@@ -140,7 +147,32 @@ export function getStatusMessage(status: RestaurantStatus): string {
     if (status.isHoliday) {
         return status.holidayName ? `Fermé (${status.holidayName})` : 'Fermé (Vacances)';
     }
-    return status.isOpen ? 'Ouvert' : 'Fermé';
+    if (status.isOpen) {
+        return 'Ouvert';
+    }
+    if (status.nextOpeningTime) {
+        const now = new Date();
+        const next = new Date(status.nextOpeningTime);
+
+        const hours = String(next.getHours()).padStart(2, '0');
+        const minutes = String(next.getMinutes()).padStart(2, '0');
+        const timeStr = `${hours}:${minutes}`;
+
+        // Check day difference (normalized to midnight)
+        const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const nextDay = new Date(next.getFullYear(), next.getMonth(), next.getDate());
+        const diffDays = Math.round((nextDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            return `Ouvre à ${timeStr}`;
+        } else if (diffDays === 1) {
+            return `Ouvre demain à ${timeStr}`;
+        } else {
+            const dayName = next.toLocaleDateString('fr-FR', { weekday: 'long' });
+            return `Ouvre ${dayName} à ${timeStr}`;
+        }
+    }
+    return 'Fermé';
 }
 
 /** "Ouvre dans 30 min" / "Ouvre dans 1h" / "Ouvre dans 1h30". */
