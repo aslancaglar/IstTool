@@ -17,7 +17,7 @@ export default function Footer() {
       <div className="absolute inset-0 bg-dark-950" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           <div>
             <a href="#accueil" className="flex items-center gap-5 mb-6">
               {/* Replaced img with next/image component */}
@@ -87,7 +87,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-display font-normal text-white mb-6">Horaires</h3>
             {hours.length > 0 ? (
               <ul className="space-y-3">
