@@ -62,11 +62,11 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 sm:py-3 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 sm:py-3 px-2 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto pl-3 pr-2 sm:px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
         <div className="flex items-center justify-between h-16 relative">
           <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
-            <div className="flex-shrink-0 flex items-center relative w-[180px] sm:w-[195px] h-[75px]">
+            <div className="flex-shrink-0 flex items-center relative w-[130px] sm:w-[195px] h-[55px] sm:h-[75px]">
               <Image
                 src="/logo-istanbul-kebab.png"
                 alt="Resto Istanbul"
@@ -78,7 +78,7 @@ export default function Header() {
           </Link>
           
           {/* Spacer to preserve layout flow since logo is now absolute */}
-          <div className="w-[180px] sm:w-[195px] shrink-0 h-full" />
+          <div className="w-[130px] sm:w-[195px] shrink-0 h-full" />
 
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
@@ -167,39 +167,33 @@ export default function Header() {
             </a>
           </div>
 
-          {/* Mobile Status - Always Visible - Absolutely Centered */}
-          <div className="lg:hidden absolute left-1/2 -translate-x-1/2 pointer-events-none">
-            <div className="pointer-events-auto">
-              <OpenStatus isScrolled={isScrolled} variant="mobile" />
-            </div>
-          </div>
-
-          {/* Mobile Menu Button Only - Cart removed (handled by MobileStickyCart) */}
-          <div className="lg:hidden flex items-center gap-2">
+          {/* Mobile Menu Button & Status - Cart removed (handled by MobileStickyCart) */}
+          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2">
+            <OpenStatus isScrolled={isScrolled} variant="mobile" />
             {user ? (
               <Link
                 href="/account"
-                className="p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
                 aria-label="Mon Compte"
               >
-                <User className="w-6 h-6" />
+                <User className="w-5 h-5 sm:w-6 sm:h-6" />
               </Link>
             ) : (
               <button
                 type="button"
                 onClick={() => openLoginModal(pathname || '/')}
-                className="p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
                 aria-label="Se connecter"
               >
-                <User className="w-6 h-6" />
+                <User className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             )}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+              className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
               aria-label="Toggle menu"
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
         </div>
