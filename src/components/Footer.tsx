@@ -17,7 +17,7 @@ export default function Footer() {
       <div className="absolute inset-0 bg-dark-950" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr] gap-8 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           <div>
             <a href="#accueil" className="flex items-center gap-5 mb-6">
               {/* Replaced img with next/image component */}
@@ -96,7 +96,7 @@ export default function Footer() {
                     <span className="block font-medium text-gray-300">
                       {item.day}
                     </span>
-                    <span className="whitespace-nowrap">{item.time}</span>
+                    <span>{item.time}</span>
                   </li>
                 ))}
               </ul>
