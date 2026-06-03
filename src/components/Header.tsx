@@ -167,17 +167,17 @@ export default function Header() {
             </a>
           </div>
 
-          {/* Mobile Status - Centered in the remaining space between logo and account icon */}
-          <div className="lg:hidden flex-1 flex justify-center items-center px-1 min-w-0">
+          {/* Mobile Status - flex-1 centers between logo spacer and account icon */}
+          <div className="lg:hidden flex-1 flex justify-center items-center min-w-0">
             <OpenStatus isScrolled={isScrolled} variant="mobile" />
           </div>
 
-          {/* Mobile Menu Button Only - Cart removed (handled by MobileStickyCart) */}
-          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Account icon - right boundary of the centering area */}
+          <div className="lg:hidden shrink-0 pr-9">
             {user ? (
               <Link
                 href="/account"
-                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10 flex items-center justify-center"
                 aria-label="Mon Compte"
               >
                 <User className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -192,14 +192,16 @@ export default function Header() {
                 <User className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             )}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
-            </button>
           </div>
+
+          {/* Hamburger - absolutely anchored to right edge, excluded from centering */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden absolute right-1 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+          </button>
         </div>
       </div>
 
