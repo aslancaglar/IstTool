@@ -167,40 +167,42 @@ export default function Header() {
             </a>
           </div>
 
-          {/* Mobile Status - flex-1 centers between logo spacer and account icon */}
-          <div className="lg:hidden flex-1 flex justify-center items-center min-w-0">
-            <OpenStatus isScrolled={isScrolled} variant="mobile" />
+          {/* Mobile: Opening hours - absolutely centered between logo right edge and account icon center.
+               Badge container: left=130px (logo spacer end), right=56px (account icon center from right).
+               Center of container = (130 + totalWidth - 56) / 2 = midpoint between logo and account. */}
+          <div className="lg:hidden absolute inset-y-0 left-[130px] right-[56px] flex items-center justify-center pointer-events-none z-0">
+            <div className="pointer-events-auto">
+              <OpenStatus isScrolled={isScrolled} variant="mobile" />
+            </div>
           </div>
 
-          {/* Account icon - right boundary of the centering area */}
-          <div className="lg:hidden shrink-0 pr-9">
-            {user ? (
-              <Link
-                href="/account"
-                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10 flex items-center justify-center"
-                aria-label="Mon Compte"
-              >
-                <User className="w-5 h-5 sm:w-6 sm:h-6" />
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => openLoginModal(pathname || '/')}
-                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
-                aria-label="Se connecter"
-              >
-                <User className="w-5 h-5 sm:w-6 sm:h-6" />
-              </button>
-            )}
-          </div>
+          {/* Mobile: Account icon - absolute, right edge at 40px → center at 56px from right */}
+          {user ? (
+            <Link
+              href="/account"
+              className="lg:hidden absolute right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors text-white hover:bg-white/10"
+              aria-label="Mon Compte"
+            >
+              <User className="w-5 h-5" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => openLoginModal(pathname || '/')}
+              className="lg:hidden absolute right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors text-white hover:bg-white/10"
+              aria-label="Se connecter"
+            >
+              <User className="w-5 h-5" />
+            </button>
+          )}
 
-          {/* Hamburger - absolutely anchored to right edge, excluded from centering */}
+          {/* Mobile: Hamburger - absolute at far right (4px from edge) */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden absolute right-1 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+            className="lg:hidden absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors text-white hover:bg-white/10"
             aria-label="Toggle menu"
           >
-            {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
