@@ -72,7 +72,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-titan font-normal text-white mb-6">Liens Rapides</h3>
+            <h3 className="text-lg font-display font-normal text-white mb-6">Liens Rapides</h3>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.href}>
@@ -88,7 +88,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-titan font-normal text-white mb-6">Horaires</h3>
+            <h3 className="text-lg font-display font-normal text-white mb-6">Horaires</h3>
             {hours.length > 0 ? (
               <ul className="space-y-3">
                 {hours.map((item, index) => (
@@ -106,7 +106,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-titan font-normal text-white mb-6">Contact</h3>
+            <h3 className="text-lg font-display font-normal text-white mb-6">Contact</h3>
             {restaurantInfo ? (
               <ul className="space-y-3 text-gray-400">
                 {restaurantInfo.address && (
