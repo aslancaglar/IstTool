@@ -19,8 +19,8 @@ export default function Footer() {
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12 mb-12">
           <div className="lg:col-span-2">
-            <a href="#accueil" className="flex items-center gap-5 mb-6">
-              {/* Replaced img with next/image component */}
+            <a href="#accueil" className="inline-flex mb-3">
+              {/* Logo */}
               <div className="relative w-[100px] h-[100px]">
                 <Image
                   src="/logo-istanbul-kebab.png"
@@ -29,8 +29,8 @@ export default function Footer() {
                   className="object-contain"
                 />
               </div>
-              <span className="font-display text-3xl tracking-wider text-white">RESTO ISTANBUL</span>
             </a>
+            <h2 className="font-display text-3xl tracking-wider text-white mb-4">RESTO ISTANBUL</h2>
             <p className="text-gray-400 mb-6 leading-relaxed">
               Le vrai goût de la cuisine authentique. Des saveurs exceptionnelles préparées avec passion depuis plus de 25 ans.
             </p>
