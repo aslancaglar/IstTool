@@ -96,7 +96,9 @@ export default function Footer() {
                     <span className="block font-medium text-gray-300">
                       {item.day}
                     </span>
-                    <span>{item.time}</span>
+                    <span className={item.time?.toLowerCase() === 'fermé' ? 'text-red-400 font-semibold' : ''}>
+                      {item.time || 'Fermé'}
+                    </span>
                   </li>
                 ))}
               </ul>

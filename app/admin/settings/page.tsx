@@ -135,9 +135,16 @@ export default function SettingsPage() {
     setDeliveryZones(restaurantInfo.deliveryFees || []);
 
     if (restaurantInfo.hours) {
-      const parsedSchedule = restaurantInfo.hours.map(h => ({ day: h.day, slots: parseTime(h.time) }));
+      const parsedSchedule = restaurantInfo.hours.map(h => {
+        const isClosed = !h.time || h.time.toLowerCase() === 'fermé';
+        return {
+          day: h.day,
+          closed: isClosed,
+          slots: isClosed ? [{ start: '', end: '' }] : parseTime(h.time),
+        };
+      });
       const validSchedule = parsedSchedule.map(s =>
-        s.slots.length > 0 ? s : { ...s, slots: [{ start: '', end: '' }] }
+        (!s.closed && s.slots.length === 0) ? { ...s, slots: [{ start: '', end: '' }] } : s
       );
       setSchedule(validSchedule);
     } else {
@@ -149,6 +156,7 @@ export default function SettingsPage() {
 
   const serializeSchedule = (): { day: string, time: string }[] =>
     schedule.map(day => {
+      if (day.closed) return { day: day.day, time: 'Fermé' };
       const timeStr = day.slots
         .filter(s => s.start && s.end)
         .map(s => `${s.start.replace(':', 'h')} - ${s.end.replace(':', 'h')}`)
@@ -209,11 +217,16 @@ export default function SettingsPage() {
   };
 
   // ── Schedule handlers ─────────────────────────────────────────────────
-  const addDay = () => setSchedule([...schedule, { day: '', slots: [{ start: '', end: '' }] }]);
+  const addDay = () => setSchedule([...schedule, { day: '', closed: false, slots: [{ start: '', end: '' }] }]);
   const removeDay = (index: number) => setSchedule(schedule.filter((_, i) => i !== index));
   const updateDayName = (index: number, name: string) => {
     const next = [...schedule];
     next[index].day = name;
+    setSchedule(next);
+  };
+  const toggleClosed = (index: number, closed: boolean) => {
+    const next = [...schedule];
+    next[index] = { ...next[index], closed };
     setSchedule(next);
   };
   const addSlot = (dayIndex: number) => {
@@ -472,6 +485,7 @@ export default function SettingsPage() {
             onAddDay={addDay}
             onRemoveDay={removeDay}
             onUpdateDayName={updateDayName}
+            onToggleClosed={toggleClosed}
             onAddSlot={addSlot}
             onRemoveSlot={removeSlot}
             onUpdateSlot={updateSlot}
