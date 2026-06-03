@@ -65,7 +65,7 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 sm:py-3 px-2 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto pl-3 pr-2 sm:px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
         <div className="flex items-center justify-between h-16 relative">
-          <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
+          <Link href="/" className="absolute left-[-12px] sm:left-[-8px] top-1/2 -translate-y-1/2 z-10">
             <div className="flex-shrink-0 flex items-center relative w-[170px] sm:w-[195px] h-[68px] sm:h-[75px]">
               <Image
                 src="/logo-istanbul-kebab.png"
@@ -167,15 +167,13 @@ export default function Header() {
             </a>
           </div>
 
-          {/* Mobile Status - Always Visible - Absolutely Centered */}
-          <div className="lg:hidden absolute left-[55%] -translate-x-1/2 pointer-events-none">
-            <div className="pointer-events-auto">
-              <OpenStatus isScrolled={isScrolled} variant="mobile" />
-            </div>
+          {/* Mobile Status - Centered in the remaining space between logo and account icon */}
+          <div className="lg:hidden flex-1 flex justify-center items-center px-1 min-w-0">
+            <OpenStatus isScrolled={isScrolled} variant="mobile" />
           </div>
 
           {/* Mobile Menu Button Only - Cart removed (handled by MobileStickyCart) */}
-          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2">
+          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
             {user ? (
               <Link
                 href="/account"
