@@ -168,7 +168,7 @@ export default function Header() {
           </div>
 
           {/* Mobile Status - Always Visible - Absolutely Centered */}
-          <div className="lg:hidden absolute left-[53%] -translate-x-1/2 pointer-events-none">
+          <div className="lg:hidden absolute left-[55%] -translate-x-1/2 pointer-events-none">
             <div className="pointer-events-auto">
               <OpenStatus isScrolled={isScrolled} variant="mobile" />
             </div>
