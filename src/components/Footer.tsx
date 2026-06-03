@@ -21,7 +21,7 @@ export default function Footer() {
           <div>
             <a href="#accueil" className="flex items-center gap-5 mb-6">
               {/* Replaced img with next/image component */}
-              <div className="relative w-[72px] h-[72px]">
+              <div className="relative w-[100px] h-[100px]">
                 <Image
                   src="/logo-istanbul-kebab.png"
                   alt="Resto Istanbul Logo"
