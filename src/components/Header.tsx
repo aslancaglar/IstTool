@@ -65,8 +65,8 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 sm:py-3 px-2 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto pl-3 pr-2 sm:px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
         <div className="flex items-center justify-between h-16 relative">
-          <Link href="/" className="absolute left-[-12px] sm:left-[-8px] top-1/2 -translate-y-1/2 z-10">
-            <div className="flex-shrink-0 flex items-center relative w-[170px] sm:w-[195px] h-[68px] sm:h-[75px]">
+          <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
+            <div className="flex-shrink-0 flex items-center relative w-[145px] sm:w-[195px] h-[56px] sm:h-[75px]">
               <Image
                 src="/logo-istanbul-kebab.png"
                 alt="Resto Istanbul"
@@ -78,7 +78,7 @@ export default function Header() {
           </Link>
           
           {/* Spacer to preserve layout flow since logo is now absolute */}
-          <div className="w-[130px] sm:w-[195px] shrink-0 h-full" />
+          <div className="w-[145px] sm:w-[195px] shrink-0 h-full" />
 
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
@@ -167,43 +167,41 @@ export default function Header() {
             </a>
           </div>
 
-          {/* Mobile: Opening hours - absolutely centered between logo right edge and account icon center.
-               Badge container: left=130px (logo spacer end), right=56px (account icon center from right).
-               Center of container = (130 + totalWidth - 56) / 2 = midpoint between logo and account. */}
-          <div className="lg:hidden absolute inset-y-0 left-[130px] right-[56px] flex items-center justify-center pointer-events-none z-0">
+          {/* Mobile Status - Always Visible - Absolutely Centered */}
+          <div className="lg:hidden absolute left-1/2 -translate-x-1/2 pointer-events-none">
             <div className="pointer-events-auto">
               <OpenStatus isScrolled={isScrolled} variant="mobile" />
             </div>
           </div>
 
-          {/* Mobile: Account icon - absolute, right edge at 40px → center at 56px from right */}
-          {user ? (
-            <Link
-              href="/account"
-              className="lg:hidden absolute right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors text-white hover:bg-white/10"
-              aria-label="Mon Compte"
-            >
-              <User className="w-5 h-5" />
-            </Link>
-          ) : (
+          {/* Mobile Menu Button Only - Cart removed (handled by MobileStickyCart) */}
+          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2">
+            {user ? (
+              <Link
+                href="/account"
+                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+                aria-label="Mon Compte"
+              >
+                <User className="w-5 h-5 sm:w-6 sm:h-6" />
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openLoginModal(pathname || '/')}
+                className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+                aria-label="Se connecter"
+              >
+                <User className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+            )}
             <button
-              type="button"
-              onClick={() => openLoginModal(pathname || '/')}
-              className="lg:hidden absolute right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors text-white hover:bg-white/10"
-              aria-label="Se connecter"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-1.5 sm:p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+              aria-label="Toggle menu"
             >
-              <User className="w-5 h-5" />
+              {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
-          )}
-
-          {/* Mobile: Hamburger - absolute at far right (4px from edge) */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors text-white hover:bg-white/10"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          </div>
         </div>
       </div>
 
