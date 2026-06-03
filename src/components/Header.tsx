@@ -66,7 +66,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto pl-3 pr-2 sm:px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
         <div className="flex items-center justify-between h-16 relative">
           <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
-            <div className="flex-shrink-0 flex items-center relative w-[130px] sm:w-[195px] h-[55px] sm:h-[75px]">
+            <div className="flex-shrink-0 flex items-center relative w-[160px] sm:w-[195px] h-[62px] sm:h-[75px]">
               <Image
                 src="/logo-istanbul-kebab.png"
                 alt="Resto Istanbul"
@@ -78,7 +78,7 @@ export default function Header() {
           </Link>
           
           {/* Spacer to preserve layout flow since logo is now absolute */}
-          <div className="w-[130px] sm:w-[195px] shrink-0 h-full" />
+          <div className="w-[160px] sm:w-[195px] shrink-0 h-full" />
 
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
@@ -167,9 +167,13 @@ export default function Header() {
             </a>
           </div>
 
-          {/* Mobile Menu Button & Status - Cart removed (handled by MobileStickyCart) */}
-          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2">
+          {/* Mobile Status - Centered in the remaining space */}
+          <div className="lg:hidden flex-1 flex justify-center items-center px-1">
             <OpenStatus isScrolled={isScrolled} variant="mobile" />
+          </div>
+
+          {/* Mobile Menu Button Only - Cart removed (handled by MobileStickyCart) */}
+          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
             {user ? (
               <Link
                 href="/account"
