@@ -230,7 +230,7 @@ export default function MenuFull() {
                       else mobilePillRefs.current.delete(category.slug);
                     }}
                     onClick={() => scrollToCategory(category.slug)}
-                    className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
+                    className={`whitespace-nowrap px-4 py-2 rounded-full font-display text-base tracking-wider uppercase transition-all duration-200 ${
                       activeCategory === category.slug
                         ? 'bg-primary-600 text-white shadow-md'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -260,7 +260,7 @@ export default function MenuFull() {
                     <li key={category.slug}>
                       <button
                         onClick={() => scrollToCategory(category.slug)}
-                        className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        className={`w-full text-left px-4 py-2.5 rounded-xl font-display text-xl tracking-wider uppercase transition-all duration-200 ${
                           activeCategory === category.slug
                             ? 'bg-primary-600 text-white shadow-md'
                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
