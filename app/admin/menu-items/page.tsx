@@ -62,6 +62,7 @@ export default function MenuItemsPage() {
   const createTopping = useMutation(api.toppingsAdmin.createTopping);
   const updateTopping = useMutation(api.toppingsAdmin.updateTopping);
   const deleteTopping = useMutation(api.toppingsAdmin.removeTopping);
+  const removeToppingImage = useMutation(api.toppingsAdmin.removeToppingImage);
   const updateToppingDisplayOrder = useMutation(api.toppingsAdmin.updateToppingDisplayOrder);
 
   // ── Article UI state ─────────────────────────────────────────────────────────
@@ -79,7 +80,7 @@ export default function MenuItemsPage() {
   const [toppingCategoryFilter, setToppingCategoryFilter] = useState<string>('all');
   const [isToppingCatModalOpen, setIsToppingCatModalOpen] = useState(false);
   const [editingToppingCatId, setEditingToppingCatId] = useState<Id<'toppingCategories'> | null>(null);
-  const [toppingCatFormData, setToppingCatFormData] = useState<ToppingCategoryFormData>({ categoryId: '', name: '', minSelection: 0, maxSelection: undefined, displayOrder: 0, active: true, freeForBogo: false });
+  const [toppingCatFormData, setToppingCatFormData] = useState<ToppingCategoryFormData>({ categoryId: '', name: '', minSelection: 0, maxSelection: undefined, displayOrder: 0, active: true, freeForBogo: false, visibleWhenCategoryId: undefined, visibleWhenToppingIds: undefined });
   const [toppingCatConfirmModal, setToppingCatConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppingCategories'> | null }>({ isOpen: false, id: null });
 
   // ── Topping UI state ─────────────────────────────────────────────────────────
@@ -87,7 +88,8 @@ export default function MenuItemsPage() {
   const [editingToppingId, setEditingToppingId] = useState<Id<'toppings'> | null>(null);
   const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({
     toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true,
-    menuItemId: undefined, specialPrice: undefined, tvaPercent: undefined
+    menuItemId: undefined, specialPrice: undefined, tvaPercent: undefined,
+    image: undefined, imageStorageId: undefined
   });
   const [toppingConfirmModal, setToppingConfirmModal] = useState<{ isOpen: boolean; id: Id<'toppings'> | null }>({ isOpen: false, id: null });
 
@@ -306,12 +308,12 @@ export default function MenuItemsPage() {
   // ── Topping category handlers ─────────────────────────────────────────────────
   const handleCreateToppingCategory = () => {
     setEditingToppingCatId(null);
-    setToppingCatFormData({ categoryId: `cat-${Date.now()}`, name: '', minSelection: 0, maxSelection: undefined, displayOrder: toppingCategories?.length || 0, active: true, freeForBogo: false });
+    setToppingCatFormData({ categoryId: `cat-${Date.now()}`, name: '', minSelection: 0, maxSelection: undefined, displayOrder: toppingCategories?.length || 0, active: true, freeForBogo: false, visibleWhenCategoryId: undefined, visibleWhenToppingIds: undefined });
     setIsToppingCatModalOpen(true);
   };
   const handleEditToppingCategory = (cat: any) => {
     setEditingToppingCatId(cat._id);
-    setToppingCatFormData({ categoryId: cat.categoryId, name: cat.name, minSelection: cat.minSelection, maxSelection: cat.maxSelection, displayOrder: cat.displayOrder || 0, active: cat.active !== false, freeForBogo: cat.freeForBogo === true });
+    setToppingCatFormData({ categoryId: cat.categoryId, name: cat.name, minSelection: cat.minSelection, maxSelection: cat.maxSelection, displayOrder: cat.displayOrder || 0, active: cat.active !== false, freeForBogo: cat.freeForBogo === true, visibleWhenCategoryId: cat.visibleWhenCategoryId, visibleWhenToppingIds: cat.visibleWhenToppingIds });
     setIsToppingCatModalOpen(true);
   };
   const handleToppingCatSubmit = async (e: React.FormEvent) => {
@@ -334,7 +336,7 @@ export default function MenuItemsPage() {
     setToppingFormData({
       toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '',
       displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined, specialPrice: undefined,
-      tvaPercent: undefined
+      tvaPercent: undefined, image: undefined, imageStorageId: undefined
     });
     setIsToppingModalOpen(true);
     setActiveTab('garnitures');
@@ -345,16 +347,40 @@ export default function MenuItemsPage() {
       toppingId: topping.toppingId, name: topping.name, price: topping.price || 0,
       categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0,
       active: topping.active !== false, menuItemId: topping.menuItemId,
-      specialPrice: topping.specialPrice, tvaPercent: topping.tvaPercent
+      specialPrice: topping.specialPrice, tvaPercent: topping.tvaPercent,
+      image: topping.image, imageStorageId: topping.imageStorageId
     });
     setIsToppingModalOpen(true);
   };
-  const handleToppingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!adminToken) return;
-    if (editingToppingId) await updateTopping({ id: editingToppingId, ...toppingFormData, adminToken });
-    else await createTopping({ ...toppingFormData, adminToken });
-    setIsToppingModalOpen(false);
+  const handleToppingSubmit = async (formData: any, selectedFile: File | null) => {
+    try {
+      if (!adminToken) return;
+      let imageStorageId = formData.imageStorageId, imageUrl = formData.image;
+      if (selectedFile) {
+        const uploadUrl = await generateUploadUrl({ adminToken });
+        const result = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': selectedFile.type }, body: selectedFile });
+        if (!result.ok) {
+          alert("Erreur lors de l'upload: " + result.statusText);
+          throw new Error("Upload failed");
+        }
+        const parsed = await result.json();
+        if (!parsed.storageId) {
+          alert("Erreur: pas de storageId reçu.");
+          throw new Error("No storageId");
+        }
+        imageStorageId = parsed.storageId; imageUrl = '';
+      }
+
+      if (editingToppingId) {
+        await updateTopping({ id: editingToppingId, ...formData, image: imageUrl, imageStorageId, adminToken });
+      } else {
+        await createTopping({ ...formData, image: imageUrl || '', imageStorageId, adminToken });
+      }
+      setIsToppingModalOpen(false);
+    } catch (error: any) {
+      alert("Erreur lors de la sauvegarde: " + error.message);
+      console.error("Error saving topping:", error);
+    }
   };
   const handleConfirmDeleteTopping = async () => {
     if (!toppingConfirmModal.id || !adminToken) return;
@@ -673,6 +699,8 @@ export default function MenuItemsPage() {
         setFormData={setToppingCatFormData}
         onClose={() => setIsToppingCatModalOpen(false)}
         onSubmit={handleToppingCatSubmit}
+        allToppingCategories={toppingCategories}
+        allToppings={allToppings}
       />
 
       <ToppingFormModal
@@ -684,6 +712,11 @@ export default function MenuItemsPage() {
         onSubmit={handleToppingSubmit}
         menuItems={menuItems}
         toppingCategories={toppingCategories}
+        onRemoveImage={async (id) => {
+          if (!adminToken) return;
+          await removeToppingImage({ id, adminToken });
+        }}
+        editingToppingId={editingToppingId}
       />
 
       <ConfirmModal isOpen={categoryConfirmModal.isOpen} onClose={() => setCategoryConfirmModal({ ...categoryConfirmModal, isOpen: false })} onConfirm={handleConfirmDeleteCategory} title="Supprimer la Catégorie" message="Êtes-vous sûr de vouloir supprimer cette catégorie ?" />

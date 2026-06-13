@@ -434,7 +434,7 @@ export default function CheckoutPage() {
     };
 
     return (
-        <div className="bg-gray-50 min-h-screen flex flex-col">
+        <div className="bg-gray-100 min-h-screen flex flex-col">
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-32 pb-20 lg:pb-20">
                 <div className="mb-6">
                     <CheckoutStepper currentStep={step} />
@@ -446,7 +446,7 @@ export default function CheckoutPage() {
                         {/* Left column */}
                         <div className="w-full lg:flex-1 flex flex-col gap-4">
                             {/* 1. Mode de récupération */}
-                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-8 relative overflow-hidden">
+                            <div className="bg-white rounded-3xl shadow-md border border-gray-200/60 overflow-hidden">
                                 <OrderTypeSelector
                                     orderType={orderType}
                                     setOrderType={setOrderType}
@@ -461,7 +461,7 @@ export default function CheckoutPage() {
                             </div>
 
                             {/* 3. Mes informations */}
-                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-8 relative overflow-hidden">
+                            <div className="bg-white rounded-3xl shadow-md border border-gray-200/60 overflow-hidden">
                                 <CustomerInfoSection
                                     user={user}
                                     customer={customer}
@@ -480,7 +480,7 @@ export default function CheckoutPage() {
                             <button
                                 onClick={() => goToPayment()}
                                 disabled={continueDisabled}
-                                className="hidden lg:flex w-full bg-primary-600 text-white font-bold py-4 rounded-2xl hover:bg-primary-700 hover:scale-[1.01] transition-all shadow-xl shadow-primary-500/20 disabled:opacity-30 disabled:scale-100 items-center justify-center gap-3 text-base"
+                                className="hidden lg:flex w-full bg-gray-900 text-white font-bold py-4 rounded-2xl hover:bg-black hover:scale-[1.01] transition-all shadow-xl shadow-gray-900/20 disabled:opacity-30 disabled:scale-100 items-center justify-center gap-3 text-base"
                             >
                                 Continuer vers le paiement
                                 <ArrowLeft className="w-5 h-5 rotate-180" />
@@ -506,7 +506,7 @@ export default function CheckoutPage() {
                             </button>
 
                             {/* Payment method + conditional forms */}
-                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-8 relative overflow-hidden">
+                            <div className="bg-white rounded-3xl shadow-md border border-gray-200/60 overflow-hidden">
                                 <PaymentSection
                                     paymentMethod={paymentMethod}
                                     setPaymentMethod={setPaymentMethod}
@@ -549,7 +549,7 @@ export default function CheckoutPage() {
                                         isStripeProcessing ||
                                         (paymentMethod === 'stripe' && !showStripeForm)
                                     }
-                                    className={`hidden lg:flex w-full bg-primary-600 shadow-xl shadow-primary-500/25 text-white font-bold py-4 rounded-2xl hover:bg-primary-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${(isSubmitting || isStripeProcessing) ? 'animate-pulse' : ''}`}
+                                    className={`hidden lg:flex w-full bg-emerald-600 shadow-xl shadow-emerald-500/25 text-white font-bold py-4 rounded-2xl hover:bg-emerald-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 items-center justify-center gap-3 text-base ${(isSubmitting || isStripeProcessing) ? 'animate-pulse' : ''}`}
                                 >
                                     {(isSubmitting || isStripeProcessing)
                                         ? <><ShoppingBag className="w-5 h-5 animate-bounce" /> Traitement en cours...</>
@@ -587,9 +587,9 @@ export default function CheckoutPage() {
                                 onClick={onClick}
                                 className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
                                     processing
-                                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 animate-pulse'
+                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 animate-pulse'
                                         : ready
-                                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 active:scale-[0.98]'
+                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 active:scale-[0.98]'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             >
@@ -613,7 +613,7 @@ export default function CheckoutPage() {
                         className={`w-full font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 text-base ${
                             continueDisabled
                                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 active:scale-[0.98]'
+                                : 'bg-gray-900 text-white shadow-lg shadow-gray-900/25 active:scale-[0.98]'
                         }`}
                     >
                         Continuer vers le paiement

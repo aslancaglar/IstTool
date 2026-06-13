@@ -21,8 +21,8 @@ export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
     };
 
     return (
-        <div className="flex justify-center items-center py-4 mb-4">
-            <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar px-4">
+        <div className="flex justify-center items-center py-4 mb-4 w-full">
+            <div className="flex items-center justify-center w-full max-w-sm sm:max-w-md gap-3 sm:gap-6 px-2">
                 {steps.map((step, idx) => {
                     const active = currentStep === step.id;
                     const completed = isCompleted(step.id);

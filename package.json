@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "test": "vitest run",
-    "db:export": "node scripts/sync-db.mjs"
+    "db:export": "node scripts/sync-db.mjs",
+    "db:seed": "npx convex run seed:seedAll \"{\\\"adminToken\\\": \\\"$(npx convex env get ADMIN_BOOTSTRAP_SECRET)\\\"}\"",
+    "db:clear": "npx convex run seed:clearAllData \"{\\\"adminToken\\\": \\\"$(npx convex env get ADMIN_BOOTSTRAP_SECRET)\\\"}\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

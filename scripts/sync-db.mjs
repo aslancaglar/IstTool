@@ -13,8 +13,21 @@ console.log('🚀 Exporting current database state from Convex...');
 try {
     const tempFile = join(PROJECT_ROOT, 'temp_export.json');
     
+    // Fetch bootstrap secret to bypass session requirements
+    let bootstrapSecret = '';
+    try {
+        bootstrapSecret = execSync('npx convex env get ADMIN_BOOTSTRAP_SECRET', {
+            cwd: PROJECT_ROOT,
+            stdio: ['pipe', 'pipe', 'ignore'],
+        }).toString().trim();
+    } catch (e) {
+        console.warn('⚠️ Warning: Failed to fetch ADMIN_BOOTSTRAP_SECRET from Convex environment.');
+    }
+
+    const runArgs = JSON.stringify({ adminToken: bootstrapSecret });
+    
     // Call the exportData query using Convex CLI and redirect output to file
-    execSync(`npx convex run seed:exportData > "${tempFile}"`, {
+    execSync(`npx convex run seed:exportData '${runArgs}' > "${tempFile}"`, {
         cwd: PROJECT_ROOT,
     });
 

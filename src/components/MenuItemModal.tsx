@@ -46,6 +46,41 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
     }
   }, [isOpen]);
 
+  // ── Conditional visibility: filter categories based on trigger selections ──
+  const visibleCategories = useMemo(() => {
+    if (!availableCategories) return [];
+    return availableCategories.filter((category: any) => {
+      // If no visibility condition set, always show
+      if (!category.visibleWhenCategoryId || !category.visibleWhenToppingIds?.length) {
+        return true;
+      }
+      // Check if any of the trigger toppings are selected in the trigger category
+      const triggerSelections = selectedToppings[category.visibleWhenCategoryId] || [];
+      return triggerSelections.some(t =>
+        category.visibleWhenToppingIds.includes(t.toppingId)
+      );
+    });
+  }, [availableCategories, selectedToppings]);
+
+  // Auto-clear selections from categories that become hidden
+  useEffect(() => {
+    if (!availableCategories) return;
+    const visibleIds = new Set(visibleCategories.map((c: any) => c.id));
+    const hiddenCategoryIds = availableCategories
+      .filter((c: any) => !visibleIds.has(c.id) && c.visibleWhenCategoryId)
+      .map((c: any) => c.id);
+
+    if (hiddenCategoryIds.length === 0) return;
+
+    setSelectedToppings(prev => {
+      const hasStaleSelections = hiddenCategoryIds.some(id => prev[id]?.length > 0);
+      if (!hasStaleSelections) return prev;
+      const next = { ...prev };
+      hiddenCategoryIds.forEach(id => { delete next[id]; });
+      return next;
+    });
+  }, [visibleCategories, availableCategories]);
+
   // MEMOIZATION: Calculate complex pricing fields only when dependencies change
   const allSelectedToppings = useMemo(() => Object.values(selectedToppings).flat(), [selectedToppings]);
   const currentPrice = useMemo(() => getBasePrice(item as any), [item]);
@@ -83,10 +118,11 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
     });
   }, [availableCategories]);
 
+  // Validate only visible categories
   const validateSelections = useCallback(() => {
     const errors: Record<string, string> = {};
 
-    availableCategories?.forEach((category: any) => {
+    visibleCategories?.forEach((category: any) => {
       const categoryToppings = selectedToppings[category.id] || [];
       const count = categoryToppings.length;
 
@@ -96,8 +132,22 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
     });
 
     setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      const firstErrorId = visibleCategories?.find((c: any) => errors[c.id])?.id;
+      if (firstErrorId) {
+        // Use setTimeout to ensure DOM has updated with the error message before scrolling
+        setTimeout(() => {
+          const element = document.getElementById(`category-${firstErrorId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 50);
+      }
+    }
+
     return Object.keys(errors).length === 0;
-  }, [availableCategories, selectedToppings]);
+  }, [visibleCategories, selectedToppings]);
 
   const handleAddToOrder = useCallback(() => {
     if (!validateSelections()) {
@@ -159,9 +209,9 @@ export default function MenuItemModal({ item, isOpen, onClose }: MenuItemModalPr
           <h2 className="text-3xl font-bold text-gray-900 mb-2 font-display">{item.name}</h2>
           <p className="text-gray-600 mb-6">{item.description}</p>
 
-          {availableCategories && availableCategories.length > 0 && (
+          {visibleCategories && visibleCategories.length > 0 && (
             <div className="space-y-6">
-              {availableCategories.map((category: any) => (
+              {visibleCategories.map((category: any) => (
                 <ToppingCategory
                   key={category.id}
                   category={category}

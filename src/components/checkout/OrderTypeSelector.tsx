@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Store, Truck, Info, Check, Utensils } from 'lucide-react';
+import { Store, Truck, Info, Check, Utensils, ShoppingBag } from 'lucide-react';
 
 interface OrderTypeSelectorProps {
     orderType: 'pickup' | 'delivery' | 'dine_in' | null;
@@ -39,11 +39,11 @@ export default function OrderTypeSelector({
 
     return (
         <div>
-            <h3 className="font-bold text-gray-800 text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-4 rounded-full bg-primary-500 inline-block" />
-                Mode de récupération
-            </h3>
-            <div className={`grid grid-cols-1 ${
+            <div className="px-5 py-4 bg-primary-600 flex items-center gap-2.5">
+                <Store className="w-4 h-4 text-white" />
+                <span className="text-sm font-bold text-white uppercase tracking-widest">Mode de récupération</span>
+            </div>
+            <div className={`p-5 md:p-8 grid grid-cols-1 ${
                 visibleCount === 3
                     ? 'sm:grid-cols-3'
                     : visibleCount === 2
@@ -64,7 +64,7 @@ export default function OrderTypeSelector({
                                 ? 'bg-primary-50 text-primary-600'
                                 : 'bg-gray-100 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-500'
                         }`}>
-                            <Store className="w-6 h-6" />
+                            <ShoppingBag className="w-6 h-6" />
                         </div>
                         <div className="text-center">
                             <span className={`block font-bold text-sm tracking-wide ${orderType === 'pickup' ? 'text-primary-700' : 'text-gray-700'}`}>

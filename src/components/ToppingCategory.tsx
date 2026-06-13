@@ -19,7 +19,7 @@ export default function ToppingCategory({
     isToppingDisabled,
 }: ToppingCategoryProps) {
     return (
-        <div className="border-t pt-4">
+        <div id={`category-${category.id}`} className="border-t pt-4">
             <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-extrabold text-gray-900 font-display bg-primary-50 px-3 py-2 rounded-lg">
                     {category.name}
@@ -65,8 +65,13 @@ export default function ToppingCategory({
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                    <div className="text-sm font-medium text-gray-900">
-                                        {topping.name}
+                                    <div className="flex items-center gap-2">
+                                        {topping.image && (
+                                            <img src={topping.image} alt="" className="w-8 h-8 object-cover rounded-md flex-shrink-0" />
+                                        )}
+                                        <div className="text-sm font-medium text-gray-900">
+                                            {topping.name}
+                                        </div>
                                     </div>
                                     <div className="text-xs text-gray-500 mt-1">
                                         {topping.price !== undefined && topping.price > 0

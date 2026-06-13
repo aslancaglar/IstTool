@@ -1,5 +1,6 @@
 import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+import { resolveImageUrl } from "./lib/storage";
 import { requireAdminSession, maybeGetUserFromSession } from "./lib/auth";
 
 // Re-export menu item queries from menuItems.ts for backwards compatibility
@@ -95,14 +96,15 @@ export const getToppingCategories = query({
 export const getToppingsForMenuItem = query({
   args: { menuItemId: v.id("menuItems") },
   handler: async (ctx, args) => {
-    // Get assignments and sort them by displayOrder
+    // Get assignments for this menu item
     const assignments = await ctx.db
       .query("menuItemToppings")
       .withIndex("by_menu_item", (q) => q.eq("menuItemId", args.menuItemId))
       .collect();
 
+    // Sort by display order (the per-menu-item order)
     const sortedAssignments = assignments.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
-    // Deduplicate category IDs to prevent duplicate categories from being displayed
+    // Deduplicate category IDs
     const categoryIds = Array.from(new Set(sortedAssignments.map((a) => a.toppingCategoryId)));
 
     const allCategories = await ctx.db.query("toppingCategories").collect();
@@ -136,11 +138,11 @@ export const getToppingsForMenuItem = query({
       if (item) menuItemById.set(linkedIds[i] as string, item);
     });
 
-    const categoriesWithToppings = categoryToppings.map((entry) => {
+    const categoriesWithToppings = await Promise.all(categoryToppings.map(async (entry) => {
         if (!entry) return null;
         const { category, toppings } = entry;
 
-        const toppingData = toppings.map((t) => {
+        const toppingData = await Promise.all(toppings.map(async (t) => {
           if (t.active === false) return null;
 
           if (t.menuItemId) {
@@ -153,6 +155,7 @@ export const getToppingsForMenuItem = query({
               specialPrice: t.specialPrice,
               displayOrder: t.displayOrder || 0,
               tvaPercent: t.tvaPercent ?? menuItem.tvaPercent,
+              image: t.imageStorageId ? await resolveImageUrl(ctx, t) : await resolveImageUrl(ctx, { imageStorageId: menuItem.imageStorageId, image: menuItem.image }),
             };
           }
 
@@ -163,8 +166,9 @@ export const getToppingsForMenuItem = query({
             specialPrice: t.specialPrice,
             displayOrder: t.displayOrder || 0,
             tvaPercent: t.tvaPercent,
+            image: await resolveImageUrl(ctx, t),
           };
-        });
+        }));
 
         const activeToppings = toppingData
           .filter((t): t is NonNullable<typeof t> => t !== null)
@@ -178,12 +182,20 @@ export const getToppingsForMenuItem = query({
           name: category.name,
           minSelection: category.minSelection,
           maxSelection: category.maxSelection,
+          displayOrder: category.displayOrder || 0,
           freeForBogo: category.freeForBogo ?? false,
+          visibleWhenCategoryId: category.visibleWhenCategoryId,
+          visibleWhenToppingIds: category.visibleWhenToppingIds,
           toppings: activeToppings,
         };
-      });
+      }));
 
-    return categoriesWithToppings.filter((c): c is NonNullable<typeof c> => c !== null);
+    const validCategories = categoriesWithToppings
+      .filter((c): c is NonNullable<typeof c> => c !== null)
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+      .map(({ displayOrder, ...rest }) => rest);
+
+    return validCategories;
   },
 });
 

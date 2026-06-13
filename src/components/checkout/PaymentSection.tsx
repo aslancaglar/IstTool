@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { CreditCard, Wallet, Lock, CheckCircle2, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
+import { CreditCard, Wallet, Lock, CheckCircle2, ChevronRight, AlertCircle, Loader2, Store, Banknote } from 'lucide-react';
 import StripePaymentForm, { type StripeFormHandle } from '../StripePaymentForm';
 import { formatPrice } from '../../utils/formatters';
 
@@ -49,15 +49,13 @@ export default function PaymentSection({
     const bothEnabled = cashEnabled && stripeEnabled;
 
     return (
-        <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div>
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-primary-500">
-                        <CreditCard className="w-3.5 h-3.5 text-white" />
-                    </div>
-                    <span className="font-bold text-gray-800 text-sm uppercase tracking-wider">Mode de paiement</span>
-                </div>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="px-5 py-4 bg-primary-600 flex items-center gap-2.5">
+                <CreditCard className="w-4 h-4 text-white" />
+                <span className="text-sm font-bold text-white uppercase tracking-widest">Mode de paiement</span>
+            </div>
 
+            <div className="p-5 md:p-8 space-y-5">
                 <div className={`grid gap-3 ${bothEnabled ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
                     {cashEnabled && (
                         <button
@@ -77,13 +75,16 @@ export default function PaymentSection({
                                     ? 'bg-primary-50 text-primary-600'
                                     : 'bg-gray-100 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-500'
                             }`}>
-                                <Wallet className="w-5 h-5" />
+                                <div className="flex -space-x-1 items-center justify-center">
+                                    <Banknote className="w-4 h-4" />
+                                    <CreditCard className="w-4 h-4 opacity-70 scale-90" />
+                                </div>
                             </div>
                             <div className="text-left">
                                 <p className={`font-bold text-sm tracking-wide ${paymentMethod === 'cash' ? 'text-primary-700' : 'text-gray-700'}`}>
-                                    Espèces / Carte
+                                    Paiement au comptoir
                                 </p>
-                                <p className="text-[12px] font-medium text-gray-500 mt-0.5">Paiement à la récupération</p>
+                                <p className="text-[11px] font-medium text-gray-500 mt-0.5 leading-snug">Réglez sur place (Espèces, CB, Tickets Resto)</p>
                             </div>
                             {paymentMethod === 'cash' && (
                                 <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shadow-sm">
@@ -127,7 +128,6 @@ export default function PaymentSection({
                         </button>
                     )}
                 </div>
-            </div>
 
             {paymentMethod === 'stripe' && showStripeForm && clientSecret && (
                 <div className="p-6 bg-white rounded-2xl border border-indigo-100 shadow-sm animate-in slide-in-from-top-4 duration-500">
@@ -174,12 +174,14 @@ export default function PaymentSection({
             {paymentMethod === 'cash' && (
                 <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 flex gap-3 items-start">
                     <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-lg flex items-center justify-center shrink-0 shadow">
-                        <Wallet className="w-4 h-4" />
+                        <div className="flex items-center justify-center gap-1">
+                            <Banknote className="w-4 h-4" />
+                        </div>
                     </div>
                     <p className="text-amber-800 text-[11px] font-medium leading-relaxed">
-                        En confirmant, vous vous engagez à régler votre commande de{' '}
+                        Le règlement de votre commande d'un montant de{' '}
                         <span className="font-bold text-amber-900">{formatPrice(totalPrice)}</span>{' '}
-                        lors de la récupération.
+                        s'effectuera directement au comptoir lors de votre venue.
                     </p>
                 </div>
             )}
@@ -188,7 +190,7 @@ export default function PaymentSection({
                 <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || (paymentMethod === 'stripe' && !showStripeForm)}
-                    className={`w-full bg-primary-600 shadow-md shadow-primary-500/20 text-white font-bold py-4 rounded-2xl hover:bg-primary-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-3 text-base ${
+                    className={`w-full bg-emerald-600 shadow-md shadow-emerald-500/20 text-white font-bold py-4 rounded-2xl hover:bg-emerald-700 hover:scale-[1.01] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-3 text-base ${
                         isSubmitting ? 'animate-pulse' : ''
                     }`}
                 >
@@ -198,6 +200,7 @@ export default function PaymentSection({
                     }
                 </button>
             )}
+            </div>
         </div>
     );
 }

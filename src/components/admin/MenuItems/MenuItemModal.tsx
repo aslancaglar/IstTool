@@ -1,8 +1,25 @@
 "use client";
 
 import { useRef, useState, useEffect } from 'react';
-import { X, Upload, Trash2, AlertTriangle, Star, CheckCircle, Package, ShoppingCart } from 'lucide-react';
+import { X, Upload, Trash2, AlertTriangle, Star, CheckCircle, Package, ShoppingCart, GripVertical, ChevronDown } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Id } from '../../../../convex/_generated/dataModel';
+
+function SortableSelectedCategory({ id, name }: { id: string; name: string }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
+
+    return (
+        <div ref={setNodeRef} style={style} className={`flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm ${isDragging ? 'opacity-50 border-red-300 z-10 relative bg-red-50' : 'border-slate-200'}`}>
+            <button type="button" {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 p-1">
+                <GripVertical className="w-4 h-4" />
+            </button>
+            <span className="text-sm font-semibold text-slate-700">{name}</span>
+        </div>
+    );
+}
 
 interface MenuItemFormData {
     name: string;
@@ -64,6 +81,22 @@ export default function MenuItemModal({
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [selectedToppingCategories, setSelectedToppingCategories] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            setSelectedToppingCategories((items) => {
+                const oldIndex = items.indexOf(active.id as string);
+                const newIndex = items.indexOf(over.id as string);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
 
     useEffect(() => {
         setShowDeleteConfirm(false);
@@ -260,8 +293,11 @@ export default function MenuItemModal({
                             </div>
                         </div>
 
-                        <div className="col-span-2 border-t border-slate-100 pt-4 mt-2">
-                            <label className="block text-xs font-semibold text-slate-600 mb-3">Catégories</label>
+                        <details className="col-span-2 border-t border-slate-100 pt-4 mt-2 group">
+                            <summary className="flex items-center justify-between text-xs font-semibold text-slate-600 mb-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                                Catégories
+                                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+                            </summary>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                                 {categories?.map((cat) => (
                                     <button
@@ -285,11 +321,14 @@ export default function MenuItemModal({
                                     </button>
                                 ))}
                             </div>
-                        </div>
+                        </details>
 
                         {toppingCategories && toppingCategories.length > 0 && (
-                            <div className="col-span-2 border-t border-slate-100 pt-4 mt-2">
-                                <label className="block text-xs font-semibold text-slate-600 mb-3">Catégories de Garnitures</label>
+                            <details className="col-span-2 border-t border-slate-100 pt-4 mt-2 group">
+                                <summary className="flex items-center justify-between text-xs font-semibold text-slate-600 mb-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                                    Catégories de Garnitures
+                                    <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+                                </summary>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     {toppingCategories.map((cat) => (
                                         <button
@@ -314,7 +353,28 @@ export default function MenuItemModal({
                                         </button>
                                     ))}
                                 </div>
-                            </div>
+                            </details>
+                        )}
+
+                        {selectedToppingCategories.length > 0 && toppingCategories && (
+                            <details className="col-span-2 border-t border-slate-100 pt-4 mt-2 group">
+                                <summary className="flex items-center justify-between text-xs font-semibold text-slate-600 mb-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                                    Ordre d'affichage des garnitures
+                                    <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+                                </summary>
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                    <SortableContext items={selectedToppingCategories} strategy={verticalListSortingStrategy}>
+                                        <div className="space-y-2">
+                                            {selectedToppingCategories.map((id) => {
+                                                const cat = toppingCategories.find(c => c.categoryId === id);
+                                                if (!cat) return null;
+                                                return <SortableSelectedCategory key={id} id={id} name={cat.name} />;
+                                            })}
+                                        </div>
+                                    </SortableContext>
+                                </DndContext>
+                                <p className="text-[10px] text-slate-400 mt-2 italic">Faites glisser pour définir l'ordre d'affichage de ces options pour ce produit spécifique.</p>
+                            </details>
                         )}
 
                         <div className="col-span-2 border-t border-slate-100 pt-4 mt-2">

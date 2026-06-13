@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdminSession } from "./lib/auth";
+import { resolveImageUrl } from "./lib/storage";
 
 export const listToppingCategories = query({
   args: {},
@@ -31,6 +32,8 @@ export const createToppingCategory = mutation({
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
     freeForBogo: v.optional(v.boolean()),
+    visibleWhenCategoryId: v.optional(v.string()),
+    visibleWhenToppingIds: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -42,6 +45,8 @@ export const createToppingCategory = mutation({
       displayOrder: args.displayOrder ?? 0,
       active: args.active ?? true,
       freeForBogo: args.freeForBogo ?? false,
+      visibleWhenCategoryId: args.visibleWhenCategoryId,
+      visibleWhenToppingIds: args.visibleWhenToppingIds,
     });
     return id;
   },
@@ -58,6 +63,8 @@ export const updateToppingCategory = mutation({
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
     freeForBogo: v.optional(v.boolean()),
+    visibleWhenCategoryId: v.optional(v.string()),
+    visibleWhenToppingIds: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -69,6 +76,8 @@ export const updateToppingCategory = mutation({
       displayOrder: args.displayOrder,
       active: args.active,
       freeForBogo: args.freeForBogo,
+      visibleWhenCategoryId: args.visibleWhenCategoryId,
+      visibleWhenToppingIds: args.visibleWhenToppingIds,
     });
     return args.id;
   },
@@ -93,16 +102,19 @@ export const listToppings = query({
       if (t.menuItemId) {
         const menuItem = await ctx.db.get(t.menuItemId);
         if (menuItem) {
+          const menuItemImage = await resolveImageUrl(ctx, { imageStorageId: menuItem.imageStorageId, image: menuItem.image });
           return { 
             ...t, 
             name: t.name || menuItem.name, 
-            effectivePrice: t.specialPrice !== undefined ? t.specialPrice : menuItem.price 
+            effectivePrice: t.specialPrice !== undefined ? t.specialPrice : menuItem.price,
+            image: t.imageStorageId ? await resolveImageUrl(ctx, t) : menuItemImage,
           };
         }
       }
       return { 
         ...t, 
-        effectivePrice: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0) 
+        effectivePrice: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0),
+        image: await resolveImageUrl(ctx, t),
       };
     }));
     return enriched.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
@@ -120,16 +132,19 @@ export const listToppingsByCategory = query({
       if (t.menuItemId) {
         const menuItem = await ctx.db.get(t.menuItemId);
         if (menuItem) {
+          const menuItemImage = await resolveImageUrl(ctx, { imageStorageId: menuItem.imageStorageId, image: menuItem.image });
           return { 
             ...t, 
             name: t.name || menuItem.name, 
-            effectivePrice: t.specialPrice !== undefined ? t.specialPrice : menuItem.price 
+            effectivePrice: t.specialPrice !== undefined ? t.specialPrice : menuItem.price,
+            image: t.imageStorageId ? await resolveImageUrl(ctx, t) : menuItemImage,
           };
         }
       }
       return { 
         ...t, 
-        effectivePrice: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0) 
+        effectivePrice: t.specialPrice !== undefined ? t.specialPrice : (t.price ?? 0),
+        image: await resolveImageUrl(ctx, t),
       };
     }));
     return enriched.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
@@ -148,6 +163,8 @@ export const createTopping = mutation({
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
     tvaPercent: v.optional(v.number()),
+    image: v.optional(v.string()),
+    imageStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
@@ -161,6 +178,8 @@ export const createTopping = mutation({
       menuItemId: args.menuItemId,
       specialPrice: args.specialPrice,
       tvaPercent: args.tvaPercent,
+      image: args.image,
+      imageStorageId: args.imageStorageId,
     });
     return id;
   },
@@ -179,9 +198,19 @@ export const updateTopping = mutation({
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
     tvaPercent: v.optional(v.number()),
+    image: v.optional(v.string()),
+    imageStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
+    
+    const existingItem = await ctx.db.get(args.id);
+    if (existingItem?.imageStorageId &&
+      args.imageStorageId &&
+      existingItem.imageStorageId !== args.imageStorageId) {
+      await ctx.storage.delete(existingItem.imageStorageId);
+    }
+
     await ctx.db.patch(args.id, {
       toppingId: args.toppingId,
       name: args.name,
@@ -192,6 +221,8 @@ export const updateTopping = mutation({
       menuItemId: args.menuItemId,
       specialPrice: args.specialPrice,
       tvaPercent: args.tvaPercent,
+      image: args.image,
+      imageStorageId: args.imageStorageId,
     });
     return args.id;
   },
@@ -228,7 +259,34 @@ export const removeTopping = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
+    const item = await ctx.db.get(args.id);
+    if (item?.imageStorageId) {
+      await ctx.storage.delete(item.imageStorageId);
+    }
     await ctx.db.delete(args.id);
+  },
+});
+
+export const removeToppingImage = mutation({
+  args: {
+    id: v.id("toppings"),
+    adminToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+    const item = await ctx.db.get(args.id);
+    if (!item) throw new Error("Topping not found");
+
+    if (item.imageStorageId) {
+      await ctx.storage.delete(item.imageStorageId);
+    }
+
+    await ctx.db.patch(args.id, {
+      imageStorageId: undefined,
+      image: "",
+    });
+
+    return { success: true };
   },
 });
 

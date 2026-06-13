@@ -63,6 +63,10 @@ export default defineSchema({
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
     freeForBogo: v.optional(v.boolean()),
+    // Conditional visibility: only show this category when one of the specified
+    // toppings is selected in the referenced trigger category.
+    visibleWhenCategoryId: v.optional(v.string()),
+    visibleWhenToppingIds: v.optional(v.array(v.string())),
   }).index("by_display_order", ["displayOrder"]),
 
   toppings: defineTable({
@@ -75,6 +79,8 @@ export default defineSchema({
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
     tvaPercent: v.optional(v.number()),
+    image: v.optional(v.string()),
+    imageStorageId: v.optional(v.id("_storage")),
   }).index("by_category", ["categoryId"])
     .index("by_display_order", ["displayOrder"])
     .index("by_topping_id", ["toppingId"])

@@ -27,9 +27,17 @@ export default function SortableTopping({ topping, toppingCategories, onEdit, on
           <GripVertical className="w-4 h-4" />
         </button>
       )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <p className="font-semibold text-slate-900 text-sm truncate">{topping.name}</p>
+      <div className="flex-1 min-w-0 flex items-center gap-3">
+        {topping.image ? (
+          <img src={topping.image} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200 flex-shrink-0" />
+        ) : (
+          <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0">
+            <LayoutGrid className="w-4 h-4 text-slate-300" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <p className="font-semibold text-slate-900 text-sm truncate">{topping.name}</p>
           {topping.menuItemId && (
             <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-blue-100 flex-shrink-0">
               <LayoutGrid className="w-2.5 h-2.5" />
@@ -56,6 +64,7 @@ export default function SortableTopping({ topping, toppingCategories, onEdit, on
           )}
         </p>
       </div>
+    </div>
       <div className="flex gap-1 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition ml-auto">
         <button onClick={() => onEdit(topping)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
           <Edit className="w-4 h-4" />

@@ -68,13 +68,24 @@ async function runSeedGallery(ctx: MutationCtx) {
   }
 }
 
+async function checkAdminOrDev(ctx: MutationCtx, adminToken?: string) {
+  const bootstrapSecret = process.env.ADMIN_BOOTSTRAP_SECRET;
+  if (bootstrapSecret && adminToken === bootstrapSecret) {
+    return;
+  }
+  if (!adminToken) {
+    throw new Error("Unauthorized: adminToken is required");
+  }
+  await requireAdminSession(ctx, adminToken);
+}
+
 // Exported Mutations
 export const clearAllData = mutation({
   args: {
-    adminToken: v.string(),
+    adminToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.adminToken);
+    await checkAdminOrDev(ctx, args.adminToken);
     const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery", "orders", "promoCodes", "users", "userSessions"] as const;
     for (const table of tables) {
       const items = await ctx.db.query(table).collect();
@@ -88,10 +99,10 @@ export const clearAllData = mutation({
 
 export const seedAll = mutation({
   args: {
-    adminToken: v.string(),
+    adminToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.adminToken);
+    await checkAdminOrDev(ctx, args.adminToken);
     // 1. Clear everything
     const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery"] as const;
     for (const table of tables) {
@@ -120,9 +131,7 @@ export const exportData = mutation({
     adminToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    if (args.adminToken !== undefined) {
-      await requireAdminSession(ctx, args.adminToken);
-    }
+    await checkAdminOrDev(ctx, args.adminToken);
     const menuCategories = await ctx.db.query("menuCategories").collect();
     const menuItems = await ctx.db.query("menuItems").collect();
     const toppingCategories = await ctx.db.query("toppingCategories").collect();
@@ -147,12 +156,12 @@ export const exportData = mutation({
 
 export const importData = mutation({
   args: {
-    adminToken: v.string(),
+    adminToken: v.optional(v.string()),
     data: v.any(),
     clearFirst: v.boolean(),
   },
   handler: async (ctx, args) => {
-    await requireAdminSession(ctx, args.adminToken);
+    await checkAdminOrDev(ctx, args.adminToken);
     if (args.clearFirst) {
       const tables = ["menuItems", "toppings", "toppingCategories", "menuItemToppings", "menuCategories", "restaurantInfo", "reviews", "gallery"] as const;
       for (const table of tables) {
@@ -186,5 +195,7 @@ export const importData = mutation({
     return { success: true };
   },
 });
+
+
 
 

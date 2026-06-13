@@ -10,7 +10,7 @@ type ContextWithStorage = {
 
 interface ItemWithImage {
     imageStorageId?: Id<"_storage">;
-    image: string;
+    image?: string;
 }
 
 /**
@@ -25,7 +25,7 @@ export async function resolveImageUrl(
         const url = await ctx.storage.getUrl(item.imageStorageId);
         if (url) return url;
     }
-    return item.image;
+    return item.image || "";
 }
 
 /**

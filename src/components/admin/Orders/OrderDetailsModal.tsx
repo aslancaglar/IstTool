@@ -645,9 +645,11 @@ export default function OrderDetailsModal({
                     {nextStatus && nextConfig && (
                         <div className="px-5 pb-5 pt-1">
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     if (isPending && nextStatus === 'preparing') {
-                                        setTimePickerOpen(true);
+                                        await onStatusChange(order._id, 'preparing', {
+                                            prepTimeMinutes: pickedPrep,
+                                        });
                                     } else {
                                         onStatusChange(order._id, nextStatus);
                                     }

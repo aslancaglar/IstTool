@@ -107,16 +107,14 @@ export default function OrderSummary({
         : Math.max(0, subtotal + bogoFreeTotal - totalDiscount);
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200/60 overflow-hidden sticky top-24">
             {/* Header */}
-            <div className="p-5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center shadow-sm">
-                        <ShoppingBag className="w-3.5 h-3.5 text-white" />
-                    </div>
+            <div className="px-5 py-4 bg-primary-600 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-white flex items-center gap-2.5 uppercase tracking-widest">
+                    <ShoppingBag className="w-4 h-4" />
                     Mon Panier
                 </h2>
-                <span className="bg-white px-2.5 py-1 rounded-full text-xs font-bold text-primary-600 border border-gray-200 shadow-sm">
+                <span className="bg-white/20 px-2.5 py-1 rounded-full text-xs font-bold text-white">
                     {orderItems.length} article{orderItems.length > 1 ? 's' : ''}
                 </span>
             </div>
