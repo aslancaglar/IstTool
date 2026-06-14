@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CreditCard, Wallet, Lock, CheckCircle2, ChevronRight, AlertCircle, Loader2, Store, Banknote } from 'lucide-react';
 import StripePaymentForm, { type StripeFormHandle } from '../StripePaymentForm';
 import { formatPrice } from '../../utils/formatters';
@@ -47,6 +47,22 @@ export default function PaymentSection({
     onStripeProcessingChange,
 }: PaymentSectionProps) {
     const bothEnabled = cashEnabled && stripeEnabled;
+
+    useEffect(() => {
+        if (!paymentMethod) {
+            if (cashEnabled && !stripeEnabled) {
+                setPaymentMethod('cash');
+                setShowStripeForm(false);
+                setStripeError(null);
+            } else if (stripeEnabled && !cashEnabled) {
+                setPaymentMethod('stripe');
+                setStripeError(null);
+                if (!showStripeForm && !clientSecret) {
+                    createPaymentIntent();
+                }
+            }
+        }
+    }, [paymentMethod, cashEnabled, stripeEnabled, setPaymentMethod, setShowStripeForm, setStripeError, showStripeForm, clientSecret, createPaymentIntent]);
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
