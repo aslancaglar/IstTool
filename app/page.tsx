@@ -8,8 +8,8 @@ import Contact from '../src/components/Contact';
 import AppLoaderWrapper from '../src/components/AppLoaderWrapper';
 
 export const metadata: Metadata = {
-    title: 'Resto Istanbul Toul | Kebab, Tacos, Burgers & Livraison à Toul',
-    description: 'Resto Istanbul, le meilleur restaurant de kebab, tacos et burgers à Toul ! Plats savoureux, Durum -Wrap, Assiettes, Bowls, livraison rapide et click & collect. Commandez en ligne maintenant.',
+    title: 'Resto Istanbul Toul | Kebab, Tacos & Burgers à Toul',
+    description: 'Resto Istanbul, le meilleur restaurant de kebab, tacos et burgers à Toul ! Plats savoureux, Durum -Wrap, Assiettes, Bowls, et click & collect. Commandez en ligne maintenant.',
     alternates: {
         canonical: 'https://mondopizza.fr',
     },

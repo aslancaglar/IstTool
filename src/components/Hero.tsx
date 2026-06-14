@@ -24,7 +24,7 @@ export default function Hero() {
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <FadeIn delay={200} className="max-w-2xl text-left">
-            <h1 className="sr-only">Resto Istanbul, votre restaurant de kebabs et de pizzas authentiques à Metz</h1>
+            <h1 className="sr-only">Resto Istanbul, votre restaurant de kebab, tacos et burgers à Toul</h1>
             <h2 
               style={{ 
                 fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', 

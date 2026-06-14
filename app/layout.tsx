@@ -14,15 +14,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
     metadataBase: new URL('https://mondopizza.fr'),
     title: {
-        default: 'Resto Istanbul Toul | Kebab, Tacos, Burgers & Livraison à Toul',
+        default: 'Resto Istanbul Toul | Kebab, Tacos, Burgers à Toul',
         template: '%s | Resto Istanbul Toul',
     },
-    description: 'Resto Istanbul à Toul : Kebab, Tacos, burger, Durum -Wrap, Assiettes, Bowls et plus. Ingrédients de qualité. Commandez en ligne pour livraison ou à emporter ! ☎ 07 82 81 46 56',
+    description: 'Resto Istanbul à Toul : Kebab, Tacos, burger, Durum -Wrap, Assiettes, Bowls et plus. Ingrédients de qualité. Commandez en ligne à emporter ! ☎ 07 82 81 46 56',
     keywords: [
         'kebab toul',
         'tacos toul',
         'burger toul',
-        'livraison kebab toul',
         'commander kebab toul',
         'kebab authentique toul',
         'meilleur kebab toul',
@@ -45,8 +44,8 @@ export const metadata: Metadata = {
         apple: '/logo-istanbul-kebab.png',
     },
     openGraph: {
-        title: 'Resto Istanbul Toul | Kebab, Tacos, Burgers & Livraison',
-        description: 'Resto Istanbul à Toul : Kebab, Tacos, burger, Durum -Wrap, Assiettes, Bowls et plus. Ingrédients de qualité. Commandez en ligne pour livraison ou à emporter !',
+        title: 'Resto Istanbul Toul | Kebab, Tacos, Burgers',
+        description: 'Resto Istanbul à Toul : Kebab, Tacos, burger, Durum -Wrap, Assiettes, Bowls et plus. Ingrédients de qualité. Commandez en ligne à emporter !',
         url: 'https://mondopizza.fr/',
         siteName: 'Resto Istanbul Toul',
         images: [{
@@ -60,7 +59,7 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Resto Istanbul Toul | Kebab, Tacos, Burgers & Livraison',
+        title: 'Resto Istanbul Toul | Kebab, Tacos, Burgers',
         description: 'Resto Istanbul à Toul : Kebab, Tacos, burger, Durum -Wrap, Assiettes, Bowls et plus. Commandez en ligne !',
         images: ['/MondoHeroImage-min.jpg'],
     },
