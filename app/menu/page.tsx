@@ -19,7 +19,7 @@ export default function MenuPage() {
         <AppLoaderWrapper>
             <div className="min-h-screen">
                 {/* Hero Section */}
-                <section className="relative h-[25vh] min-h-[220px] md:h-[35vh] md:min-h-[280px] pt-[104px] md:pt-[88px] pb-4 flex flex-col justify-center overflow-hidden">
+                <section className="relative h-[25vh] min-h-[220px] md:h-[35vh] md:min-h-[280px] pt-[72px] md:pt-[88px] pb-0 flex flex-col justify-center overflow-hidden">
                     <div className="absolute inset-0">
 
 
