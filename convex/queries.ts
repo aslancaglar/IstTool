@@ -192,7 +192,6 @@ export const getToppingsForMenuItem = query({
 
     const validCategories = categoriesWithToppings
       .filter((c): c is NonNullable<typeof c> => c !== null)
-      .sort((a, b) => a.displayOrder - b.displayOrder)
       .map(({ displayOrder, ...rest }) => rest);
 
     return validCategories;
