@@ -129,7 +129,6 @@ input:-webkit-autofill:active {
 }
 
 html {
-  scroll-behavior: smooth;
 }
 
 body {
