@@ -49,8 +49,11 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     const hideFooter = isCheckout || isOrderSuccess;
 
     // Force scroll to top on route change to fix Next.js scroll restoration bug
+    // Only if there is no hash in the URL, to avoid breaking hash navigation
     useEffect(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        if (!window.location.hash) {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }
     }, [pathname]);
 
     if (isAdmin) {

@@ -20,18 +20,21 @@ export default function Footer() {
     e.preventDefault();
 
     if (pathname !== '/') {
-      router.push('/');
+      router.push('/' + hash);
+      // Fallback smooth scroll in case Next.js native hash navigation is too fast or doesn't smooth scroll
       setTimeout(() => {
         const element = document.querySelector(hash);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 100);
+      }, 300);
     } else {
       const element = document.querySelector(hash);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+      // Update URL hash without jumping
+      window.history.pushState(null, '', hash);
     }
   };
 
