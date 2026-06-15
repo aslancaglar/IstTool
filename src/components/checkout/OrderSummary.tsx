@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { ShoppingBag, Tag, Truck, Percent, CheckCircle2, X, Loader2, Sparkles, Gift, Calculator } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import FreeDeliveryBar from '../FreeDeliveryBar';
@@ -125,7 +126,7 @@ export default function OrderSummary({
                     <div key={item.id} className="flex gap-3 group p-2 rounded-xl hover:bg-gray-50 transition-colors">
                         <div className="w-12 h-12 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200 group-hover:border-primary-200 transition-colors shadow-sm">
                             {item.image ? (
-                                <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.name} />
+                                <Image src={item.image} width={48} height={48} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.name} />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <ShoppingBag className="w-5 h-5 text-gray-300" />
@@ -156,7 +157,7 @@ export default function OrderSummary({
                     <div key={`bogo-free-${item.menuItemId}-${idx}`} className="flex gap-3 p-2 rounded-xl bg-emerald-50/60 border border-dashed border-emerald-200 animate-in fade-in duration-300">
                         <div className="w-12 h-12 rounded-xl bg-emerald-50 flex-shrink-0 overflow-hidden border border-emerald-100 shadow-sm">
                             {item.image ? (
-                                <img src={item.image} className="w-full h-full object-cover opacity-80" alt={item.name} />
+                                <Image src={item.image} width={48} height={48} className="w-full h-full object-cover opacity-80" alt={item.name} />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <Gift className="w-5 h-5 text-emerald-300" />

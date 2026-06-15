@@ -78,8 +78,8 @@ export default function Contact() {
                 <h3 className="text-xl font-bold text-gray-900">Horaires</h3>
               </div>
               <div className="space-y-3">
-                {restaurantInfo.hours?.map((h, index) => (
-                  <div key={index} className="flex justify-between items-center text-sm py-2 border-b border-gray-100 last:border-0">
+                {restaurantInfo.hours?.map((h) => (
+                  <div key={h.day} className="flex justify-between items-center text-sm py-2 border-b border-gray-100 last:border-0">
                     <span className="font-semibold text-gray-800">{h.day}</span>
                     <span className="text-gray-600 text-right">{h.time}</span>
                   </div>

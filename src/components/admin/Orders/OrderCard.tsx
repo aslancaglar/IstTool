@@ -101,7 +101,7 @@ export default function OrderCard({ order, onClick, onStatusChange }: OrderCardP
                 {/* Items */}
                 <div className="flex flex-wrap gap-1.5 mb-3">
                     {itemSummary.map((item: any, i: number) => (
-                        <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">
+                        <span key={`${item.name}-${i}`} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">
                             {item.name}
                             {item.toppingCount > 0 && (
                                 <span className="text-[9px] bg-slate-200 text-slate-500 rounded px-1 font-bold">+{item.toppingCount}</span>

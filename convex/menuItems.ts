@@ -10,21 +10,27 @@ export const list = query({
     const sortedItems = items.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
     const itemsWithImages = await resolveItemsWithImages(ctx, sortedItems);
 
+    // Fetch all topping assignments in a single read and group them by menu item,
+    // instead of running one indexed query per item (N+1).
+    const allAssignments = await ctx.db.query("menuItemToppings").collect();
+    const assignmentsByItem = new Map<string, typeof allAssignments>();
+    for (const assignment of allAssignments) {
+      const list = assignmentsByItem.get(assignment.menuItemId);
+      if (list) list.push(assignment);
+      else assignmentsByItem.set(assignment.menuItemId, [assignment]);
+    }
+
     // Add topping category IDs for each item (sorted by display order)
-    const itemsWithToppings = await Promise.all(
-      itemsWithImages.map(async (item) => {
-        const assignments = await ctx.db
-          .query("menuItemToppings")
-          .withIndex("by_menu_item", (q) => q.eq("menuItemId", item._id))
-          .collect();
-        // Sort by display order
-        const sorted = assignments.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
-        return {
-          ...item,
-          toppingCategoryIds: sorted.map((a) => a.toppingCategoryId),
-        };
-      })
-    );
+    const itemsWithToppings = itemsWithImages.map((item) => {
+      const assignments = assignmentsByItem.get(item._id) ?? [];
+      const sorted = assignments
+        .slice()
+        .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+      return {
+        ...item,
+        toppingCategoryIds: sorted.map((a) => a.toppingCategoryId),
+      };
+    });
 
     return itemsWithToppings;
   },

@@ -127,8 +127,8 @@ export default function Footer() {
             <h3 className="text-lg font-display font-normal text-white mb-6">Horaires</h3>
             {hours.length > 0 ? (
               <ul className="space-y-3">
-                {hours.map((item, index) => (
-                  <li key={index} className="text-gray-400">
+                {hours.map((item) => (
+                  <li key={item.day} className="text-gray-400">
                     <span className="block font-medium text-gray-300">
                       {item.day}
                     </span>

@@ -8,7 +8,10 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+// Only initialize Stripe when a publishable key is configured. Calling
+// loadStripe('') throws an IntegrationError and crashes the checkout page.
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 export interface StripeFormHandle {
   submit: () => Promise<void>;
@@ -106,6 +109,15 @@ const StripePaymentForm = forwardRef<StripeFormHandle, StripePaymentFormProps>(
         },
       },
     };
+
+    if (!stripePromise) {
+      return (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          Le paiement par carte est momentanément indisponible. Veuillez choisir le
+          paiement en espèces ou réessayer plus tard.
+        </div>
+      );
+    }
 
     return (
       <Elements stripe={stripePromise} options={options}>

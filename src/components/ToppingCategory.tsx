@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Check } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 
@@ -67,7 +68,7 @@ export default function ToppingCategory({
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                         {topping.image && (
-                                            <img src={topping.image} alt="" className="w-8 h-8 object-cover rounded-md flex-shrink-0" />
+                                            <Image src={topping.image} alt="" width={32} height={32} className="w-8 h-8 object-cover rounded-md flex-shrink-0" />
                                         )}
                                         <div className="text-sm font-medium text-gray-900">
                                             {topping.name}

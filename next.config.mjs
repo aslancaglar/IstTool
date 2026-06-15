@@ -29,7 +29,8 @@ const nextConfig = {
         ...(convexSiteUrl ? { NEXT_PUBLIC_CONVEX_SITE_URL: convexSiteUrl } : {}),
     },
     images: {
-        unoptimized: true,
+        // Let Next.js / the Netlify image CDN serve responsive AVIF/WebP variants.
+        formats: ['image/avif', 'image/webp'],
         remotePatterns: imageHostnames.map((hostname) => ({
             protocol: 'https',
             hostname,
