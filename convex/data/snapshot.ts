@@ -1194,62 +1194,6 @@ export const snapshot: any = {
       "toppingCategoryId": "boisson-menu"
     },
     {
-      "_creationTime": 1781213550743.1975,
-      "_id": "js714bb8c1n9wzw894j7xevc1d88fvk4",
-      "displayOrder": 0,
-      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
-      "toppingCategoryId": "2-viandes"
-    },
-    {
-      "_creationTime": 1781213550743.1978,
-      "_id": "js79tajpvkyq7z15rn26km2kex88em9m",
-      "displayOrder": 1,
-      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
-      "toppingCategoryId": "sauces"
-    },
-    {
-      "_creationTime": 1781213550743.198,
-      "_id": "js7e0tryyay98tn2v5w5ebxqan88enfp",
-      "displayOrder": 2,
-      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
-      "toppingCategoryId": "supllements"
-    },
-    {
-      "_creationTime": 1781213550743.1982,
-      "_id": "js7afrz04vx6h7tqp4rfj3t9qd88f44f",
-      "displayOrder": 3,
-      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
-      "toppingCategoryId": "boissons"
-    },
-    {
-      "_creationTime": 1781213583514.2434,
-      "_id": "js7ayxdgz6ymds81jc03rbqd4988ezea",
-      "displayOrder": 0,
-      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
-      "toppingCategoryId": "2-viandes"
-    },
-    {
-      "_creationTime": 1781213583514.2437,
-      "_id": "js7c9cwyee0a8t940xnzdmfvx188e415",
-      "displayOrder": 1,
-      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
-      "toppingCategoryId": "sauces"
-    },
-    {
-      "_creationTime": 1781213583514.244,
-      "_id": "js7dkf7c9r5ey9f9y9g074ye7d88f0nx",
-      "displayOrder": 2,
-      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
-      "toppingCategoryId": "supllements"
-    },
-    {
-      "_creationTime": 1781213583514.2441,
-      "_id": "js7fj5qtkyc5wcmme1byxk7v9n88ft0g",
-      "displayOrder": 3,
-      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
-      "toppingCategoryId": "boissons"
-    },
-    {
       "_creationTime": 1781378002141.3171,
       "_id": "js795r86gsk73z0rj7fxw0yfyd88ken0",
       "displayOrder": 0,
@@ -2515,6 +2459,62 @@ export const snapshot: any = {
       "displayOrder": 5,
       "menuItemId": "jx7ec1wm4mnv8264mpnbfytjch87xerk",
       "toppingCategoryId": "boisson-menu"
+    },
+    {
+      "_creationTime": 1781435345693.9639,
+      "_id": "js76q347y1hd7wf847br7vhh5188nz3j",
+      "displayOrder": 0,
+      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
+      "toppingCategoryId": "2-viandes"
+    },
+    {
+      "_creationTime": 1781435345693.964,
+      "_id": "js7d1mdwkhhtn00vq750b7e3kd88nrmp",
+      "displayOrder": 1,
+      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1781435345693.9644,
+      "_id": "js78wwnnmyqp9bax5xg7abcyg188n1g9",
+      "displayOrder": 2,
+      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
+      "toppingCategoryId": "supllements"
+    },
+    {
+      "_creationTime": 1781435345693.9646,
+      "_id": "js72c1ps6bdjep768pyqyyp5cs88mpvj",
+      "displayOrder": 3,
+      "menuItemId": "jx7bn099bwjyb88e80v2ka9k7d87xsdz",
+      "toppingCategoryId": "boissons"
+    },
+    {
+      "_creationTime": 1781435746516.9238,
+      "_id": "js7f8x5njm5h4fkzw0b2tnm7bs88na10",
+      "displayOrder": 0,
+      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
+      "toppingCategoryId": "2-viandes"
+    },
+    {
+      "_creationTime": 1781435746516.924,
+      "_id": "js70fyygqehp0trpj2bg99v2nx88nchh",
+      "displayOrder": 1,
+      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
+      "toppingCategoryId": "sauces"
+    },
+    {
+      "_creationTime": 1781435746516.9243,
+      "_id": "js71kvxcnm9skybp09hd4ng8sx88n7f2",
+      "displayOrder": 2,
+      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
+      "toppingCategoryId": "supllements"
+    },
+    {
+      "_creationTime": 1781435746516.9246,
+      "_id": "js71qz6bx5swjwx54pm24xm0ps88my4n",
+      "displayOrder": 3,
+      "menuItemId": "jx70twfqgpzh3ww38fd1kn8nan87wt44",
+      "toppingCategoryId": "boissons"
     }
   ],
   "menuItems": [
@@ -3151,7 +3151,7 @@ export const snapshot: any = {
       "categoryOrders": [],
       "description": "2 Viandes au choix, Sauce fromagère, Frites, Mozzarella, Sauce au choix",
       "displayOrder": 0,
-      "image": "",
+      "image": "/bowls/bowl1.jpg",
       "inStock": true,
       "isUpsell": false,
       "name": "Istanbul Bowl",
@@ -3168,7 +3168,7 @@ export const snapshot: any = {
       "categoryOrders": [],
       "description": "2 Viandes au choix, Riz, Oignon Frit, Persil, Sauce au choix",
       "displayOrder": 1,
-      "image": "",
+      "image": "/bowls/bowl2.jpg",
       "inStock": true,
       "isUpsell": false,
       "name": "Tasty Crousty",
@@ -3331,7 +3331,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Fanta Orange 1.25L",
       "popular": true,
-      "price": 4.6
+      "price": 3.5
     },
     {
       "_creationTime": 1780432263966.293,
@@ -3353,7 +3353,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Coca Cola 1.25L",
       "popular": true,
-      "price": 4.6
+      "price": 3.5
     },
     {
       "_creationTime": 1780432263966.2932,
@@ -3375,7 +3375,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Ice Tea Pêche 1.25L",
       "popular": false,
-      "price": 4.6
+      "price": 3.5
     },
     {
       "_creationTime": 1780432263966.2935,
@@ -3397,7 +3397,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Oasis Tropical 2L",
       "popular": false,
-      "price": 5.1
+      "price": 4
     },
     {
       "_creationTime": 1780432263966.2937,
@@ -3419,7 +3419,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "RedBull 25cl",
       "popular": false,
-      "price": 3.5
+      "price": 3
     },
     {
       "_creationTime": 1780432263966.294,
@@ -3507,7 +3507,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Icetea 33cl",
       "popular": false,
-      "price": 2.2
+      "price": 2
     },
     {
       "_creationTime": 1780432263966.295,
@@ -3529,7 +3529,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Oasis Pomme Cassis Framboise 33cl",
       "popular": false,
-      "price": 2.2
+      "price": 2
     },
     {
       "_creationTime": 1780432263966.2952,
@@ -3551,7 +3551,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Oasis tropicale 33cl",
       "popular": false,
-      "price": 2.2
+      "price": 2
     },
     {
       "_creationTime": 1780432263966.2954,
@@ -3573,7 +3573,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Perrier 33cl",
       "popular": false,
-      "price": 2.2
+      "price": 2
     },
     {
       "_creationTime": 1780432263966.2957,
@@ -3749,7 +3749,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Dada Cerise 35cl",
       "popular": false,
-      "price": 2.2
+      "price": 2
     },
     {
       "_creationTime": 1780432263966.2976,
@@ -3920,7 +3920,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Desperados 33cl",
       "popular": false,
-      "price": 4.3
+      "price": 4.5
     },
     {
       "_creationTime": 1780432263966.2996,
@@ -3937,7 +3937,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "8.6 50cl",
       "popular": false,
-      "price": 4.3
+      "price": 4
     },
     {
       "_creationTime": 1780432263966.2998,
@@ -3954,7 +3954,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Efes 50cl",
       "popular": false,
-      "price": 4.3
+      "price": 4
     },
     {
       "_creationTime": 1780432263966.3,
@@ -3971,7 +3971,7 @@ export const snapshot: any = {
       "isUpsell": false,
       "name": "Heineken 25cl",
       "popular": false,
-      "price": 2.6
+      "price": 2.5
     },
     {
       "_creationTime": 1780432263966.3003,
