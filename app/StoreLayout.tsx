@@ -48,6 +48,11 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     const isOrderSuccess = pathname?.startsWith('/order-success');
     const hideFooter = isCheckout || isOrderSuccess;
 
+    // Force scroll to top on route change to fix Next.js scroll restoration bug
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, [pathname]);
+
     if (isAdmin) {
         return <main className="min-h-screen">{children}</main>;
     }
