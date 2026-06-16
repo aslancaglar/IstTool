@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, CheckCircle2, ChevronDown, FileDown, MapPin, Star, Store, Truck, User as UserIcon, Utensils } from 'lucide-react';
-import { CancelledX, CompletedCheck, CookingPot, DeliveryScooter, PulsingClock } from './StatusIcons';
+import { CancelledX, CompletedCheck, CookingPot, DeliveryScooter, PulsingClock, ReadyBag } from './StatusIcons';
 import { useInvoiceDownload } from '../../hooks/useInvoiceDownload';
 
 interface OrderDetailProps {
@@ -14,13 +14,14 @@ interface OrderDetailProps {
   onLeaveReview: () => void;
 }
 
-const FLOW_PICKUP = ['pending', 'preparing', 'completed'];
-const FLOW_DELIVERY = ['pending', 'preparing', 'delivering', 'completed'];
-const STEP_LABELS: Record<string, string> = { pending: 'Reçue', preparing: 'Préparation', delivering: 'Livraison', completed: 'Terminée' };
+const FLOW_PICKUP = ['pending', 'preparing', 'ready', 'completed'];
+const FLOW_DELIVERY = ['pending', 'preparing', 'ready', 'delivering', 'completed'];
+const STEP_LABELS: Record<string, string> = { pending: 'Reçue', preparing: 'Préparation', ready: 'Prêt', delivering: 'Livraison', completed: 'Terminée' };
 
 const STATUS_CONF: Record<string, { icon: React.FC; title: string; subtitle: string; bg: string; accent: string; text: string; dot: string; progressBg: string }> = {
   pending:    { icon: PulsingClock,    title: 'En attente',      subtitle: 'Votre commande est en attente de confirmation.',  bg: 'from-amber-50 to-orange-50',  accent: 'text-amber-700',   text: 'text-amber-600',   dot: 'bg-amber-500',   progressBg: 'bg-amber-500' },
   preparing:  { icon: CookingPot,      title: 'En préparation',  subtitle: 'Notre chef prépare votre commande avec soin.',    bg: 'from-blue-50 to-indigo-50',   accent: 'text-blue-700',    text: 'text-blue-600',    dot: 'bg-blue-500',    progressBg: 'bg-blue-500' },
+  ready:      { icon: ReadyBag,        title: 'Prête ! 🎉',       subtitle: 'Votre commande est prête ! Vous pouvez venir la récupérer.', bg: 'from-emerald-50 to-teal-50', accent: 'text-emerald-700', text: 'text-emerald-600', dot: 'bg-emerald-500', progressBg: 'bg-emerald-500' },
   delivering: { icon: DeliveryScooter, title: 'En livraison',    subtitle: 'Votre livreur est en route !',                    bg: 'from-violet-50 to-purple-50', accent: 'text-violet-700',  text: 'text-violet-600',  dot: 'bg-violet-500',  progressBg: 'bg-violet-500' },
   completed:  { icon: CompletedCheck,  title: 'Terminée',        subtitle: 'Merci et bon appétit !',                          bg: 'from-emerald-50 to-green-50', accent: 'text-emerald-700', text: 'text-emerald-600', dot: 'bg-emerald-500', progressBg: 'bg-emerald-500' },
   cancelled:  { icon: CancelledX,      title: 'Annulée',         subtitle: 'Cette commande a été annulée.',                   bg: 'from-red-50 to-rose-50',      accent: 'text-red-700',     text: 'text-red-600',     dot: 'bg-red-500',     progressBg: 'bg-red-500' },
@@ -241,14 +242,16 @@ export default function OrderDetail({ order, user, sessionToken, detailsOpen, on
         </button>
       )}
 
-      <button
-        onClick={handleDownloadInvoice}
-        disabled={isDownloading || !sessionToken}
-        className="w-full py-3 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <FileDown className="w-4 h-4" />
-        {isDownloading ? 'Génération…' : 'Télécharger la facture'}
-      </button>
+      {order.status === 'completed' && (
+        <button
+          onClick={handleDownloadInvoice}
+          disabled={isDownloading || !sessionToken}
+          className="w-full py-3 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <FileDown className="w-4 h-4" />
+          {isDownloading ? 'Génération…' : 'Télécharger la facture'}
+        </button>
+      )}
     </div>
   );
 }

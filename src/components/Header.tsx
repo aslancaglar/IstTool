@@ -67,9 +67,11 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 sm:py-3 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto pl-4 pr-3 sm:px-4 lg:px-6 bg-primary-600 rounded-full shadow-2xl border border-white/5 transition-all duration-300">
-        <div className="flex items-center justify-between h-16 relative">
+        
+        {/* Desktop Header Layout */}
+        <div className="hidden lg:flex items-center justify-between h-16 relative">
           <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
-            <div className="flex-shrink-0 flex items-center relative w-[155px] sm:w-[195px] h-[60px] sm:h-[75px]">
+            <div className="flex-shrink-0 flex items-center relative w-[195px] h-[75px]">
               <Image
                 src="/logo-istanbul-kebab.png"
                 alt="Resto Istanbul"
@@ -81,9 +83,9 @@ export default function Header() {
           </Link>
           
           {/* Spacer to preserve layout flow since logo is now absolute */}
-          <div className="w-[155px] sm:w-[195px] shrink-0 h-full" />
+          <div className="w-[195px] shrink-0 h-full" />
 
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = link.type === 'route'
                 ? pathname === link.href
@@ -115,7 +117,7 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-5">
+          <div className="flex items-center gap-5">
             <OpenStatus isScrolled={isScrolled} variant="desktop" />
 
             <div className="flex items-center gap-3 pr-2 border-r border-white/10">
@@ -169,16 +171,30 @@ export default function Header() {
               07 82 81 46 56
             </a>
           </div>
+        </div>
 
-          {/* Mobile Status - Always Visible - Absolutely Centered */}
-          <div className="lg:hidden absolute left-1/2 -translate-x-1/2 pointer-events-none">
-            <div className="pointer-events-auto">
-              <OpenStatus isScrolled={isScrolled} variant="mobile" />
-            </div>
+        {/* Mobile Header Layout (Left Logo, Center Status, Right Hamburger) */}
+        <div className="lg:hidden grid grid-cols-3 items-center h-16 w-full relative">
+          {/* Left: Logo */}
+          <div className="flex justify-start">
+            <Link href="/" className="relative flex items-center w-[120px] h-[46px] left-[-8px]">
+              <Image
+                src="/logo-istanbul-kebab.png"
+                alt="Resto Istanbul"
+                fill
+                priority
+                className="object-contain object-left drop-shadow-xl"
+              />
+            </Link>
           </div>
 
-          {/* Mobile Menu Button Only - Cart removed (handled by MobileStickyCart) */}
-          <div className="lg:hidden flex items-center gap-1 sm:gap-2">
+          {/* Center: Status */}
+          <div className="flex justify-center min-w-0">
+            <OpenStatus isScrolled={isScrolled} variant="mobile" />
+          </div>
+
+          {/* Right: Hamburger Menu & Account */}
+          <div className="flex justify-end items-center gap-1 sm:gap-2 shrink-0">
             {user ? (
               <Link
                 href="/account"

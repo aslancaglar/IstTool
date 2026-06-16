@@ -154,3 +154,27 @@ export const CancelledX = () => (
         <line x1="52" y1="28" x2="28" y2="52" stroke="#DC2626" strokeWidth="4" strokeLinecap="round" />
     </svg>
 );
+
+export const ReadyBag = () => (
+    <svg viewBox="0 0 80 80" className="w-20 h-20">
+        <circle cx="40" cy="40" r="36" fill="#D1FAE5" stroke="#10B981" strokeWidth="2.5">
+            <animate attributeName="r" values="34;36;34" dur="2s" repeatCount="indefinite" />
+        </circle>
+        <path d="M24 34 L24 58 Q24 60 26 60 L54 60 Q56 60 56 58 L56 34 Z" fill="#10B981" opacity="0.9" />
+        <path d="M24 34 L56 34" stroke="#059669" strokeWidth="2" />
+        <path d="M32 34 L32 28 Q32 22 40 22 Q48 22 48 28 L48 34" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M32 46 L38 52 L50 38" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <animate attributeName="stroke-dashoffset" from="30" to="0" dur="0.8s" fill="freeze" />
+            <animate attributeName="stroke-dasharray" from="0 30" to="30 0" dur="0.8s" fill="freeze" />
+        </path>
+        <circle cx="18" cy="28" r="1.5" fill="#34D399" opacity="0">
+            <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0s" />
+        </circle>
+        <circle cx="62" cy="30" r="1" fill="#34D399" opacity="0">
+            <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0.5s" />
+        </circle>
+        <circle cx="60" cy="52" r="1.5" fill="#34D399" opacity="0">
+            <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="1s" />
+        </circle>
+    </svg>
+);

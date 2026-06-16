@@ -135,10 +135,10 @@ export default function OpenStatus({ variant = 'desktop' }: OpenStatusProps) {
             <>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 bg-black/20 hover:bg-black/30 transition-colors rounded-full backdrop-blur-md border border-white/20 shadow-sm active:scale-95"
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-black/20 hover:bg-black/30 transition-colors rounded-full backdrop-blur-md border border-white/20 shadow-sm active:scale-95"
                 >
-                    <Clock className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${clockColor}`} />
-                    <span className="text-white font-bold uppercase tracking-wider text-xs sm:text-xs whitespace-nowrap">
+                    <Clock className={`w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 ${clockColor}`} />
+                    <span className="text-white font-bold uppercase tracking-wider text-[11px] sm:text-xs whitespace-nowrap">
                         {label}
                     </span>
                 </button>
