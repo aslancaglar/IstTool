@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -8,7 +8,7 @@ import { Lock, KeyRound, AlertCircle, CheckCircle2, ArrowRight } from "lucide-re
 import Link from "next/link";
 import AppLoaderWrapper from "../../src/components/AppLoaderWrapper";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -63,8 +63,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <AppLoaderWrapper>
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-24">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-24">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden p-8 border border-gray-100">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -143,6 +142,15 @@ export default function ResetPasswordPage() {
           )}
         </div>
       </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <AppLoaderWrapper>
+      <Suspense fallback={null}>
+        <ResetPasswordForm />
+      </Suspense>
     </AppLoaderWrapper>
   );
 }
