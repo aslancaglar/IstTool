@@ -115,7 +115,10 @@ export default function PaymentSection({
                             onClick={() => {
                                 setPaymentMethod('stripe');
                                 setStripeError(null);
-                                if (!showStripeForm && !clientSecret) createPaymentIntent();
+                                if (!showStripeForm) {
+                                    if (!clientSecret) createPaymentIntent();
+                                    else setShowStripeForm(true);
+                                }
                             }}
                             className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-start gap-3 bg-white ${
                                 paymentMethod === 'stripe'
