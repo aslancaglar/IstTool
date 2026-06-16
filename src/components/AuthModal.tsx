@@ -79,7 +79,10 @@ export default function AuthModal() {
     setIsLoading(true);
 
     try {
-      await requestPasswordReset({ email: forgotPasswordEmail });
+      await requestPasswordReset({ 
+        email: forgotPasswordEmail,
+        origin: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"
+      });
       setSuccessMessage("Si un compte existe avec cette adresse, un email de réinitialisation vous a été envoyé.");
       setForgotPasswordEmail("");
     } catch (err: unknown) {

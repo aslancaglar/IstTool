@@ -43,7 +43,7 @@ export const generatePasswordResetToken = mutation({
 });
 
 export const requestPasswordReset = action({
-  args: { email: v.string() },
+  args: { email: v.string(), origin: v.string() },
   handler: async (ctx, args) => {
     const resendApiKey = process.env.RESEND_API_KEY;
     if (!resendApiKey) {
@@ -62,8 +62,8 @@ export const requestPasswordReset = action({
       return { success: true };
     }
 
-    // Determine the base URL for the reset link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    // Determine the base URL for the reset link based on the client origin
+    const baseUrl = args.origin || "http://localhost:3000";
     const resetLink = `${baseUrl}/reset-password?token=${result.token}`;
 
     try {
