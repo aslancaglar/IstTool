@@ -77,17 +77,17 @@ export default function MenuItem({ item, onOpenModal, discountPercent = 0, promo
           </div>
         </div>
         <div className="p-3 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-1 sm:mb-2 gap-0.5 sm:gap-2">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 font-display line-clamp-2 leading-tight">
+          <div className="flex items-start justify-between mb-1 sm:mb-2">
+            <h3 className="text-sm sm:text-xl font-bold text-gray-900 font-display line-clamp-1">
               {item?.name || 'Article'}
             </h3>
             {discountedPrice !== null ? (
-              <div className="flex flex-row sm:flex-col items-baseline sm:items-end gap-1.5 sm:gap-0 shrink-0">
+              <div className="flex flex-col items-end ml-1.5 sm:ml-2 shrink-0">
                 <span className="text-[10px] text-gray-400 line-through leading-none">{item.price.toFixed(2)}€</span>
-                <span className="text-lg sm:text-xl font-bold text-green-600 font-display leading-tight">{discountedPrice.toFixed(2)}€</span>
+                <span className="text-sm sm:text-xl font-bold text-green-600 font-display leading-tight">{discountedPrice.toFixed(2)}€</span>
               </div>
             ) : (
-              <span className="text-lg sm:text-xl font-bold text-primary-500 font-display shrink-0">
+              <span className="text-sm sm:text-xl font-bold text-primary-500 ml-1.5 sm:ml-2 font-display shrink-0">
                 {(item?.price || 0).toFixed(2)}€
               </span>
             )}
