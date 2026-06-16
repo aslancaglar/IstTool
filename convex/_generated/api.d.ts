@@ -24,6 +24,7 @@ import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as menuItems from "../menuItems.js";
 import type * as mutations from "../mutations.js";
+import type * as passwordReset from "../passwordReset.js";
 import type * as printAgent from "../printAgent.js";
 import type * as printing from "../printing.js";
 import type * as promoCodes from "../promoCodes.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   "lib/storage": typeof lib_storage;
   menuItems: typeof menuItems;
   mutations: typeof mutations;
+  passwordReset: typeof passwordReset;
   printAgent: typeof printAgent;
   printing: typeof printing;
   promoCodes: typeof promoCodes;

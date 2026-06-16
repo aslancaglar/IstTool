@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Mail, Lock, UserPlus, LogIn, User, Phone, MapPin, ArrowRight, AlertCircle } from "lucide-react";
+import { X, Mail, Lock, UserPlus, LogIn, User, Phone, MapPin, ArrowRight, AlertCircle, KeyRound, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useAuthModal } from "../context/AuthModalContext";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 /**
  * Convex wraps thrown server errors as
@@ -49,18 +51,42 @@ export default function AuthModal() {
     confirmPassword: "",
   });
 
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  
+  const requestPasswordReset = useAction(api.passwordReset.requestPasswordReset);
+
   useBodyScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {
       setError("");
+      setSuccessMessage("");
       setIsLoading(false);
     }
   }, [isOpen, mode]);
 
   const close = () => {
     setError("");
+    setSuccessMessage("");
     closeAuthModal();
+  };
+
+  const handleForgotPasswordSubmit = async (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
+    setError("");
+    setSuccessMessage("");
+    setIsLoading(true);
+
+    try {
+      await requestPasswordReset({ email: forgotPasswordEmail });
+      setSuccessMessage("Si un compte existe avec cette adresse, un email de réinitialisation vous a été envoyé.");
+      setForgotPasswordEmail("");
+    } catch (err: unknown) {
+      setError(extractServerErrorMessage(err) || "Une erreur est survenue.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLoginSubmit = async (e?: React.SyntheticEvent) => {
@@ -135,7 +161,7 @@ export default function AuthModal() {
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div>
             <h2 className="font-display text-2xl font-extrabold text-gray-900">
-              {mode === "login" ? "Connexion" : "Inscription"}
+              {mode === "login" ? "Connexion" : mode === "signup" ? "Inscription" : "Mot de passe oublié"}
             </h2>
           </div>
           <button
@@ -148,7 +174,61 @@ export default function AuthModal() {
         </div>
 
         <div className="p-6 max-h-[80vh] overflow-y-auto">
-          {mode === "login" ? (
+          {mode === "forgot_password" ? (
+            <div className="space-y-4">
+              {successMessage ? (
+                <div className="bg-green-50 text-green-700 p-4 rounded-2xl flex items-start gap-3 border border-green-100">
+                  <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm font-medium leading-relaxed">{successMessage}</p>
+                </div>
+              ) : (
+                <form 
+                  autoComplete="on" 
+                  className="space-y-4"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (e.currentTarget.reportValidity()) handleForgotPasswordSubmit(e);
+                    }
+                  }}
+                >
+                  <p className="text-gray-600 text-sm mb-4">
+                    Entrez votre adresse email ci-dessous. Nous vous enverrons un lien pour réinitialiser votre mot de passe.
+                  </p>
+                  <div className="space-y-2">
+                    <label htmlFor="forgot-email" className="text-sm font-bold text-gray-700">Email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        id="forgot-email"
+                        type="email"
+                        name="email"
+                        autoComplete="email"
+                        required
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                        className="w-full bg-gray-50 border-none rounded-2xl p-4 pl-11 focus:ring-2 focus:ring-red-500 text-gray-900"
+                        placeholder="votre@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      const form = e.currentTarget.closest('form');
+                      if (form && form.reportValidity()) handleForgotPasswordSubmit(e);
+                    }}
+                    disabled={isLoading}
+                    className="w-full bg-red-500 text-white font-bold py-4 rounded-2xl hover:bg-red-600 transition-all shadow-lg hover:shadow-red-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? "Envoi..." : "Envoyer le lien"}
+                    <KeyRound className="w-5 h-5" />
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : mode === "login" ? (
             <form 
               autoComplete="on" 
               className="space-y-4"
@@ -193,6 +273,16 @@ export default function AuthModal() {
                     placeholder="••••••••"
                   />
                 </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot_password")}
+                  className="text-sm font-bold text-red-500 hover:text-red-600 transition-colors"
+                >
+                  Mot de passe oublié ?
+                </button>
               </div>
 
               <button
@@ -390,26 +480,35 @@ export default function AuthModal() {
             </form>
           )}
 
-          <div className="mt-6 pt-5 border-t border-gray-100 text-center">
+          <div className="mt-6 pt-5 border-t border-gray-100 text-center flex flex-col gap-3">
             {mode === "login" ? (
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-600 transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-red-500 font-bold hover:text-red-600 transition-colors"
               >
                 <UserPlus className="w-4 h-4" />
                 Créer un compte
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : mode === "signup" ? (
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="inline-flex items-center justify-center gap-2 text-red-500 font-bold hover:text-red-600 transition-colors"
+              >
+                <LogIn className="w-4 h-4" />
+                J'ai déjà un compte
                 <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setMode("login")}
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-600 transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-gray-600 font-bold hover:text-gray-900 transition-colors"
               >
-                <LogIn className="w-4 h-4" />
-                J'ai déjà un compte
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 rotate-180" />
+                Retour à la connexion
               </button>
             )}
           </div>

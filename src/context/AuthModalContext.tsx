@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
-export type AuthModalMode = "login" | "signup";
+export type AuthModalMode = "login" | "signup" | "forgot_password";
 
 interface AuthModalContextType {
   isOpen: boolean;

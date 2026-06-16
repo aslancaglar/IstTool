@@ -171,6 +171,14 @@ export default defineSchema({
   }).index("by_user", ["userId"])
     .index("by_token_hash", ["tokenHash"]),
 
+  passwordResets: defineTable({
+    userId: v.id("users"),
+    tokenHash: v.string(),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  }).index("by_user", ["userId"])
+    .index("by_token_hash", ["tokenHash"]),
+
   orders: defineTable({
     userId: v.optional(v.id("users")),
     customer: v.object({
