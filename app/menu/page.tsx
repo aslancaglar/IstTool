@@ -24,7 +24,7 @@ export default function MenuPage() {
 
 
                         <Image
-                            src="/cover33.jpg"
+                            src="/cover33.webp"
                             alt="Resto Istanbul Background"
                             fill
                             priority

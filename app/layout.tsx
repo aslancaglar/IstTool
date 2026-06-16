@@ -1,5 +1,26 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, Bebas_Neue, Titan_One } from 'next/font/google';
 import '../src/index.css';
+
+// Self-hosted via next/font: removes the render-blocking request to
+// fonts.googleapis.com and the font files are served from our own origin.
+const inter = Inter({
+    subsets: ['latin'],
+    display: 'swap',
+    variable: '--font-inter',
+});
+const bebasNeue = Bebas_Neue({
+    subsets: ['latin'],
+    weight: '400',
+    display: 'swap',
+    variable: '--font-bebas',
+});
+const titanOne = Titan_One({
+    subsets: ['latin'],
+    weight: '400',
+    display: 'swap',
+    variable: '--font-titan',
+});
 
 import ConvexClientProvider from './ConvexClientProvider';
 import { AdminAuthProvider } from '../src/context/AdminAuthContext';
@@ -89,14 +110,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="fr">
+        <html lang="fr" className={`${inter.variable} ${bebasNeue.variable} ${titanOne.variable}`}>
             <head>
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Titan+One&family=Inter:wght@300;400;500;600;700;800&display=swap"
-                    rel="stylesheet"
-                />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{

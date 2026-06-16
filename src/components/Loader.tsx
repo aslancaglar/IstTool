@@ -37,7 +37,7 @@ export default function Loader({ onFinished }: { onFinished: () => void }) {
                 <div className={`loader-logo ${progress > 0 ? 'loader-logo-visible' : ''}`}>
                     <div className="relative w-32 md:w-40 h-32 md:h-40 mb-8 animate-pulse">
                         <Image
-                            src="/logo-istanbul-kebab.png"
+                            src="/logo-istanbul-kebab.webp"
                             alt="Resto Istanbul"
                             fill
                             priority

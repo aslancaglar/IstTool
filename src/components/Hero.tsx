@@ -11,7 +11,7 @@ export default function Hero() {
     >
       <div className="absolute inset-0">
         <Image
-          src="/cover33.jpg"
+          src="/cover33.webp"
           alt="Resto Istanbul Background"
           fill
           priority
@@ -27,7 +27,7 @@ export default function Hero() {
             <h1 className="sr-only">Resto Istanbul, votre restaurant de kebab, tacos et burgers à Toul</h1>
             <h2 
               style={{ 
-                fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', 
+                fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif', 
                 fontWeight: 900, 
                 textShadow: '3px 3px 0px #000, 0 4px 10px rgba(0,0,0,0.5)'
               }} 

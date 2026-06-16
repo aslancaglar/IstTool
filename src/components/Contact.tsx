@@ -23,7 +23,7 @@ export default function Contact() {
         <FadeIn>
           <div className="text-center mb-16">
             <p className="text-primary-700 font-semibold mb-2">Contactez-nous</p>
-            <h2 style={{ fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl text-gray-900 mb-6 tracking-wide uppercase">
+            <h2 style={{ fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl text-gray-900 mb-6 tracking-wide uppercase">
               Nous Trouver
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">

@@ -21,7 +21,7 @@ export default function Reviews() {
         <FadeIn direction="up">
           <div className="text-center mb-16">
             <p className="text-primary-600 font-extrabold mb-2">Témoignages</p>
-            <h2 style={{ fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl text-gray-900 mb-6 tracking-wide uppercase">
+            <h2 style={{ fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl text-gray-900 mb-6 tracking-wide uppercase">
               Ce Que Disent Nos Clients
             </h2>
           </div>

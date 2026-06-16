@@ -49,7 +49,7 @@ export default function Footer() {
               {/* Logo */}
               <div className="relative w-[100px] h-[100px]">
                 <Image
-                  src="/logo-istanbul-kebab.png"
+                  src="/logo-istanbul-kebab.webp"
                   alt="Resto Istanbul Logo"
                   fill
                   className="object-contain"
@@ -179,7 +179,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-700 pt-8">
           <p className="text-center text-gray-400">
-            &copy; {new Date().getFullYear()} <span style={{ fontFamily: '"Titan One", cursive' }}>Resto Istanbul</span>. Tous droits réservés.
+            &copy; {new Date().getFullYear()} <span style={{ fontFamily: 'var(--font-titan), "Titan One", cursive' }}>Resto Istanbul</span>. Tous droits réservés.
           </p>
         </div>
       </div>

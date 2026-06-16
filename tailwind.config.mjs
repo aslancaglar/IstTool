@@ -49,9 +49,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Bebas Neue', 'sans-serif'],
-        titan: ['"Titan One"', 'cursive'],
+        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
+        display: ['var(--font-bebas)', 'Bebas Neue', 'sans-serif'],
+        titan: ['var(--font-titan)', '"Titan One"', 'cursive'],
       },
       borderRadius: {
         '4xl': '2rem',

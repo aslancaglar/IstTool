@@ -13,7 +13,7 @@ export default function About() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <FadeIn delay={100} direction="up">
             <p className="text-primary-600 font-extrabold mb-2">À Propos</p>
-            <h2 style={{ fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl lg:text-6xl text-gray-900 mb-6 leading-none tracking-wide uppercase">
+            <h2 style={{ fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl lg:text-6xl text-gray-900 mb-6 leading-none tracking-wide uppercase">
               Resto Istanbul,<br />
               votre Fast-Food à Toul
             </h2>

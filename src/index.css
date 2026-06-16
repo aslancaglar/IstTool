@@ -56,7 +56,7 @@
 }
 
 .loader-tagline {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-bebas), 'Bebas Neue', sans-serif;
   font-size: 1.25rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -99,7 +99,7 @@
 }
 
 .loader-text {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), 'Inter', sans-serif;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -132,7 +132,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

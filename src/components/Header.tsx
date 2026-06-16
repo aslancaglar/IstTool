@@ -73,7 +73,7 @@ export default function Header() {
           <Link href="/" className="absolute left-[-8px] top-1/2 -translate-y-1/2 z-10">
             <div className="flex-shrink-0 flex items-center relative w-[195px] h-[75px]">
               <Image
-                src="/logo-istanbul-kebab.png"
+                src="/logo-istanbul-kebab.webp"
                 alt="Resto Istanbul"
                 fill
                 priority
@@ -179,7 +179,7 @@ export default function Header() {
           <div className="flex justify-start">
             <Link href="/" className="relative flex items-center w-[120px] h-[46px] left-[-8px]">
               <Image
-                src="/logo-istanbul-kebab.png"
+                src="/logo-istanbul-kebab.webp"
                 alt="Resto Istanbul"
                 fill
                 priority

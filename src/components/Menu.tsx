@@ -145,7 +145,7 @@ export default function Menu({ showHeader = false, reducedTopPadding = false, re
               <h2 className="text-primary-600 font-extrabold uppercase tracking-wider mb-2 text-sm sm:text-base">
                 Découvrez
               </h2>
-              <h2 style={{ fontFamily: '"Bebas Neue Pro", "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl text-dark-900 uppercase tracking-wide">
+              <h2 style={{ fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif', fontWeight: 900 }} className="text-4xl md:text-5xl text-dark-900 uppercase tracking-wide">
                 Notre Carte
               </h2>
             </div>
