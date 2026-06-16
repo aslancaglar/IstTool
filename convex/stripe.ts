@@ -22,7 +22,10 @@ export const createPaymentIntent = action({
     if (order.paymentMethod !== "stripe") throw new Error("Cette commande n'utilise pas le paiement par carte.");
     if (order.paymentStatus === "paid") throw new Error("Cette commande est déjà payée.");
 
-    const stripe = new Stripe(stripeKey, { apiVersion: STRIPE_API_VERSION });
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: STRIPE_API_VERSION,
+      httpClient: Stripe.createFetchHttpClient(),
+    });
     const expectedCents = Math.round(order.totalPrice * 100);
 
     // Reuse a still-payable PI bound to this order if present and amount unchanged
@@ -66,7 +69,10 @@ export const verifyAndConfirmPayment = action({
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeKey) throw new Error("Stripe non configuré.");
 
-    const stripe = new Stripe(stripeKey, { apiVersion: STRIPE_API_VERSION });
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: STRIPE_API_VERSION,
+      httpClient: Stripe.createFetchHttpClient(),
+    });
     const pi = await stripe.paymentIntents.retrieve(args.paymentIntentId);
 
     if (pi.status !== "succeeded") {
