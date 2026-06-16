@@ -8,10 +8,10 @@ import Contact from '../src/components/Contact';
 import AppLoaderWrapper from '../src/components/AppLoaderWrapper';
 
 export const metadata: Metadata = {
-    title: 'Resto Istanbul Toul | Kebab, Tacos & Burgers à Toul',
-    description: 'Resto Istanbul, le meilleur restaurant de kebab, tacos et burgers à Toul ! Plats savoureux, Durum -Wrap, Assiettes, Bowls, et click & collect. Commandez en ligne maintenant.',
+    title: 'Kebab, Tacos, Burger & Fast Food à Toul | Resto Istanbul',
+    description: 'Resto Istanbul, votre fast food à Toul : kebab, tacos, burger, durum, assiettes et bowls savoureux. Commandez en ligne en click & collect ! ☎ 07 82 81 46 56',
     alternates: {
-        canonical: 'https://mondopizza.fr',
+        canonical: 'https://restoistanbultoul.fr',
     },
 };
 

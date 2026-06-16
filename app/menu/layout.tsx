@@ -1,15 +1,15 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Notre Carte | Kebab, Tacos & Burgers à Toul',
-    description: 'Découvrez la carte de Resto Istanbul à Toul : Kebab, Tacos, burger, Durum -Wrap, Assiettes, Bowls. Commandez en ligne pour le click & collect à Toul.',
+    title: 'Notre Carte – Kebab, Tacos & Burger',
+    description: 'Découvrez la carte de Resto Istanbul à Toul : kebabs, tacos, burgers, durum, assiettes et bowls. Commandez en ligne en click & collect à Toul.',
     alternates: {
-        canonical: 'https://mondopizza.fr/menu',
+        canonical: 'https://restoistanbultoul.fr/menu',
     },
     openGraph: {
-        title: 'Notre Carte | Resto Istanbul Toul',
-        description: 'Kebab, Tacos, burger, Durum -Wrap, Assiettes, Bowls et plus. Commandez en ligne sur Resto Istanbul Toul.',
-        url: 'https://mondopizza.fr/menu',
+        title: 'Notre Carte – Kebab, Tacos & Burger à Toul | Resto Istanbul',
+        description: 'Kebab, tacos, burger, durum, assiettes et bowls à Toul. Commandez en ligne en click & collect sur Resto Istanbul.',
+        url: 'https://restoistanbultoul.fr/menu',
     },
 };
 
