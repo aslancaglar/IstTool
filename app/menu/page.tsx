@@ -40,9 +40,6 @@ export default function MenuPage() {
                         <h1 className="font-display font-extrabold text-5xl md:text-7xl text-white mb-3 tracking-wide uppercase">
                             Notre Carte
                         </h1>
-                        <p className="text-xl md:text-2xl text-white/90 font-light">
-                            Découvrez nos spécialités authentiques
-                        </p>
                     </div>
                 </section>
 

@@ -182,7 +182,7 @@ export default function Header() {
             {user ? (
               <Link
                 href="/account"
-                className="p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+                className="hidden sm:block p-2 rounded-lg transition-colors text-white hover:bg-white/10"
                 aria-label="Mon Compte"
               >
                 <User className="w-6 h-6" />
@@ -191,7 +191,7 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => openLoginModal(pathname || '/')}
-                className="p-2 rounded-lg transition-colors text-white hover:bg-white/10"
+                className="hidden sm:block p-2 rounded-lg transition-colors text-white hover:bg-white/10"
                 aria-label="Se connecter"
               >
                 <User className="w-6 h-6" />
@@ -247,8 +247,6 @@ export default function Header() {
               })}
             </div>
 
-            {/* Removed OpenStatus from mobile hamburger menu */}
-
             {user ? (
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/20">
                 <div className="flex items-center gap-3 px-2">
@@ -263,9 +261,9 @@ export default function Header() {
                 <Link
                   href="/account"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-2 w-full py-3 px-4 text-white font-display text-lg tracking-wide hover:text-white/70 transition-colors uppercase border-b border-white/20"
+                  className="flex items-center gap-2 w-full py-3 px-2 text-white font-display text-lg tracking-wide hover:text-white/70 transition-colors uppercase"
                 >
-                  <User className="w-5 h-5 text-white" />
+                  <User className="w-5 h-5" />
                   Mon Compte
                 </Link>
                 <button
@@ -289,7 +287,7 @@ export default function Header() {
                 className="mt-4 flex items-center justify-center gap-2 px-6 py-3 bg-white/20 text-white font-display text-lg tracking-wide rounded-full hover:bg-white/30 transition-colors uppercase"
               >
                 <User className="w-5 h-5" />
-                Se connecter
+                Mon compte
               </button>
             )}
 

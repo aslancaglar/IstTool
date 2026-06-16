@@ -31,10 +31,10 @@ export default function Hero() {
                 fontWeight: 900, 
                 textShadow: '3px 3px 0px #000, 0 4px 10px rgba(0,0,0,0.5)'
               }} 
-              className="text-6xl md:text-7xl lg:text-[86px] tracking-wide leading-tight mb-3 text-white uppercase"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-[86px] tracking-wide leading-tight mb-3 text-white uppercase"
             >
               Bienvenue chez<br />
-              Resto Istanbul !
+              Resto Istanbul&nbsp;!
             </h2>
             <p className="text-lg md:text-xl text-white/90 mb-8 max-w-xl leading-relaxed">
               Installez-vous ou prenez votre repas à emporter et profitez de notre large choix de saveurs : kebabs traditionnels, tacos gourmands, assiettes copieuses et bien plus encore. Le point de rendez-vous des vrais gourmands.
