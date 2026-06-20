@@ -166,9 +166,15 @@ export function buildOrderReceipt(
 
   for (const item of order.items) {
     const priceStr = item.isFree ? 'OFFERT' : fmtEur(item.finalPrice);
-    push(ESC, 0x45, 0x01); // bold on — emphasise the article name
+    // Emphasis (ESC E) + double-strike (ESC G) — many thermal printers render
+    // plain emphasis too faintly to notice, so double-strike is added to make the
+    // article name visibly bold. Neither changes character width, so the price
+    // stays right-aligned.
+    push(ESC, 0x45, 0x01); // emphasis on
+    push(ESC, 0x47, 0x01); // double-strike on
     line(pad(`1x ${item.name}`, priceStr));
-    push(ESC, 0x45, 0x00); // bold off — toppings/modifiers stay normal
+    push(ESC, 0x47, 0x00); // double-strike off
+    push(ESC, 0x45, 0x00); // emphasis off — toppings/modifiers stay normal
     for (const group of item.selectedToppings ?? []) {
       const names = group.toppingNames ?? [];
       const prices = group.toppingPrices ?? [];

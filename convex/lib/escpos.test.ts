@@ -3,6 +3,8 @@ import { buildOrderReceipt, type OrderForReceipt } from './escpos';
 
 const BOLD_ON = '\x1B\x45\x01';
 const BOLD_OFF = '\x1B\x45\x00';
+const DBLSTRIKE_ON = '\x1B\x47\x01';
+const DBLSTRIKE_OFF = '\x1B\x47\x00';
 
 function decode(base64: string): string {
     return atob(base64);
@@ -23,11 +25,13 @@ const baseOrder: OrderForReceipt = {
 };
 
 describe('buildOrderReceipt', () => {
-    it('wraps the article name in bold control codes', () => {
+    it('wraps the article name in emphasis + double-strike control codes', () => {
         const raw = decode(buildOrderReceipt(baseOrder, null));
-        expect(raw).toContain(`${BOLD_ON}1x Tacos XL`);
-        // bold is turned off again before the modifiers/next line
+        // emphasis and double-strike both enabled right before the name
+        expect(raw).toContain(`${BOLD_ON}${DBLSTRIKE_ON}1x Tacos XL`);
+        // both turned off again before the modifiers/next line
         const idx = raw.indexOf('1x Tacos XL');
+        expect(raw.slice(idx)).toContain(DBLSTRIKE_OFF);
         expect(raw.slice(idx)).toContain(BOLD_OFF);
     });
 
