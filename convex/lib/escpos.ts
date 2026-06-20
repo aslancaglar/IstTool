@@ -166,7 +166,9 @@ export function buildOrderReceipt(
 
   for (const item of order.items) {
     const priceStr = item.isFree ? 'OFFERT' : fmtEur(item.finalPrice);
+    push(ESC, 0x45, 0x01); // bold on — emphasise the article name
     line(pad(`1x ${item.name}`, priceStr));
+    push(ESC, 0x45, 0x00); // bold off — toppings/modifiers stay normal
     for (const group of item.selectedToppings ?? []) {
       const names = group.toppingNames ?? [];
       const prices = group.toppingPrices ?? [];
@@ -197,6 +199,17 @@ export function buildOrderReceipt(
   line(pad('TOTAL:', fmtEur(order.totalPrice)));
   push(ESC, 0x45, 0x00);
   push(GS, 0x21, 0x00);
+  line();
+
+  // Payment status — tells staff whether cash still needs to be collected.
+  const methodLabel = order.paymentMethod === 'stripe' ? 'Carte' : 'Espèces';
+  const statusLabel =
+    order.paymentStatus === 'paid' ? 'PAYÉ'
+      : order.paymentStatus === 'failed' ? 'ÉCHEC PAIEMENT'
+        : 'NON PAYÉ';
+  push(ESC, 0x45, 0x01);
+  line(pad('PAIEMENT:', `${statusLabel} (${methodLabel})`));
+  push(ESC, 0x45, 0x00);
   line();
 
 
