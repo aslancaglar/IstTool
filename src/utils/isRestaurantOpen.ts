@@ -21,6 +21,15 @@ export interface RestaurantStatus {
 
 const MINUTES_PER_DAY = 24 * 60;
 
+/**
+ * "Now" expressed in the restaurant's local timezone (France), so the open/closed
+ * status is correct regardless of the visitor's device timezone. The returned Date's
+ * local fields (getHours/getDay/getDate) reflect Paris wall-clock time.
+ */
+function nowInParis(): Date {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+}
+
 /** French weekday name (lowercase) for a given date, matching the `hours` array's `day`. */
 function dayKey(date: Date): string {
     return date.toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
@@ -50,8 +59,10 @@ function parseTimeRanges(time: string | undefined): { start: number; end: number
         if (match) {
             const [, sh, sm, eh, em] = match;
             const start = parseInt(sh) * 60 + parseInt(sm);
-            let end = parseInt(eh) * 60 + parseInt(em);
-            if (end === 0) end = MINUTES_PER_DAY; // 00:00 = end of day
+            const end = parseInt(eh) * 60 + parseInt(em);
+            // `end <= start` means the range closes after midnight (e.g. 17:00 - 01:00,
+            // or 17:00 - 00:00). It is kept as-is and interpreted as spanning by the
+            // open/next-opening logic below.
             ranges.push({ start, end });
         }
     }
@@ -110,7 +121,7 @@ export function isRestaurantOpen(
     hours: RestaurantHours[] | undefined,
     holidays: Holiday[] | undefined
 ): RestaurantStatus {
-    const now = new Date();
+    const now = nowInParis();
     const todayHoliday = activeHolidayOn(now, holidays);
 
     if (!hours || hours.length === 0) {
@@ -123,7 +134,22 @@ export function isRestaurantOpen(
     if (!todayHoliday) {
         const todayRanges = parseTimeRanges(findDayHours(hours, now)?.time);
         for (const range of todayRanges) {
-            if (currentMinutes >= range.start && currentMinutes <= range.end) {
+            const spansMidnight = range.end <= range.start;
+            const open = spansMidnight
+                ? currentMinutes >= range.start            // evening part, until midnight
+                : currentMinutes >= range.start && currentMinutes <= range.end;
+            if (open) return { isOpen: true };
+        }
+    }
+
+    // A range that started yesterday and closes after midnight (e.g. Sat 17:00 - 01:00)
+    // can still be open in the early hours of today.
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (!activeHolidayOn(yesterday, holidays)) {
+        const yesterdayRanges = parseTimeRanges(findDayHours(hours, yesterday)?.time);
+        for (const range of yesterdayRanges) {
+            if (range.end <= range.start && currentMinutes < range.end) {
                 return { isOpen: true };
             }
         }
@@ -151,7 +177,7 @@ export function getStatusMessage(status: RestaurantStatus): string {
         return 'Ouvert';
     }
     if (status.nextOpeningTime) {
-        const now = new Date();
+        const now = nowInParis();
         const next = new Date(status.nextOpeningTime);
 
         const hours = String(next.getHours()).padStart(2, '0');
