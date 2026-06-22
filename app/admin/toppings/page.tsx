@@ -5,7 +5,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import ConfirmModal from '../../../src/components/admin/ConfirmModal';
 import CrudFormModal from '../../../src/components/admin/CrudFormModal';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { useAdminAuth } from '../../../src/context/AdminAuthContext';
 import { useCrudResource } from '../../../src/hooks/useCrudResource';
@@ -17,6 +17,7 @@ interface ToppingFormData {
   categoryId: string;
   displayOrder: number;
   active: boolean;
+  inStock: boolean;
 }
 
 export default function ToppingsPage() {
@@ -26,6 +27,12 @@ export default function ToppingsPage() {
   const createTopping = useMutation(api.toppingsAdmin.createTopping);
   const updateTopping = useMutation(api.toppingsAdmin.updateTopping);
   const deleteTopping = useMutation(api.toppingsAdmin.removeTopping);
+  const updateToppingStock = useMutation(api.toppingsAdmin.updateToppingStock);
+
+  const handleToggleStock = async (id: Id<'toppings'>, inStock: boolean) => {
+    if (!adminToken) return;
+    await updateToppingStock({ adminToken, id, inStock });
+  };
 
   const crud = useCrudResource<ToppingFormData, any, Id<'toppings'>>({
     adminToken,
@@ -36,6 +43,7 @@ export default function ToppingsPage() {
       categoryId: toppingCategories?.[0]?.categoryId || '',
       displayOrder: allToppings?.length || 0,
       active: true,
+      inStock: true,
     }),
     toForm: (topping) => ({
       toppingId: topping.toppingId,
@@ -44,6 +52,7 @@ export default function ToppingsPage() {
       categoryId: topping.categoryId,
       displayOrder: topping.displayOrder || 0,
       active: topping.active !== false,
+      inStock: topping.inStock !== false,
     }),
     getId: (topping) => topping._id,
     createMutation: createTopping,
@@ -94,18 +103,32 @@ export default function ToppingsPage() {
                 <div className="p-4">
                   {categoryToppings.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {categoryToppings.map((topping: any) => (
+                      {categoryToppings.map((topping: any) => {
+                        const isInStock = topping.inStock !== false;
+                        return (
                         <div
                           key={topping._id}
-                          className="flex items-center justify-between p-3 border border-slate-100 rounded-xl hover:bg-slate-50/50 transition"
+                          className={`flex items-center justify-between p-3 border rounded-xl transition ${isInStock ? 'border-slate-100 hover:bg-slate-50/50' : 'border-amber-200 bg-amber-50/40'}`}
                         >
-                          <div>
-                            <p className="text-sm font-medium text-slate-900">{topping.name}</p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <p className="text-sm font-medium text-slate-900 truncate">{topping.name}</p>
+                              {!isInStock && (
+                                <span className="text-[10px] font-bold uppercase tracking-tight text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full flex-shrink-0">Rupture</span>
+                              )}
+                            </div>
                             <p className="text-xs text-slate-500">
                               {topping.price ? `+${topping.price.toFixed(2)}€` : 'Gratuit'}
                             </p>
                           </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              onClick={() => handleToggleStock(topping._id, !isInStock)}
+                              title={isInStock ? 'Marquer rupture de stock' : 'Marquer en stock'}
+                              className={`p-1.5 rounded-lg transition ${isInStock ? 'text-green-600 hover:bg-green-50' : 'text-amber-600 hover:bg-amber-100'}`}
+                            >
+                              {isInStock ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                            </button>
                             <button
                               onClick={() => crud.openEdit(topping)}
                               className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
@@ -120,7 +143,8 @@ export default function ToppingsPage() {
                             </button>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-slate-500 text-center text-sm py-4">Aucune garniture dans cette catégorie</p>
@@ -189,15 +213,27 @@ export default function ToppingsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="active"
-            checked={formData.active}
-            onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-            className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500"
-          />
-          <label htmlFor="active" className="text-sm font-medium text-slate-700">Actif</label>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="active"
+              checked={formData.active}
+              onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+              className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500"
+            />
+            <label htmlFor="active" className="text-sm font-medium text-slate-700">Actif</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="inStock"
+              checked={formData.inStock}
+              onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+              className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500"
+            />
+            <label htmlFor="inStock" className="text-sm font-medium text-slate-700">En stock</label>
+          </div>
         </div>
       </CrudFormModal>
 

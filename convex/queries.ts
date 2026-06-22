@@ -144,6 +144,7 @@ export const getToppingsForMenuItem = query({
 
         const toppingData = await Promise.all(toppings.map(async (t) => {
           if (t.active === false) return null;
+          if (t.inStock === false) return null; // out of stock — hide from customers
 
           if (t.menuItemId) {
             const menuItem = menuItemById.get(t.menuItemId);

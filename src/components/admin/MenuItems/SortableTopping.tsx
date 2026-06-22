@@ -2,18 +2,20 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Edit, GripVertical, LayoutGrid, Trash2 } from 'lucide-react';
+import { CheckCircle2, Edit, GripVertical, LayoutGrid, Trash2, XCircle } from 'lucide-react';
 import type { Id } from '../../../../convex/_generated/dataModel';
 
 interface SortableToppingProps {
   topping: any;
   toppingCategories: any[] | undefined;
   onEdit: (t: any) => void;
+  onToggleStock: (id: Id<'toppings'>, inStock: boolean) => void;
   onDeleteClick: (id: Id<'toppings'>) => void;
   disabled?: boolean;
 }
 
-export default function SortableTopping({ topping, toppingCategories, onEdit, onDeleteClick, disabled }: SortableToppingProps) {
+export default function SortableTopping({ topping, toppingCategories, onEdit, onToggleStock, onDeleteClick, disabled }: SortableToppingProps) {
+  const isInStock = topping.inStock !== false;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: topping._id,
     disabled,
@@ -65,7 +67,18 @@ export default function SortableTopping({ topping, toppingCategories, onEdit, on
         </p>
       </div>
     </div>
-      <div className="flex gap-1 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition ml-auto">
+      <button
+        onClick={() => onToggleStock(topping._id, !isInStock)}
+        title={isInStock ? 'Marquer rupture de stock' : 'Marquer en stock'}
+        className={`flex-shrink-0 ml-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition text-xs font-medium ${isInStock
+          ? 'bg-green-50 text-green-700 hover:bg-green-100'
+          : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
+      >
+        {isInStock
+          ? <><CheckCircle2 className="w-3.5 h-3.5" /><span className="hidden sm:inline">En stock</span></>
+          : <><XCircle className="w-3.5 h-3.5" /><span className="hidden sm:inline">Rupture</span></>}
+      </button>
+      <div className="flex gap-1 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
         <button onClick={() => onEdit(topping)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
           <Edit className="w-4 h-4" />
         </button>

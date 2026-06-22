@@ -76,6 +76,7 @@ export default defineSchema({
     categoryId: v.string(),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    inStock: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
     tvaPercent: v.optional(v.number()),

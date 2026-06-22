@@ -11,6 +11,7 @@ export interface ToppingFormData {
   categoryId: string;
   displayOrder: number;
   active: boolean;
+  inStock: boolean;
   menuItemId?: Id<'menuItems'>;
   specialPrice?: number;
   tvaPercent?: number;
@@ -210,9 +211,15 @@ export default function ToppingFormModal({
               </select>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <input type="checkbox" id="topping-active" checked={formData.active} onChange={(e) => setFormData({ ...formData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
-            <label htmlFor="topping-active" className="text-sm font-medium text-slate-700">Actif</label>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="topping-active" checked={formData.active} onChange={(e) => setFormData({ ...formData, active: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
+              <label htmlFor="topping-active" className="text-sm font-medium text-slate-700">Actif</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="topping-instock" checked={formData.inStock} onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })} className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500" />
+              <label htmlFor="topping-instock" className="text-sm font-medium text-slate-700">En stock</label>
+            </div>
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose} disabled={isUploading} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition font-semibold text-sm disabled:opacity-50">Annuler</button>

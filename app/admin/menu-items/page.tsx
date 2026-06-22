@@ -12,7 +12,7 @@ import SortableTopping from '../../../src/components/admin/MenuItems/SortableTop
 import CategoryFormModal, { type CategoryFormData } from '../../../src/components/admin/MenuItems/CategoryFormModal';
 import ToppingCategoryFormModal, { type ToppingCategoryFormData } from '../../../src/components/admin/MenuItems/ToppingCategoryFormModal';
 import ToppingFormModal, { type ToppingFormData } from '../../../src/components/admin/MenuItems/ToppingFormModal';
-import { Plus, Tag, LayoutGrid, GripVertical, UtensilsCrossed, Pizza, X } from 'lucide-react';
+import { Plus, Tag, LayoutGrid, GripVertical, UtensilsCrossed, Pizza, X, Search } from 'lucide-react';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { useAdminAuth } from '../../../src/context/AdminAuthContext';
 import {
@@ -64,11 +64,14 @@ export default function MenuItemsPage() {
   const deleteTopping = useMutation(api.toppingsAdmin.removeTopping);
   const removeToppingImage = useMutation(api.toppingsAdmin.removeToppingImage);
   const updateToppingDisplayOrder = useMutation(api.toppingsAdmin.updateToppingDisplayOrder);
+  const updateToppingStock = useMutation(api.toppingsAdmin.updateToppingStock);
 
   // ── Article UI state ─────────────────────────────────────────────────────────
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
   const [editingArticleId, setEditingArticleId] = useState<Id<'menuItems'> | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [articleSearch, setArticleSearch] = useState('');
+  const [toppingSearch, setToppingSearch] = useState('');
 
   // ── Menu category UI state ───────────────────────────────────────────────────
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -87,7 +90,7 @@ export default function MenuItemsPage() {
   const [isToppingModalOpen, setIsToppingModalOpen] = useState(false);
   const [editingToppingId, setEditingToppingId] = useState<Id<'toppings'> | null>(null);
   const [toppingFormData, setToppingFormData] = useState<ToppingFormData>({
-    toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true,
+    toppingId: '', name: '', price: 0, categoryId: '', displayOrder: 0, active: true, inStock: true,
     menuItemId: undefined, specialPrice: undefined, tvaPercent: undefined,
     image: undefined, imageStorageId: undefined
   });
@@ -152,6 +155,23 @@ export default function MenuItemsPage() {
     if (toppingCategoryFilter === 'all') return base;
     return base.filter((t: any) => t.categoryId === toppingCategoryFilter);
   }, [localToppings, allToppings, toppingCategoryFilter]);
+
+  // Search filters scoped to each section (name/description match, case-insensitive).
+  const articleSearchActive = articleSearch.trim() !== '';
+  const visibleArticles = useMemo(() => {
+    const q = articleSearch.trim().toLowerCase();
+    if (!q) return displayedArticles;
+    return displayedArticles.filter((a: any) =>
+      a.name?.toLowerCase().includes(q) || a.description?.toLowerCase().includes(q)
+    );
+  }, [displayedArticles, articleSearch]);
+
+  const toppingSearchActive = toppingSearch.trim() !== '';
+  const visibleToppings = useMemo(() => {
+    const q = toppingSearch.trim().toLowerCase();
+    if (!q) return displayedToppings;
+    return displayedToppings.filter((t: any) => t.name?.toLowerCase().includes(q));
+  }, [displayedToppings, toppingSearch]);
 
   const activeCat = activeCatId ? displayedCategories.find(c => c._id === activeCatId) : null;
   const activeToppingCat = activeToppingCatId ? displayedToppingCategories.find(c => c._id === activeToppingCatId) : null;
@@ -335,7 +355,7 @@ export default function MenuItemsPage() {
     setEditingToppingId(null);
     setToppingFormData({
       toppingId: `topping-${Date.now()}`, name: '', price: 0, categoryId: toppingCategories?.[0]?.categoryId || '',
-      displayOrder: allToppings?.length || 0, active: true, menuItemId: undefined, specialPrice: undefined,
+      displayOrder: allToppings?.length || 0, active: true, inStock: true, menuItemId: undefined, specialPrice: undefined,
       tvaPercent: undefined, image: undefined, imageStorageId: undefined
     });
     setIsToppingModalOpen(true);
@@ -346,7 +366,7 @@ export default function MenuItemsPage() {
     setToppingFormData({
       toppingId: topping.toppingId, name: topping.name, price: topping.price || 0,
       categoryId: topping.categoryId, displayOrder: topping.displayOrder || 0,
-      active: topping.active !== false, menuItemId: topping.menuItemId,
+      active: topping.active !== false, inStock: topping.inStock !== false, menuItemId: topping.menuItemId,
       specialPrice: topping.specialPrice, tvaPercent: topping.tvaPercent,
       image: topping.image, imageStorageId: topping.imageStorageId
     });
@@ -386,6 +406,10 @@ export default function MenuItemsPage() {
     if (!toppingConfirmModal.id || !adminToken) return;
     await deleteTopping({ id: toppingConfirmModal.id, adminToken });
     setToppingConfirmModal({ isOpen: false, id: null });
+  };
+  const handleToggleToppingStock = async (id: Id<'toppings'>, inStock: boolean) => {
+    if (!adminToken) return;
+    await updateToppingStock({ adminToken, id, inStock });
   };
 
   // ── Sidebar helper ────────────────────────────────────────────────────────────
@@ -541,18 +565,35 @@ export default function MenuItemsPage() {
             <div className="flex-1 min-w-0 space-y-3 sm:space-y-4 w-full">
               {renderMobileChips('Toutes', menuItems?.length ?? 0, displayedCategories, categoryFilter, 'slug', 'name', itemCountByCategory, () => setCategoryFilter('all'), (slug) => setCategoryFilter(slug))}
 
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={articleSearch}
+                  onChange={(e) => setArticleSearch(e.target.value)}
+                  placeholder="Rechercher un article..."
+                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                {articleSearchActive && (
+                  <button onClick={() => setArticleSearch('')} title="Effacer" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-xl shadow-sm border border-slate-200">
                 <span className="text-sm text-slate-500">
-                  <span className="font-semibold text-slate-800">{displayedArticles.length}</span>
-                  {' '}article{displayedArticles.length !== 1 ? 's' : ''}
-                  {categoryFilter !== 'all' && <span className="ml-1 text-slate-400">dans « {categories?.find(c => c.slug === categoryFilter)?.name} »</span>}
+                  <span className="font-semibold text-slate-800">{visibleArticles.length}</span>
+                  {' '}article{visibleArticles.length !== 1 ? 's' : ''}
+                  {articleSearchActive && <span className="ml-1 text-slate-400">pour « {articleSearch} »</span>}
+                  {!articleSearchActive && categoryFilter !== 'all' && <span className="ml-1 text-slate-400">dans « {categories?.find(c => c.slug === categoryFilter)?.name} »</span>}
                 </span>
                 {categoryFilter !== 'all' && (
                   <button onClick={() => setCategoryFilter('all')} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition">
                     <X className="w-3 h-3" /> Tout
                   </button>
                 )}
-                {categoryFilter !== 'all' && (
+                {categoryFilter !== 'all' && !articleSearchActive && (
                   <p className="ml-auto text-xs text-slate-400 hidden sm:flex items-center gap-1">
                     <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
                   </p>
@@ -560,26 +601,28 @@ export default function MenuItemsPage() {
               </div>
 
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleArticleDragStart} onDragEnd={handleArticleDragEnd}>
-                <SortableContext items={displayedArticles.map(a => a._id)} strategy={rectSortingStrategy}>
-                  {displayedArticles.length > 0 ? (
+                <SortableContext items={visibleArticles.map(a => a._id)} strategy={rectSortingStrategy}>
+                  {visibleArticles.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                      {displayedArticles.map(item => (
+                      {visibleArticles.map(item => (
                         <SortableArticleCard
                           key={item._id}
                           item={item}
                           categoryFilter={categoryFilter}
                           onEdit={handleEditArticle}
                           onToggleStock={handleToggleStock}
-                          disabled={categoryFilter === 'all'}
+                          disabled={categoryFilter === 'all' || articleSearchActive}
                         />
                       ))}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-slate-300 text-center">
-                      <p className="text-slate-400 text-sm mb-3">Aucun article dans cette catégorie</p>
-                      <button onClick={handleCreateArticle} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition font-semibold text-sm">
-                        <Plus className="w-4 h-4" /> Ajouter un article
-                      </button>
+                      <p className="text-slate-400 text-sm mb-3">{articleSearchActive ? 'Aucun article ne correspond à votre recherche' : 'Aucun article dans cette catégorie'}</p>
+                      {!articleSearchActive && (
+                        <button onClick={handleCreateArticle} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition font-semibold text-sm">
+                          <Plus className="w-4 h-4" /> Ajouter un article
+                        </button>
+                      )}
                     </div>
                   )}
                 </SortableContext>
@@ -619,18 +662,35 @@ export default function MenuItemsPage() {
             <div className="flex-1 min-w-0 space-y-3 sm:space-y-4 w-full">
               {renderMobileChips('Toutes', allToppings?.length ?? 0, displayedToppingCategories, toppingCategoryFilter, 'categoryId', 'name', toppingCountByCategory, () => setToppingCategoryFilter('all'), (id) => setToppingCategoryFilter(id))}
 
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={toppingSearch}
+                  onChange={(e) => setToppingSearch(e.target.value)}
+                  placeholder="Rechercher une garniture..."
+                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                {toppingSearchActive && (
+                  <button onClick={() => setToppingSearch('')} title="Effacer" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-xl shadow-sm border border-slate-200">
                 <span className="text-sm text-slate-500">
-                  <span className="font-semibold text-slate-800">{displayedToppings.length}</span>
-                  {' '}garniture{displayedToppings.length !== 1 ? 's' : ''}
-                  {toppingCategoryFilter !== 'all' && <span className="ml-1 text-slate-400">dans « {toppingCategories?.find(c => c.categoryId === toppingCategoryFilter)?.name} »</span>}
+                  <span className="font-semibold text-slate-800">{visibleToppings.length}</span>
+                  {' '}garniture{visibleToppings.length !== 1 ? 's' : ''}
+                  {toppingSearchActive && <span className="ml-1 text-slate-400">pour « {toppingSearch} »</span>}
+                  {!toppingSearchActive && toppingCategoryFilter !== 'all' && <span className="ml-1 text-slate-400">dans « {toppingCategories?.find(c => c.categoryId === toppingCategoryFilter)?.name} »</span>}
                 </span>
                 {toppingCategoryFilter !== 'all' && (
                   <button onClick={() => setToppingCategoryFilter('all')} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition">
                     <X className="w-3 h-3" /> Tout
                   </button>
                 )}
-                {toppingCategoryFilter !== 'all' && (
+                {toppingCategoryFilter !== 'all' && !toppingSearchActive && (
                   <p className="ml-auto text-xs text-slate-400 flex items-center gap-1">
                     <GripVertical className="w-3 h-3" /> Glisser pour réorganiser
                   </p>
@@ -638,26 +698,29 @@ export default function MenuItemsPage() {
               </div>
 
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleToppingDragStart} onDragEnd={handleToppingDragEnd}>
-                <SortableContext items={displayedToppings.map((t: any) => t._id)} strategy={verticalListSortingStrategy}>
-                  {displayedToppings.length > 0 ? (
+                <SortableContext items={visibleToppings.map((t: any) => t._id)} strategy={verticalListSortingStrategy}>
+                  {visibleToppings.length > 0 ? (
                     <div className="space-y-2">
-                      {displayedToppings.map((topping: any) => (
+                      {visibleToppings.map((topping: any) => (
                         <SortableTopping
                           key={topping._id}
                           topping={topping}
                           toppingCategories={toppingCategories}
                           onEdit={handleEditTopping}
+                          onToggleStock={handleToggleToppingStock}
                           onDeleteClick={(id) => setToppingConfirmModal({ isOpen: true, id })}
-                          disabled={toppingCategoryFilter === 'all'}
+                          disabled={toppingCategoryFilter === 'all' || toppingSearchActive}
                         />
                       ))}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-slate-300 text-center">
-                      <p className="text-slate-400 text-sm mb-3">Aucune garniture{toppingCategoryFilter !== 'all' ? ' dans cette catégorie' : ''}</p>
-                      <button onClick={handleCreateTopping} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition font-semibold text-sm">
-                        <Plus className="w-4 h-4" /> Ajouter une garniture
-                      </button>
+                      <p className="text-slate-400 text-sm mb-3">{toppingSearchActive ? 'Aucune garniture ne correspond à votre recherche' : `Aucune garniture${toppingCategoryFilter !== 'all' ? ' dans cette catégorie' : ''}`}</p>
+                      {!toppingSearchActive && (
+                        <button onClick={handleCreateTopping} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition font-semibold text-sm">
+                          <Plus className="w-4 h-4" /> Ajouter une garniture
+                        </button>
+                      )}
                     </div>
                   )}
                 </SortableContext>

@@ -160,6 +160,7 @@ export const createTopping = mutation({
     categoryId: v.string(),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    inStock: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
     tvaPercent: v.optional(v.number()),
@@ -175,6 +176,7 @@ export const createTopping = mutation({
       categoryId: args.categoryId,
       displayOrder: args.displayOrder ?? 0,
       active: args.active ?? true,
+      inStock: args.inStock ?? true,
       menuItemId: args.menuItemId,
       specialPrice: args.specialPrice,
       tvaPercent: args.tvaPercent,
@@ -195,6 +197,7 @@ export const updateTopping = mutation({
     categoryId: v.string(),
     displayOrder: v.optional(v.number()),
     active: v.optional(v.boolean()),
+    inStock: v.optional(v.boolean()),
     menuItemId: v.optional(v.id("menuItems")),
     specialPrice: v.optional(v.number()),
     tvaPercent: v.optional(v.number()),
@@ -203,7 +206,7 @@ export const updateTopping = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdminSession(ctx, args.adminToken);
-    
+
     const existingItem = await ctx.db.get(args.id);
     if (existingItem?.imageStorageId &&
       args.imageStorageId &&
@@ -218,6 +221,7 @@ export const updateTopping = mutation({
       categoryId: args.categoryId,
       displayOrder: args.displayOrder,
       active: args.active,
+      inStock: args.inStock,
       menuItemId: args.menuItemId,
       specialPrice: args.specialPrice,
       tvaPercent: args.tvaPercent,
@@ -225,6 +229,20 @@ export const updateTopping = mutation({
       imageStorageId: args.imageStorageId,
     });
     return args.id;
+  },
+});
+
+// Quick stock toggle (mirrors menuItems.updateStock) for marking a topping
+// available / out of stock without opening the full edit form.
+export const updateToppingStock = mutation({
+  args: {
+    adminToken: v.string(),
+    id: v.id("toppings"),
+    inStock: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdminSession(ctx, args.adminToken);
+    await ctx.db.patch(args.id, { inStock: args.inStock });
   },
 });
 
